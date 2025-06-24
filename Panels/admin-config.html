@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Configuración del Sistema | Yavi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <link rel="stylesheet" href="../CSS/panel-administrativo.css" />
+</head>
+<body>
+
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar bg-dark text-white p-3">
+        <h4 class="mb-4">Yavi <span class="text-primary">Admin</span></h4>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link text-white" href="./panel-administrativo.html"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./admin-usuarios.html"><i class="bi bi-people me-2"></i>Usuarios</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./admin-comercios.html"><i class="bi bi-shop me-2"></i>Comercios</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./admin-entidades.html"><i class="bi bi-bank me-2"></i>Entidades Bancarias</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./admin-promociones.html"><i class="bi bi-megaphone me-2"></i>Promociones</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./admin-transacciones.html"><i class="bi bi-cash-stack me-2"></i>Transacciones</a></li>
+            <li class="nav-item"><a class="nav-link text-white" href="./admin-config.html"><i class="bi bi-gear me-2"></i>Configuración</a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="#"><i class="bi bi-box-arrow-right me-2"></i>Salir</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <main class="content p-4 w-100">
+        <h1 class="mb-4">Configuración del Sistema</h1>
+
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs mb-3" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#general" type="button">General</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#comisiones" type="button">Comisiones</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#notificaciones" type="button">Notificaciones</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#seguridad" type="button">Seguridad</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#perfil" type="button">Mi Perfil</button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+
+            <!-- General -->
+            <div class="tab-pane fade show active" id="general">
+                <form class="mb-4">
+                    <div class="mb-3">
+                        <label for="nombreSitio" class="form-label">Nombre del Sitio</label>
+                        <input type="text" class="form-control" id="nombreSitio" placeholder="Yavi Wallet" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="moneda" class="form-label">Moneda Principal</label>
+                        <select class="form-select" id="moneda">
+                            <option selected>CRC - Colón</option>
+                            <option>USD - Dólar</option>
+                            <option>EUR - Euro</option>
+                        </select>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="modoMantenimiento">
+                        <label class="form-check-label" for="modoMantenimiento">Modo Mantenimiento</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios Generales</button>
+                </form>
+            </div>
+
+            <!-- Comisiones -->
+            <div class="tab-pane fade" id="comisiones">
+                <form class="mb-4">
+                    <div class="mb-3">
+                        <label for="comisionComercios" class="form-label">Comisión por Defecto para Comercios (%)</label>
+                        <input type="number" class="form-control" id="comisionComercios" placeholder="3.5" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="comisionEntidades" class="form-label">Comisión por Defecto para Entidades (%)</label>
+                        <input type="number" class="form-control" id="comisionEntidades" placeholder="2.0" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Comisiones</button>
+                </form>
+            </div>
+
+            <!-- Notificaciones -->
+            <div class="tab-pane fade" id="notificaciones">
+                <form class="mb-4">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="notificarRegistros">
+                        <label class="form-check-label" for="notificarRegistros">Notificar sobre nuevos registros</label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="notificarTransacciones">
+                        <label class="form-check-label" for="notificarTransacciones">Notificar sobre transacciones de alto valor</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Preferencias</button>
+                </form>
+            </div>
+
+            <!-- Seguridad -->
+            <div class="tab-pane fade" id="seguridad">
+                <div class="mb-4">
+                    <button class="btn btn-outline-primary me-2" id="btn2fa"><i class="bi bi-shield-lock me-1"></i> Activar Autenticación de Dos Factores</button>
+                    <button class="btn btn-outline-danger" id="btnCerrarSesiones"><i class="bi bi-box-arrow-in-left me-1"></i> Cerrar todas las demás sesiones</button>
+                </div>
+            </div>
+
+            <!-- Perfil -->
+            <div class="tab-pane fade" id="perfil">
+                <form class="mb-4">
+                    <div class="mb-3">
+                        <label for="nombreAdmin" class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" id="nombreAdmin" placeholder="Admin Yavi" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="correoAdmin" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="correoAdmin" placeholder="admin@yavi.com" />
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="passActual" class="form-label">Contraseña Actual</label>
+                        <input type="password" class="form-control" id="passActual" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="passNueva" class="form-label">Nueva Contraseña</label>
+                        <input type="password" class="form-control" id="passNueva" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmarPass" class="form-label">Confirmar Nueva Contraseña</label>
+                        <input type="password" class="form-control" id="confirmarPass" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Actualizar Perfil</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer>        <div class="text-center mt-3">
+    &copy; 2025 Yavi. Todos los derechos reservados.
+</div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../Scripts/admin-config.js"></script>
+</body>
+</html>
