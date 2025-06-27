@@ -1,174 +1,208 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Registro Entidad Bancaria | Yavi</title>
-    <!-- Bootstrap 5 -->
-    <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-    />
-    <!-- Estilos de Yavi -->
-    <link rel="stylesheet" href="../CSS/style.css"/>
-    <link rel="stylesheet" href="../CSS/style-register.css"/>
-    <!-- Leaflet CSS -->
-    <link
-            rel="stylesheet"
-            href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-            integrity="sha256-sA+qCmXhYL8QA6f3Y9Wit3qUMuGB9tdrPxo0w8y+7Xk="
-            crossorigin=""
-    />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Usuario | Yavi</title>
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!--CUSTOM CSS-->
+    <link rel="stylesheet" href="../CSS/style.css" />
+    <link rel="stylesheet" href="../CSS/registro-banco.css" />
+
 </head>
+
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="index.html">Yavi</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item"><a class="nav-link" href="index.html#home">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#servicios">Servicios</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#sobre">Nosotros</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#por-que">Por qué elegirnos</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#promos">Promos</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#comercios">Comercios</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#bancos">Bancos</a></li>
-                <li class="nav-item"><a class="nav-link" href="index.html#faq">FAQ</a></li>
-            </ul>
-            <div class="dropdown">
-                <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
-                    Login / Registro
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="login.html">Login</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="user.html">Registro Persona</a></li>
-                    <li><a class="dropdown-item" href="comercio.html">Registro Comercio</a></li>
-                    <li><a class="dropdown-item" href="registro-banco.html">Registro Banco</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</nav>
-
-<!-- FORMULARIO DE REGISTRO DE ENTIDAD BANCARIA -->
-<div class="container py-5">
-    <h2 class="mb-4 text-center">Registro de Entidad Bancaria</h2>
-    <form id="registerBankForm" class="needs-validation" novalidate>
-        <div class="row g-3">
-            <div class="col-md-6">
-                <label for="contactName" class="form-label">Nombre Completo del Contacto</label>
-                <input type="text" class="form-control" id="contactName" required/>
-                <div class="invalid-feedback">El nombre del contacto es obligatorio.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="contactPhone" class="form-label">Teléfono de Contacto</label>
-                <input type="text" class="form-control" id="contactPhone" required/>
-                <div class="invalid-feedback">El teléfono es obligatorio.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="email" class="form-label">Correo Electrónico del Contacto</label>
-                <input type="email" class="form-control" id="email" required/>
-                <div class="invalid-feedback">Introduce un correo válido.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="legalId" class="form-label">Cédula Jurídica</label>
-                <input type="text" class="form-control" id="legalId" required/>
-                <div class="invalid-feedback">La cédula jurídica es obligatoria.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="iban" class="form-label">Código IBAN</label>
-                <input type="text" class="form-control" id="iban" required/>
-                <div class="invalid-feedback">El IBAN es obligatorio.</div>
-            </div>
-            <div class="col-md-6">
-                <label for="applicationFile" class="form-label">Solicitud de Inscripción (PDF)</label>
-                <input
-                        type="file"
-                        class="form-control"
-                        id="applicationFile"
-                        accept=".pdf"
-                        required
-                />
-                <div class="invalid-feedback">Debes subir el PDF de la solicitud.</div>
-            </div>
-            <div class="col-12">
-                <label class="form-label">Dirección Física</label>
-                <div id="map" class="map-container mb-2"></div>
-                <button
-                        type="button"
-                        id="btnLocate"
-                        class="btn btn-outline-secondary"
-                >
-                    Obtener mi ubicación
-                </button>
-                <input type="hidden" id="latitude" name="latitude"/>
-                <input type="hidden" id="longitude" name="longitude"/>
-            </div>
-        </div>
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary w-100">
-                Enviar Solicitud de Registro
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#home">Yavi</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
             </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#sobre">Nosotros</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#por-que">Por qué elegirnos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#promos">Promos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#comercios">Comercios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#bancos">Bancos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                </ul>
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Login /
+                        Registro</button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#">Login</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="Register/registro-usuario.html">Registro Persona</a></li>
+                        <li><a class="dropdown-item" href="#">Registro de Contacto</a></li>
+                        <li><a class="dropdown-item" href="#">Registro Banco</a></li>
+                    </ul>
+                </div>
+            </div>
         </div>
-    </form>
-    <div id="alertPlaceholder" class="mt-4"></div>
-</div>
+    </nav>
 
-<!-- FOOTER (copia exacta de index.html) -->
-<footer>
-    <div class="container">
+    <!-- MAIN FORM -->
+    <div class="container py-5">
         <div class="row">
-            <div class="col-md-3 mb-3">
-                <h5>Yavi</h5>
-                <ul class="list-unstyled">
-                    <li><a href="index.html#home">Home</a></li>
-                    <li><a href="index.html#servicios">Servicios</a></li>
-                    <li><a href="index.html#sobre">Nosotros</a></li>
-                    <li><a href="#contacto">Contacto</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3 mb-3">
-                <h5>Productos</h5>
-                <ul class="list-unstyled">
-                    <li><a href="index.html#promos">Promos</a></li>
-                    <li><a href="index.html#comercios">Comercios</a></li>
-                    <li><a href="index.html#bancos">Bancos</a></li>
-                    <li><a href="#faq">FAQ</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3 mb-3">
-                <h5>Empresa</h5>
-                <ul class="list-unstyled">
-                    <li><a href="index.html#sobre">Nosotros</a></li>
-                    <li><a href="#careers">Carreras</a></li>
-                    <li><a href="#blog">Blog</a></li>
-                </ul>
-            </div>
-            <div class="col-md-3 mb-3">
-                <h5>Legal</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#terms">Términos de uso</a></li>
-                    <li><a href="#privacy">Política de privacidad</a></li>
-                </ul>
+            <div class="col-md-8 col-lg-6 mx-auto">
+                <div class="card p-4 shadow-sm">
+                    <h2 class="text-center mb-4">Registro de Contacto</h2>
+
+                    <form id="registerEntityForm" class="needs-validation" novalidate>
+                        <!-- Nombre Contacto -->
+                        <div class="mb-3">
+                            <label for="nombreContacto" class="form-label">Nombre del Contacto *</label>
+                            <input type="text" class="form-control" id="nombreContacto" name="NombreContacto" required>
+                            <div class="invalid-feedback">Por favor ingrese el nombre del contacto.</div>
+                        </div>
+
+                        <!-- Correo Electrónico -->
+                        <div class="mb-3">
+                            <label for="correoElectronico" class="form-label">Correo Electrónico *</label>
+                            <input type="email" class="form-control" id="correoElectronico" name="CorreoElectronico"
+                                required>
+                            <div class="invalid-feedback">Por favor ingrese un correo válido.</div>
+                        </div>
+
+                        <!-- Teléfono -->
+                        <div class="mb-3">
+                            <label for="telefono" class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" id="telefono" name="Telefono" required>
+                            <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
+                        </div>
+
+                        <!-- Cédula Jurídica -->
+                        <div class="mb-3">
+                            <label for="cedulaJuridica" class="form-label">Cédula Jurídica *</label>
+                            <input type="text" class="form-control" id="cedulaJuridica" name="CedulaJuridica" required>
+                            <div class="invalid-feedback">Por favor ingrese la cédula jurídica.</div>
+                        </div>
+
+                        <!-- IBAN -->
+                        <div class="mb-3">
+                            <label for="iban" class="form-label">IBAN (Cuenta Bancaria) *</label>
+                            <input type="text" class="form-control" id="iban" name="IBAN" required
+                                pattern="[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}" placeholder="Ej: ES9121000418450200051332">
+                            <div class="invalid-feedback">Por favor ingrese un IBAN válido (formato internacional).
+                            </div>
+                            <small class="text-muted">Formato: Código país (2 letras) + dígitos de control (2 números) +
+                                código de cuenta (hasta 30 caracteres)</small>
+                        </div>
+
+                        <!-- Map Section -->
+                        <div class="mb-3">
+                            <label class="form-label">Ubicación del Contacto *</label>
+
+                            <!-- Map Container -->
+                            <div id="mapContainer" class="position-relative border rounded">
+                                <!-- Loading Spinner -->
+                                <div id="loadingLocation"
+                                    class="position-absolute top-50 start-50 translate-middle text-center">
+                                    <div class="spinner-border text-primary" role="status"
+                                        style="width: 3rem; height: 3rem;">
+                                        <span class="visually-hidden">Cargando ubicación...</span>
+                                    </div>
+                                    <p class="mt-2 mb-0 text-dark">Detectando tu ubicación...</p>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="locationError"
+                                    class="position-absolute top-50 start-50 translate-middle alert alert-danger text-center"
+                                    style="display: none;"></div>
+
+                                <!-- Actual Map -->
+                                <div id="map"></div>
+                            </div>
+
+                            <!-- Map Controls -->
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">Mueve el marcador para ajustar la ubicación exacta</small>
+                                <button type="button" id="btnRefrescarUbicacion" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-geo-alt-fill"></i> Actualizar ubicación
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dirección (se autocompleta desde el mapa) -->
+                        <div class="mb-3">
+                            <label for="direccion" class="form-label">Dirección Completa *</label>
+                            <textarea class="form-control" id="direccion" name="Direccion" rows="2" required></textarea>
+                            <div class="invalid-feedback">Por favor ingrese la dirección.</div>
+                        </div>
+
+                        <!-- Coordenadas Ocultas -->
+                        <input type="hidden" id="latitud" name="Latitud" required>
+                        <input type="hidden" id="longitud" name="Longitud" required>
+
+                        <!-- Botón de Registro -->
+                        <button type="submit" class="btn btn-primary w-100 mt-3 py-2">
+                            <i class="bi bi-shop"></i> Registrar Conctacto
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
-        <div class="text-center mt-3">&copy; 2025 Yavi. Todos los derechos reservados.</div>
     </div>
-</footer>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script
-        src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-        integrity="sha256-WBtrFlZcQPbFoXh1Q0M1srt1I7fM3UzfWPVqzf//ShI="
-        crossorigin=""
-></script>
-<script src="../Scripts/script-banco.js"></script>
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <h5>Yavi</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#sobre">Nosotros</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h5>Productos</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#promos">Promos</a></li>
+                        <li><a href="#comercios">Comercios</a></li>
+                        <li><a href="#bancos">Bancos</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h5>Empresa</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#sobre">Nosotros</a></li>
+                        <li><a href="#careers">Carreras</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h5>Legal</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#terms">Términos de uso</a></li>
+                        <li><a href="#privacy">Política de privacidad</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                &copy; 2025 Yavi. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../Scripts/registro-banco.js"></script>
 </body>
+
 </html>
