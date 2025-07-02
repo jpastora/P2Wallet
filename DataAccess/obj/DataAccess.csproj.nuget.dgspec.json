@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj": {}
+    "D:\\source\\jpastora\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj": {}
   },
   "projects": {
-    "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj": {
+    "D:\\source\\jpastora\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj",
+        "projectUniqueName": "D:\\source\\jpastora\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj",
         "projectName": "DataAccess",
-        "projectPath": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj",
-        "packagesPath": "C:\\Users\\juang\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DataAccess\\obj\\",
+        "projectPath": "D:\\source\\jpastora\\Proyecto2Yavi\\DataAccess\\DataAccess.csproj",
+        "packagesPath": "C:\\Users\\josep\\.nuget\\packages\\",
+        "outputPath": "D:\\source\\jpastora\\Proyecto2Yavi\\DataAccess\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\juang\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\josep\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -32,8 +32,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DTOs\\DTOs.csproj": {
-                "projectPath": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DTOs\\DTOs.csproj"
+              "D:\\source\\jpastora\\Proyecto2Yavi\\DTOs\\DTOs.csproj": {
+                "projectPath": "D:\\source\\jpastora\\Proyecto2Yavi\\DTOs\\DTOs.csproj"
               }
             }
           }
@@ -75,24 +75,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.301/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DTOs\\DTOs.csproj": {
+    "D:\\source\\jpastora\\Proyecto2Yavi\\DTOs\\DTOs.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DTOs\\DTOs.csproj",
+        "projectUniqueName": "D:\\source\\jpastora\\Proyecto2Yavi\\DTOs\\DTOs.csproj",
         "projectName": "DTOs",
-        "projectPath": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DTOs\\DTOs.csproj",
-        "packagesPath": "C:\\Users\\juang\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\juang\\source\\repos\\Proyecto2Yavi\\DTOs\\obj\\",
+        "projectPath": "D:\\source\\jpastora\\Proyecto2Yavi\\DTOs\\DTOs.csproj",
+        "packagesPath": "C:\\Users\\josep\\.nuget\\packages\\",
+        "outputPath": "D:\\source\\jpastora\\Proyecto2Yavi\\DTOs\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\juang\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\josep\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -140,7 +140,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.301/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
