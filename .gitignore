@@ -3,3 +3,143 @@
 ################################################################################
 
 /.vs
+bin/
+obj/
+*.cache
+*.pdb
+*.user
+*.suo
+*.vs/
+**/obj/
+**/bin/
+*.cache
+## Build output
+bin/
+obj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]og/
+[Ll]ogs/
+
+## User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.sdf
+*.cache
+*.dbmdl
+*.pdb
+*.VC.db
+
+## IDE folders
+.vs/
+.idea/
+*.code-workspace
+
+## Rider
+*.sln.iml
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## DotCover
+.idea/.idea.DotSettings
+.idea/.idea.DotSettings.user
+
+## StyleCop
+StyleCopReport.xml
+
+## TFS
+$tf/
+
+## Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+## NUnit
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+## MSTest
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+## Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## TeamCity
+_TeamCity*
+
+## Dotnet watch
+**/node_modules/
+
+## NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+!**/packages/repositories.config
+.nuget/
+packages/
+*.nuspec
+
+## Web
+node_modules/
+bower_components/
+wwwroot/lib/
+dist/
+build/
+*.log
+yarn.lock
+package-lock.json
+
+## Log files
+*.log
+
+## Others
+*.swp
+*.bak
+*.tmp
+*.tmp.*
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# JetBrains Rider
+.idea/
+
+# dotenv
+.env
+.env.*
+
+# Local test & coverage results
+coverage/
+*.lcov
+test-output/
+
+# Optional: ignore any zipped folders or exports
+*.zip
+*.tar.gz
+*.7z
+
