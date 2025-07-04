@@ -10,3 +10,6 @@ obj/
 *.user
 *.suo
 *.vs/
+**/obj/
+**/bin/
+*.cache
