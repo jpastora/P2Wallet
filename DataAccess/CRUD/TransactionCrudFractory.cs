@@ -99,10 +99,10 @@ namespace DataAccess.CRUD
                 UserID = (int)row["UserID"],
                 MerchantID = (int)row["MerchantID"],
                 BankAccountID = (int)row["BankAccountID"],
-                GrossAmount = (double)row["GrossAmount"],
-                NetAmount = (double)row["NetAmount"],
-                DiscountApplied = (double)row["DiscountApplied"],
-                CommissionApplied = (double)row["CommissionApplied"],
+                GrossAmount = Convert.ToDouble(row["GrossAmount"]),
+                NetAmount = Convert.ToDouble(row["NetAmount"]),
+                DiscountApplied = Convert.ToDouble(row["DiscountApplied"]),
+                CommissionApplied = Convert.ToDouble(row["CommissionApplied"]),
                 TransactionStatus = (string)row["TransactionStatus"]
             };
         }
