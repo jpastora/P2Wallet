@@ -56,13 +56,40 @@ namespace DataAccess.CRUD
             }
             return lstUsers;
         }
-        public override T RetrieveById<T>(int iD)
+        public override T RetrieveById<T>(int ID)
         {
-            throw new NotImplementedException();
+            var sqlOperation = new SqlOperation() { ProcedureName = "RET_USER_BY_ID_PR" };
+            sqlOperation.AddIntParam("P_UserID", ID);
+
+            var lstResults = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+
+            if (lstResults.Count > 0)
+            {
+                var row = lstResults[0];
+                var user = BuildUser(row);
+
+                return (T)Convert.ChangeType(user, typeof(T));
+            }
+            return default(T);
         }
         public override void Update(BaseDTO baseDTO)
         {
-            throw new NotImplementedException();
+            var user = baseDTO as User;
+            var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_USER_PR" };
+            sqlOperation.AddIntParam("@P_UserID", user.ID);
+            sqlOperation.AddStringParameter("@P_FullName", user.FullName);
+            sqlOperation.AddStringParameter("@P_Email", user.Email);
+            sqlOperation.AddStringParameter("@P_MobilePhone", user.MobilePhone);
+            sqlOperation.AddStringParameter("@P_IDPhotoFront", user.IDPhotoFrontUrl);
+            sqlOperation.AddStringParameter("@P_IDPhotoBack", user.IDPhotoBackUrl);
+            sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
+            sqlOperation.AddDoubleParam("@P_Longitude", user.Longitude);
+            sqlOperation.AddStringParameter("@P_Password", user.Password);
+            sqlOperation.AddBoolParam("@P_EmailVerified", user.EmailVerified);
+            sqlOperation.AddBoolParam("@P_MobileVerified", user.MobileVerified);
+            sqlOperation.AddBoolParam("@P_BiometricVerified", user.BiometricVerified);
+            sqlOperation.AddBoolParam("@P_Status", user.IsActive);
+            _sqlDao.ExecuteProcedure(sqlOperation);
         }
         private User BuildUser(Dictionary<string, object> row)
         {
