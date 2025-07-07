@@ -1,0 +1,332 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Yavi – Wallet Digital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#home">Yavi</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#servicios">Servicios</a></li>
+                <li class="nav-item"><a class="nav-link" href="#sobre">Nosotros</a></li>
+                <li class="nav-item"><a class="nav-link" href="#por-que">Por qué elegirnos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#promos">Promos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#comercios">Comercios</a></li>
+                <li class="nav-item"><a class="nav-link" href="#bancos">Bancos</a></li>
+                <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+            </ul>
+            <div class="dropdown">
+                <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Login / Registro</button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#">Login</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="Register/registro-usuario.html">Registro Persona</a></li>
+                    <li><a class="dropdown-item" href="#">Registro Comercio</a></li>
+                    <li><a class="dropdown-item" href="#">Registro Banco</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO CAROUSEL -->
+<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="https://picsum.photos/seed/hero1/1600/600" class="d-block w-100" alt="Hero 1">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Bienvenido a Yavi</h5>
+                <p>La billetera digital que simplifica tu vida.</p>
+                <a class="btn btn-primary" href="#servicios">Descubrir más</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="https://picsum.photos/seed/hero2/1600/600" class="d-block w-100" alt="Hero 2">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Pagos Instantáneos</h5>
+                <p>Envía y recibe dinero al instante y sin complicaciones.</p>
+                <a class="btn btn-primary" href="#promos">Ver Promociones</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="https://picsum.photos/seed/hero3/1600/600" class="d-block w-100" alt="Hero 3">
+            <div class="carousel-caption d-none d-md-block">
+                <h5>Conecta con Comercios</h5>
+                <p>Explora descuentos exclusivos en comercios aliados.</p>
+                <a class="btn btn-primary" href="#comercios">Ver Comercios</a>
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+<!-- SERVICIOS -->
+<section id="servicios" class="py-5">
+    <div class="container text-center">
+        <h2 class="section-title">Nuestros Servicios</h2>
+        <p class="mb-5">Soluciones integradas para usuarios, comercios y bancos.</p>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <h5>Pagos y Cobros</h5>
+                    <p>Transacciones seguras al instante.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <h5>Promociones</h5>
+                    <p>Ofertas exclusivas para usuarios Yavi.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-4 h-100">
+                    <h5>Integración Bancaria</h5>
+                    <p>Conecta tus cuentas en un clic.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SOBRE NOSOTROS -->
+<section id="sobre" class="py-5 bg-light-alt">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="section-title">Pagos rápidos y control inteligente</h2>
+                <p>En Yavi conectamos usuarios, comercios y bancos con una experiencia digital simple y segura.</p>
+            </div>
+            <div class="col-md-6 text-center">
+                <img src="https://picsum.photos/seed/about/500/350" class="img-fluid rounded" alt="Sobre Yavi">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- POR QUÉ ELEGIRNOS -->
+<section id="por-que" class="py-5">
+    <div class="container text-center">
+        <h2 class="section-title">¿Por qué elegir Yavi?</h2>
+        <p>Experiencia intuitiva, seguridad y convenios exclusivos.</p>
+    </div>
+</section>
+
+<!-- PROMOCIONES -->
+<section id="promos" class="py-5 bg-light-alt">
+    <div class="container">
+        <h2 class="section-title text-center">Promociones Destacadas</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="https://picsum.photos/seed/promo1/400/200" class="card-img-top" alt="Promo 1">
+                    <div class="card-body">
+                        <h5 class="card-title">10% en Supermercados</h5>
+                        <p class="card-text">Pagando con Yavi tenés un 10% de descuento en compras mayores a ₡10.000.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="https://picsum.photos/seed/promo2/400/200" class="card-img-top" alt="Promo 2">
+                    <div class="card-body">
+                        <h5 class="card-title">2x1 en Cafeterías</h5>
+                        <p class="card-text">Disfrutá de cafés dobles en locales aliados los fines de semana.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="https://picsum.photos/seed/promo3/400/200" class="card-img-top" alt="Promo 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Envíos Gratis</h5>
+                        <p class="card-text">Comprá online y pagá con Yavi para obtener envíos gratis en comercios afiliados.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COMERCIOS AFILIADOS -->
+<section id="comercios" class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center">Comercios Afiliados</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-3">
+                    <img src="https://picsum.photos/seed/comercio1/400/200" class="card-img-top" alt="Comercio 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Super Tienda</h5>
+                        <p class="card-text">Productos esenciales con beneficios al pagar con Yavi.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-3">
+                    <img src="https://picsum.photos/seed/comercio2/400/200" class="card-img-top" alt="Comercio 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Café Central</h5>
+                        <p class="card-text">Disfrutá de un café especial con Yavi.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-3">
+                    <img src="https://picsum.photos/seed/comercio3/400/200" class="card-img-top" alt="Comercio 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Moda Urbana</h5>
+                        <p class="card-text">Accedé a descuentos exclusivos en moda urbana.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ENTIDADES FINANCIERAS -->
+<section id="bancos" class="py-5 bg-light-alt">
+    <div class="container">
+        <h2 class="section-title text-center">Entidades Financieras</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-3">
+                    <img src="https://picsum.photos/seed/banco1/400/200" class="card-img-top" alt="Banco Nacional">
+                    <div class="card-body">
+                        <h5 class="card-title">Banco Nacional</h5>
+                        <p class="card-text">Operaciones seguras y rápidas con tu banco aliado.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-3">
+                    <img src="https://picsum.photos/seed/banco2/400/200" class="card-img-top" alt="Banco Ágil">
+                    <div class="card-body">
+                        <h5 class="card-title">Banco Ágil</h5>
+                        <p class="card-text">Transferencias instantáneas y sin comisiones.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center p-3">
+                    <img src="https://picsum.photos/seed/banco3/400/200" class="card-img-top" alt="Financieras Unidas">
+                    <div class="card-body">
+                        <h5 class="card-title">Financieras Unidas</h5>
+                        <p class="card-text">Más convenios y beneficios para tu billetera.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PREGUNTAS FRECUENTES -->
+<section id="faq" class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center">Preguntas Frecuentes</h2>
+        <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="faq1">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                        ¿Qué necesito para registrarme en Yavi?
+                    </button>
+                </h2>
+                <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        Solo necesitás un correo electrónico válido, una selfie y tus datos personales básicos para comenzar.
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="faq2">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
+                        ¿Yavi cobra alguna comisión?
+                    </button>
+                </h2>
+                <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        El uso de Yavi es gratuito para los usuarios. Solo algunos comercios o entidades pueden aplicar comisiones según sus políticas.
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="faq3">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
+                        ¿Dónde puedo usar Yavi?
+                    </button>
+                </h2>
+                <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        En los comercios afiliados y plataformas que acepten pagos digitales a través de Yavi.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <h5>Yavi</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#servicios">Servicios</a></li>
+                    <li><a href="#sobre">Nosotros</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Productos</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#promos">Promos</a></li>
+                    <li><a href="#comercios">Comercios</a></li>
+                    <li><a href="#bancos">Bancos</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Empresa</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#sobre">Nosotros</a></li>
+                    <li><a href="#careers">Carreras</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-3">
+                <h5>Legal</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#terms">Términos de uso</a></li>
+                    <li><a href="#privacy">Política de privacidad</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            &copy; 2025 Yavi. Todos los derechos reservados.
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="Scripts/script.js"></script>
+</body>
+</html>
