@@ -1,0 +1,24 @@
+﻿CREATE PROCEDURE UPDATE_FINANCIAL_PROMOTION_PR
+    @P_PROMOTION_ID INT,
+    @P_FINANCIAL_ENTITY_ID INT,
+    @P_PROMOTION_TYPE NVARCHAR(100),
+    @P_DISCOUNT_PERCENTAGE FLOAT,
+    @P_MAX_REFUND FLOAT = NULL,
+    @P_START_DATE DATETIME,
+    @P_END_DATE DATETIME,
+    @P_AVAILABLE_QUANTITY INT,
+    @P_STATUS NVARCHAR(50)
+AS
+BEGIN
+    UPDATE FinancialPromotions
+    SET
+        FinancialEntityID = @P_FINANCIAL_ENTITY_ID,
+        PromotionType = @P_PROMOTION_TYPE,
+        DiscountPercentage = @P_DISCOUNT_PERCENTAGE,
+        MaxRefund = @P_MAX_REFUND,
+        StartDate = @P_START_DATE,
+        EndDate = @P_END_DATE,
+        AvailableQuantity = @P_AVAILABLE_QUANTITY,
+        Status = @P_STATUS
+    WHERE PromotionID = @P_PROMOTION_ID;
+END
