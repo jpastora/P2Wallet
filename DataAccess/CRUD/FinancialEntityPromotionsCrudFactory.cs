@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 namespace DataAccess.CRUD
 {
-    public class FinancialEntityPromotionCrudFactory : CrudFactory
+    public class FinancialEntityPromotionsCrudFactory : CrudFactory
     {
-        public FinancialEntityPromotionCrudFactory()
+        public FinancialEntityPromotionsCrudFactory()
         {
             _sqlDao = SqlDAO.GetInstance();
         }
