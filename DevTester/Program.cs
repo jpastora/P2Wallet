@@ -12,26 +12,21 @@ public class Program
 {
     public static void Main(string[] args)
     {
-
-        var transaction = new Transaction()
+        var user = new User()
         {
-            ID = 3,
-            UserID = 2,
-            MerchantID = 1,
-            BankAccountID = 1,
-            GrossAmount = 30.00,
-            NetAmount = 30.00,
-            DiscountApplied = 0,
-            CommissionApplied = 0,
-            Timestamp = DateTime.Now,
-            TransactionStatus = "Refunded"
+            FullName = "Test User",
+            Email = "test",
+            MobilePhone = "1234567890",
+            IDPhotoFrontUrl = "https://example.com/front.jpg",
+            IDPhotoBackUrl = "https://example.com/back.jpg",
+            Latitude = 0.0,
+            Longitude = 0.0,
+            Password = "password123"
         };
 
+        var userCrudFactory = new UserCrudFactory();
+        userCrudFactory.Create(user);
 
-        var tCrudFactory = new TransactionCrudFactory();
-        //tCrudFactory.Create(transaction);
-
-        tCrudFactory.Update(transaction);
 
     }
 }
