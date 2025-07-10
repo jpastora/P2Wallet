@@ -12,13 +12,11 @@ namespace WebAPI.Controllers
     {
         [HttpPost]
         [Route("Create")]
-
         public ActionResult CreateUser(User user)
-        { 
+        {
 
             try
             {
-
                 var userManager = new UserManager();
                 userManager.CreateUser(user);
                 return Ok("User created successfully.");
@@ -35,5 +33,94 @@ namespace WebAPI.Controllers
 
         }
 
+        [HttpPost]
+        [Route("Update")]
+        public ActionResult UpdateUser(User user)
+        {
+
+            try
+            {
+                var userManager = new UserManager();
+                userManager.UpdateUser(user);
+                return Ok("User updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("RetrieveAll")]
+        public ActionResult<List<User>> RetrieveAllUsers()
+        {
+            try
+            {
+                var userManager = new UserManager();
+                var listUserResult = userManager.RetrieveAllUsers();
+                return Ok(listUserResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("RetrieveById/{id}")]
+        public ActionResult RetrieveUserById(int id)
+        {
+            try
+            {
+                var userManager = new UserManager();
+                var userResult = userManager.RetrieveUserById(id);
+                if (userResult == null)
+                {
+                    return NotFound("User not found.");
+                }
+                return Ok(userResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("RetrieveByEmail/{email}")]
+        public ActionResult RetrieveUserByEmail(string email)
+        {
+            try
+            {
+                var userManager = new UserManager();
+                var user = new User { Email = email };
+                var userResult = userManager.RetrieveUserByEmail(user);
+                if (userResult == null)
+                {
+                    return NotFound("User not found.");
+                }
+                return Ok(userResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpDelete]
+        [Route("Delete")]
+        public ActionResult DeleteUser(User user)
+        {
+            try
+            {
+                var userManager = new UserManager();
+                userManager.DeleteUser(user);
+                return Ok("User deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }
