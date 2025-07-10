@@ -47,12 +47,12 @@ namespace CoreApp
         }
 
         // Recupera un usuario por su correo electrónico.
-        public User RetrieveUserByEmail(string email)
+        public User RetrieveUserByEmail(User user)
         {
             try
             {
                 var userCrud = new UserCrudFactory();
-                return userCrud.RetrieveByEmail<User>(email); // Recupera el usuario por correo electrónico
+                return userCrud.RetrieveByEmail<User>(user); // Recupera el usuario por correo electrónico
             }
             catch (Exception ex)
             {

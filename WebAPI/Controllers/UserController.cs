@@ -93,7 +93,8 @@ namespace WebAPI.Controllers
             try
             {
                 var userManager = new UserManager();
-                var userResult = userManager.RetrieveUserByEmail(email);
+                var user = new User { Email = email };
+                var userResult = userManager.RetrieveUserByEmail(user);
                 if (userResult == null)
                 {
                     return NotFound("User not found.");
