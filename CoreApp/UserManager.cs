@@ -8,86 +8,85 @@ using System.Threading.Tasks;
 
 namespace CoreApp
 {
-    public class UserManager :BaseManager
+    // Administra las operaciones relacionadas con usuarios.
+    public class UserManager : BaseManager
     {
-        public void Create(User user)
+        // Crea un nuevo usuario si el correo electrónico no existe previamente.
+        public void CreateUser(User user)
         {
-
             try
             {
-                //Validar la edad
-                if (IsOver18(user))
-                {
-                    var userCrud = new UserCrudFactory();
+                var userCrud = new UserCrudFactory();
 
-                    //Consultamos en la base de datos si existe un usuario con ese codigo
-                    var userExist = userCrud.RetrieveById<User>(user);
+                // Consultamos si en la base de datos existe un usuario con ese correo electrónico
+                var userExist = userCrud.RetrieveByEmail<User>(user);
 
-                    if (uExist == null)
-                    {
-
-                        if (uExist == null)
-                        {
-                            //Consultamos si en la bd existe un usuario con ese mail
-                            uExist = userCrud.RetrieveByUserEmail<User>(user);
-
-                            if (uExist == null)
-                                uCrud.Create(user);
-
-                            // var emailService = new SendGridService();
-                            // emailService.SendWelcomeEmail(user.Email, user.Name).Wait();
-
-                        }
-                        else
-                        {
-                            throw new Exception("Este correo ya se encuentra registrado.");
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("Codigo de usuario no disponible.");
-                    }
-
-                    uCrud.Create(user);
-                }
+                if (userExist == null)
+                    userCrud.Create(user); // Si no existe, crea el usuario
                 else
-                {
-                    throw new Exception("Usuario no cumple con la edad");
-                }
-
+                    throw new Exception("User already exists with this email."); // Si existe, lanza excepción
             }
             catch (Exception ex)
             {
-                {
-                    ManagerException(ex);
-                }
-
+                ManageException(ex); // Maneja la excepción usando el método base
             }
         }
 
+        // Recupera la lista de todos los usuarios registrados.
+        public List<User> RetrieveAllUsers()
+        {
+            var userCrud = new UserCrudFactory();
+            return userCrud.RetrieveAll<User>();
+        }
+
+        // Recupera un usuario por su identificador único.
+        public User RetrieveUserById(int id)
+        {
+            var userCrud = new UserCrudFactory();
+            return userCrud.RetrieveById<User>(id);
+        }
+
+        // Recupera un usuario por su correo electrónico.
+        public User RetrieveUserByEmail(string email)
+        {
+            try
+            {
+                var userCrud = new UserCrudFactory();
+                return userCrud.RetrieveByEmail<User>(email); // Recupera el usuario por correo electrónico
+            }
+            catch (Exception ex)
+            {
+                ManageException(ex); // Maneja la excepción usando el método base
+                return null; // Retorna null si ocurre una excepción
+            }
+        }
+
+        // Actualiza la información de un usuario existente.
         public void UpdateUser(User user)
         {
             try
             {
+                var userCrud = new UserCrudFactory();
+                userCrud.Update(user); // Actualiza el usuario en la base de datos
             }
             catch (Exception ex)
             {
-                ManageException(ex);
+                ManageException(ex); // Maneja la excepción usando el método base
             }
         }
 
+        // Elimina un usuario del sistema.
         public void DeleteUser(User user)
         {
             try
             {
                 var userCrud = new UserCrudFactory();
+                userCrud.Delete(user); // Elimina el usuario de la base de datos
             }
             catch (Exception ex)
             {
-                ManageException(ex);
+                ManageException(ex); // Maneja la excepción usando el método base
             }
         }
-
-
     }
 }
