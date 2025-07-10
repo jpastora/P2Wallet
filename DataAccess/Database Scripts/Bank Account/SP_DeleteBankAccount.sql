@@ -1,0 +1,10 @@
+﻿CREATE PROCEDURE DELETE_BANK_ACCOUNT_PR
+    @P_BankAccountID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM BankAccounts
+    WHERE BankAccountID = @P_BankAccountID
+END
+GO

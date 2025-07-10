@@ -8,10 +8,9 @@ namespace DTOs
 {
     public class Administrator : BaseDTO
     {
-        public int AdminID { get; set; }
         public string Name { get; set; }
         public string AcessUsername { get; set; }
         public string AccessPassword { get; set; }
-        public string AdminStatus { get; set; }
+        public bool AdminStatus { get; set; }
     }
 }

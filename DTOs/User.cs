@@ -20,6 +20,6 @@ namespace DTOs
         public bool EmailVerified { get; set; }
         public bool MobileVerified { get; set; }
         public bool BiometricVerified { get; set; }
-        public bool IsActive { get; set; }
+        public bool UserStatus { get; set; }
     }
 }

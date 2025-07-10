@@ -12,14 +12,18 @@ namespace DataAccess.CRUD
 {
     public class MerchantCrudFactory : CrudFactory
     {
+        public MerchantCrudFactory()
+        {
+            _sqlDao = SqlDAO.GetInstance();
+        }
         public override void Create(BaseDTO baseDTO)
         {
             var merchant = baseDTO as Merchant;
-            var sqlOperation = new SqlOperation() { ProcedureName = "CREATE_MERCHANT_SP" };
+            var sqlOperation = new SqlOperation() { ProcedureName = "CREATE_MERCHANT_PR" };
 
             sqlOperation.AddStringParameter("@P_MerchantName", merchant.MerchantName);
             sqlOperation.AddStringParameter("@P_TaxID", merchant.TaxID);
-            sqlOperation.AddStringParameter("@P_LogoImage", merchant.LogoImage);
+            //sqlOperation.AddStringParameter("@P_LogoImage", merchant.LogoImage);
             sqlOperation.AddDoubleParam("@P_Latitude", merchant.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", merchant.Longitude);
             sqlOperation.AddStringParameter("@P_Phone", merchant.Phone);
@@ -31,22 +35,74 @@ namespace DataAccess.CRUD
         public override void Delete(BaseDTO baseDTO)
         {
             var merchant = baseDTO as Merchant;
-            var sqlOperation = new SqlOperation() { ProcedureName = "DELETE_MERCHANT_SP" };
+            var sqlOperation = new SqlOperation() { ProcedureName = "DELETE_MERCHANT_PR" };
             sqlOperation.Parameters.Add(new SqlParameter("@P_ID", merchant.ID));
 
             var lstResults = _sqlDao.ExecuteQueryProcedure(sqlOperation);
         }
         public override List<T> RetrieveAll<T>()
         {
-            throw new NotImplementedException();
+            var lstMerchants = new List<T>();
+            var sqlOperation = new SqlOperation() { ProcedureName = "RET_ALL_MERCHANTS_PR" };
+            var results = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+
+            foreach (var row in results)
+            {
+                var merchant = BuildMerchant(row);
+                lstMerchants.Add((T)Convert.ChangeType(merchant, typeof(T)));
+            }
+
+            return lstMerchants;
         }
-        public override T RetrieveById<T>(int iD)
+        public override T RetrieveById<T>(int ID)
         {
-            throw new NotImplementedException();
+            var sqlOperation = new SqlOperation() { ProcedureName = "RET_MERCHANT_BY_ID_PR" };
+            sqlOperation.AddIntParam("@P_MerchantID", ID);
+
+            var results = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+
+            if (results.Count > 0)
+            {
+                var merchant = BuildMerchant(results[0]);
+                return (T)Convert.ChangeType(merchant, typeof(T));
+            }
+
+            return default(T);
         }
         public override void Update(BaseDTO baseDTO)
         {
-            throw new NotImplementedException();
+            var merchant = baseDTO as Merchant;
+            var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_MERCHANT_PR" };
+
+            sqlOperation.AddIntParam("@P_MerchantID", merchant.ID);
+            sqlOperation.AddStringParameter("@P_MerchantName", merchant.MerchantName);
+            sqlOperation.AddStringParameter("@P_TaxID", merchant.TaxID);
+            sqlOperation.AddStringParameter("@P_LogoImage", merchant.LogoImage);
+            sqlOperation.AddDoubleParam("@P_Latitude", merchant.Latitude);
+            sqlOperation.AddDoubleParam("@P_Longitude", merchant.Longitude);
+            sqlOperation.AddStringParameter("@P_Phone", merchant.Phone);
+            sqlOperation.AddStringParameter("@P_Email", merchant.Email);
+            sqlOperation.AddDoubleParam("@P_CommissionPercentage", merchant.CommissionPercentage);
+            sqlOperation.AddBoolParam("@P_ValidationStatus", merchant.ValidationStatus);
+
+            _sqlDao.ExecuteProcedure(sqlOperation);
+        }
+
+        private Merchant BuildMerchant(Dictionary<string, object> row)
+        {
+            return new Merchant
+            {
+                ID = (int)row["MerchantID"],
+                MerchantName = (string)row["MerchantName"],
+                TaxID = (string)row["TaxID"],
+                LogoImage = (string)row["LogoImage"],
+                Latitude = Convert.ToDouble(row["Latitude"]),
+                Longitude = Convert.ToDouble(row["Longitude"]),
+                Phone = (string)row["Phone"],
+                Email = (string)row["Email"],
+                CommissionPercentage = Convert.ToDouble(row["CommissionPercentage"]),
+                ValidationStatus = Convert.ToBoolean(row["ValidationStatus"])
+            };
         }
     }
 }

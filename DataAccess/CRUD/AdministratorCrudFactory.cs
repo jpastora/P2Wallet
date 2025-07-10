@@ -24,15 +24,14 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_Name", administrator.Name);
             sqlOperation.AddStringParameter("@P_AccessUsername", administrator.AcessUsername);
             sqlOperation.AddStringParameter("@P_AccessPassword", administrator.AccessPassword);
-            sqlOperation.AddDateTimeParam("@P_CreatedAt", administrator.Created);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
         public override void Delete(BaseDTO baseDTO)
         {
             var administrator = baseDTO as Administrator;
-            var sqlOperation = new SqlOperation() { ProcedureName = "DEL_ADMINISTRATOR_PR" };
-            sqlOperation.Parameters.Add(new SqlParameter("@P_ID", administrator.ID));
+            var sqlOperation = new SqlOperation() { ProcedureName = "DELETE_ADMINISTRATOR_PR" };
+            sqlOperation.Parameters.Add(new SqlParameter("@P_AdminID", administrator.ID));
 
             var lstResults = _sqlDao.ExecuteQueryProcedure(sqlOperation);
         }
@@ -54,10 +53,10 @@ namespace DataAccess.CRUD
             return lstAdministrators;
         }
 
-        public override T RetrieveById<T>(int iD)
+        public override T RetrieveById<T>(int ID)
         {
             var sqlOperation = new SqlOperation() { ProcedureName = "RET_ADMINISTRATOR_BY_ID_PR" };
-            sqlOperation.AddIntParam("@P_ID", iD);
+            sqlOperation.AddIntParam("@P_AdminID", ID);
             var lstResults = _sqlDao.ExecuteQueryProcedure(sqlOperation);
             if (lstResults.Count > 0)
             {
@@ -73,11 +72,11 @@ namespace DataAccess.CRUD
         {
             var administrator = baseDTO as Administrator;
             var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_ADMINISTRATOR_PR" };
-            sqlOperation.AddIntParam("@P_ID", administrator.AdminID);
+            sqlOperation.AddIntParam("@P_AdminID", administrator.ID);
             sqlOperation.AddStringParameter("@P_Name", administrator.Name);
             sqlOperation.AddStringParameter("@P_AccessUsername", administrator.AcessUsername);
             sqlOperation.AddStringParameter("@P_AccessPassword", administrator.AccessPassword);
-            sqlOperation.AddDateTimeParam("@P_Updated", administrator.Updated);
+            sqlOperation.AddBoolParam("@P_AdminStatus", administrator.AdminStatus);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
@@ -86,14 +85,11 @@ namespace DataAccess.CRUD
 
             var administrator = new Administrator()
             {
-                ID = Convert.ToInt32(row["ID"]),
-                AdminID = Convert.ToInt32(row["AdminID"]),
-                Name = row["Name"].ToString(),
-                AcessUsername = row["AccessUsername"].ToString(),
-                AccessPassword = row["AccessPassword"].ToString(),
-                AdminStatus = row["AdminStatus"].ToString(),
-                Created = Convert.ToDateTime(row["Created"]),
-                Updated = Convert.ToDateTime(row["Updated"])
+                ID = (int)row["AdminID"],
+                Name = (string)row["Name"],
+                AcessUsername = (string)row["AccessUsername"],
+                AccessPassword = (string)row["AccessPassword"],
+                AdminStatus = (bool)row["AdminStatus"]
             };
             return administrator;
         }

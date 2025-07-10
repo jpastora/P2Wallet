@@ -15,7 +15,6 @@ namespace DTOs
         public double NetAmount { get; set; }
         public double DiscountApplied { get; set; }
         public double CommissionApplied { get; set; }
-        public DateTime Timestamp { get; set; }
         public string TransactionStatus { get; set; }
     }
 }
