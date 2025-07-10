@@ -35,7 +35,7 @@ namespace DataAccess.CRUD
         public override void Delete(BaseDTO baseDTO)
         {
             var user = baseDTO as User;
-            var sqlOperation = new SqlOperation() { ProcedureName = "DEL_USER_PR" };
+            var sqlOperation = new SqlOperation() { ProcedureName = "DELETE_USER_PR" };
             sqlOperation.Parameters.Add(new SqlParameter("@P_ID", user.ID));
 
             var lstResults = _sqlDao.ExecuteQueryProcedure(sqlOperation);
@@ -80,6 +80,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_FullName", user.FullName);
             sqlOperation.AddStringParameter("@P_Email", user.Email);
             sqlOperation.AddStringParameter("@P_MobilePhone", user.MobilePhone);
+            sqlOperation.AddStringParameter("@P_ProfilePhoto", user.ProfilePhotoUrl);
             sqlOperation.AddStringParameter("@P_IDPhotoFront", user.IDPhotoFrontUrl);
             sqlOperation.AddStringParameter("@P_IDPhotoBack", user.IDPhotoBackUrl);
             sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
@@ -88,7 +89,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddBoolParam("@P_EmailVerified", user.EmailVerified);
             sqlOperation.AddBoolParam("@P_MobileVerified", user.MobileVerified);
             sqlOperation.AddBoolParam("@P_BiometricVerified", user.BiometricVerified);
-            sqlOperation.AddBoolParam("@P_Status", user.IsActive);
+            sqlOperation.AddBoolParam("@P_UserStatus", user.UserStatus);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
         private User BuildUser(Dictionary<string, object> row)
@@ -99,11 +100,13 @@ namespace DataAccess.CRUD
                 FullName = (string)row["FullName"],
                 Email = (string)row["Email"],
                 MobilePhone = (string)row["MobilePhone"],
-                IDPhotoFrontUrl = (string)row["IDPhotoFrontUrl"],
-                IDPhotoBackUrl = (string)row["IDPhotoBackUrl"],
-                Latitude = (double)row["Latitude"],
-                Longitude = (double)row["Longitude"],
-                Password = (string)row["Password"]
+                ProfilePhotoUrl = (string)row["ProfilePhoto"],
+                IDPhotoFrontUrl = (string)row["IDPhotoFront"],
+                IDPhotoBackUrl = (string)row["IDPhotoBack"],
+                Latitude = Convert.ToDouble(row["Latitude"]),
+                Longitude = Convert.ToDouble(row["Longitude"]),
+                Password = (string)row["Password"],
+                UserStatus = (bool)row["UserStatus"]
 
             };
             return user;
