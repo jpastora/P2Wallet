@@ -24,7 +24,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_Name", administrator.Name);
             sqlOperation.AddStringParameter("@P_AccessUsername", administrator.AcessUsername);
             sqlOperation.AddStringParameter("@P_AccessPassword", administrator.AccessPassword);
-            sqlOperation.AddDateTimeParam("@P_CreatedAt", administrator.CreateAt);
+            sqlOperation.AddDateTimeParam("@P_CreatedAt", administrator.Created);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
@@ -77,7 +77,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_Name", administrator.Name);
             sqlOperation.AddStringParameter("@P_AccessUsername", administrator.AcessUsername);
             sqlOperation.AddStringParameter("@P_AccessPassword", administrator.AccessPassword);
-            sqlOperation.AddDateTimeParam("@P_UpdatedAt", administrator.UpdatedAt);
+            sqlOperation.AddDateTimeParam("@P_Updated", administrator.Updated);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
@@ -92,8 +92,8 @@ namespace DataAccess.CRUD
                 AcessUsername = row["AccessUsername"].ToString(),
                 AccessPassword = row["AccessPassword"].ToString(),
                 AdminStatus = row["AdminStatus"].ToString(),
-                CreateAt = Convert.ToDateTime(row["CreatedAt"]),
-                UpdatedAt = Convert.ToDateTime(row["UpdatedAt"])
+                Created = Convert.ToDateTime(row["Created"]),
+                Updated = Convert.ToDateTime(row["Updated"])
             };
             return administrator;
         }
