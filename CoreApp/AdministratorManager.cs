@@ -62,7 +62,7 @@ namespace CoreApp
 
         }
 
-        // Elimina un administrador por su identificador único.
+        // Elimina un administrador.
         public void DeleteAdministrator(Administrator administrator)
         {
             try
