@@ -1,0 +1,18 @@
+.divider {
+    border: none;
+    border-top: 1px solid #ccc;
+    text-align: center;
+    position: relative;
+    margin: 1.5rem 0;
+}
+
+.divider::after {
+    content: attr(data-content);
+    position: absolute;
+    top: -0.7em;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    padding: 0 1rem;
+    color: #888;
+}
