@@ -6,4 +6,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="Pages\TempUI\CSS\comercio.css" />
+    <Content Include="Pages\TempUI\CSS\entidades.css" />
+    <Content Include="Pages\TempUI\CSS\login.css" />
+    <Content Include="Pages\TempUI\CSS\panel-administrativo.css" />
+    <Content Include="Pages\TempUI\CSS\panel-usuario.css" />
+    <Content Include="Pages\TempUI\CSS\perfil.css" />
+    <Content Include="Pages\TempUI\CSS\promociones.css" />
+    <Content Include="Pages\TempUI\CSS\recuperar-contrasena.css" />
+    <Content Include="Pages\TempUI\CSS\registro-banco.css" />
+    <Content Include="Pages\TempUI\CSS\registro-comercio.css" />
+    <Content Include="Pages\TempUI\CSS\registro-usuario.css" />
+    <Content Include="Pages\TempUI\CSS\style-register.css" />
+    <Content Include="Pages\TempUI\CSS\style.css" />
+    <Content Include="Pages\TempUI\CSS\verificacion-facial.css" />
+  </ItemGroup>
+
 </Project>
