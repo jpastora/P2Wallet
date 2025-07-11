@@ -37,7 +37,6 @@ namespace WebAPI.Controllers
         [Route("Update")]
         public ActionResult UpdateUser(User user)
         {
-
             try
             {
                 var userManager = new UserManager();
