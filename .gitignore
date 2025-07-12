@@ -143,3 +143,19 @@ test-output/
 *.tar.gz
 *.7z
 
+# Resultados de compilación
+[Bb]in/
+[Oo]bj/
+
+# Archivos de Visual Studio
+*.suo
+*.user
+*.userprefs
+*.vspscc
+*.vssscc
+.vs/
+
+# Paquetes NuGet
+packages/
+*.nupkg
+.nuget/packages/
