@@ -143,6 +143,7 @@ test-output/
 *.tar.gz
 *.7z
 
+
 # Resultados de compilación
 [Bb]in/
 [Oo]bj/
