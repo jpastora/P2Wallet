@@ -1,9 +1,12 @@
-﻿CREATE PROCEDURE RET_ALL_USERS_PR
+﻿
+
+CREATE PROCEDURE RET_ALL_USERS_PR
 AS
 BEGIN
     SELECT 
-        UserID, CreatedAt, EmailVerified, MobileVerified, BiometricVerified, UserStatus,
-        FullName, Email, MobilePhone, ProfilePhoto, IDPhotoFront, IDPhotoBack,
+        UserID, CreatedAt, EmailVerified, MobileVerified, BiometricVerified, ValidationStatus,
+		SMSNotificaction, PushNotification, EmailNotification,
+        FullName, IDNumber, BirthDate, Email, MobilePhone, ProfilePhoto, IDPhotoFront, IDPhotoBack,
         Latitude, Longitude, Password
     FROM Users
 END

@@ -81,7 +81,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_ContactPhone", entity.ContactPhone);
             sqlOperation.AddStringParameter("@P_Email", entity.Email);
             sqlOperation.AddDoubleParam("@P_CommissionPercentage", entity.CommissionPercentage);
-            sqlOperation.AddBoolParam("@P_ValidationStatus", entity.ValidationStatus);
+            sqlOperation.AddStringParameter("@P_ValidationStatus", entity.ValidationStatus);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -97,7 +97,7 @@ namespace DataAccess.CRUD
                 ContactPhone = (string)row["ContactPhone"],
                 Email = (string)row["Email"],
                 CommissionPercentage = Convert.ToDouble(row["CommissionPercentage"]),
-                ValidationStatus = Convert.ToBoolean(row["ValidationStatus"])
+                ValidationStatus = (string)row["ValidationStatus"]
             };
         }
     }

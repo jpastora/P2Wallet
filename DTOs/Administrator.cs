@@ -11,6 +11,6 @@ namespace DTOs
         public string Name { get; set; }
         public string AcessUsername { get; set; }
         public string AccessPassword { get; set; }
-        public bool AdminStatus { get; set; }
+        public string ValidationStatus { get; set; }
     }
 }

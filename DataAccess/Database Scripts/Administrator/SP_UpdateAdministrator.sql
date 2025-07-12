@@ -3,7 +3,7 @@
     @P_Name VARCHAR(20),
     @P_AccessUsername VARCHAR(50),
     @P_AccessPassword VARCHAR(255),
-    @P_AdminStatus BIT
+    @P_ValidationStatus VARCHAR(15)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -13,7 +13,7 @@ BEGIN
         Name = @P_Name,
         AccessUsername = @P_AccessUsername,
         AccessPassword = @P_AccessPassword,
-        AdminStatus = @P_AdminStatus,
+        ValidationStatus = @P_ValidationStatus,
         UpdatedAt = GETDATE()
     WHERE
         AdminID = @P_AdminID

@@ -13,9 +13,9 @@ namespace DTOs
         public string LogoImage { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
-        public string Phone { get; set; }
+        public string ContactPhone { get; set; }
         public string Email { get; set; }
         public double CommissionPercentage { get; set; }
-        public bool ValidationStatus { get; set; }
+        public String ValidationStatus { get; set; }
     }
 }
