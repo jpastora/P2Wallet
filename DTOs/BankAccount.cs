@@ -11,6 +11,6 @@ namespace DTOs
         public int UserID { get; set; }
         public string IBAN { get; set; }
         public int FinancialEntityID { get; set; }
-        public bool Status { get; set; }
+        public String ValidationStatus { get; set; }
     }
 }

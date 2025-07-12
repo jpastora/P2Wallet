@@ -9,7 +9,7 @@ BEGIN
         Name, 
         AccessUsername, 
         AccessPassword, 
-        AdminStatus, 
+        ValidationStatus, 
         CreatedAt, 
         UpdatedAt
     FROM 

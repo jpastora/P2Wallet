@@ -4,7 +4,7 @@ BEGIN
     SELECT 
         MerchantID, CreatedAt, ValidationStatus, 
         MerchantName, TaxID, LogoImage, Latitude, Longitude, 
-        Phone, Email, CommissionPercentage
+        ContactPhone, Email, CommissionPercentage
     FROM Merchants
 END
 GO

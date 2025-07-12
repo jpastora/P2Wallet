@@ -11,7 +11,7 @@ BEGIN
         LogoImage,
         Latitude,
         Longitude,
-        Phone,
+        ContactPhone,
         Email,
         CommissionPercentage,
         ValidationStatus,

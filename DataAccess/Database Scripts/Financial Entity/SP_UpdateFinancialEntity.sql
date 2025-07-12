@@ -7,7 +7,7 @@
     @P_ContactPhone VARCHAR(15),
     @P_Email VARCHAR(100),
     @P_CommissionPercentage DECIMAL(5,2),
-    @P_ValidationStatus BIT
+    @P_ValidationStatus VARCHAR(15)
 AS
 BEGIN
     SET NOCOUNT ON;

@@ -76,7 +76,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_Name", administrator.Name);
             sqlOperation.AddStringParameter("@P_AccessUsername", administrator.AcessUsername);
             sqlOperation.AddStringParameter("@P_AccessPassword", administrator.AccessPassword);
-            sqlOperation.AddBoolParam("@P_AdminStatus", administrator.AdminStatus);
+            sqlOperation.AddStringParameter("@P_ValidationStatus", administrator.ValidationStatus);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
@@ -89,7 +89,7 @@ namespace DataAccess.CRUD
                 Name = (string)row["Name"],
                 AcessUsername = (string)row["AccessUsername"],
                 AccessPassword = (string)row["AccessPassword"],
-                AdminStatus = (bool)row["AdminStatus"]
+                ValidationStatus = (string)row["AdminStatus"]
             };
             return administrator;
         }

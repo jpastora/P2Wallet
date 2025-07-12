@@ -6,7 +6,7 @@ BEGIN
         UserID,
         IBAN,
         FinancialEntityID,
-        Status,
+        ValidationStatus,
         RegisteredAt
     FROM 
         BankAccounts

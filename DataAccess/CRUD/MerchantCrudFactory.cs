@@ -23,10 +23,9 @@ namespace DataAccess.CRUD
 
             sqlOperation.AddStringParameter("@P_MerchantName", merchant.MerchantName);
             sqlOperation.AddStringParameter("@P_TaxID", merchant.TaxID);
-            //sqlOperation.AddStringParameter("@P_LogoImage", merchant.LogoImage);
             sqlOperation.AddDoubleParam("@P_Latitude", merchant.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", merchant.Longitude);
-            sqlOperation.AddStringParameter("@P_Phone", merchant.Phone);
+            sqlOperation.AddStringParameter("@P_ContactPhone", merchant.ContactPhone);
             sqlOperation.AddStringParameter("@P_Email", merchant.Email);
             sqlOperation.AddDoubleParam("@P_CommissionPercentage", merchant.CommissionPercentage);
 
@@ -80,10 +79,10 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_LogoImage", merchant.LogoImage);
             sqlOperation.AddDoubleParam("@P_Latitude", merchant.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", merchant.Longitude);
-            sqlOperation.AddStringParameter("@P_Phone", merchant.Phone);
+            sqlOperation.AddStringParameter("@P_ContactPhone", merchant.ContactPhone);
             sqlOperation.AddStringParameter("@P_Email", merchant.Email);
             sqlOperation.AddDoubleParam("@P_CommissionPercentage", merchant.CommissionPercentage);
-            sqlOperation.AddBoolParam("@P_ValidationStatus", merchant.ValidationStatus);
+            sqlOperation.AddStringParameter("@P_ValidationStatus", merchant.ValidationStatus);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -98,10 +97,10 @@ namespace DataAccess.CRUD
                 LogoImage = (string)row["LogoImage"],
                 Latitude = Convert.ToDouble(row["Latitude"]),
                 Longitude = Convert.ToDouble(row["Longitude"]),
-                Phone = (string)row["Phone"],
+                ContactPhone = (string)row["ContactPhone"],
                 Email = (string)row["Email"],
                 CommissionPercentage = Convert.ToDouble(row["CommissionPercentage"]),
-                ValidationStatus = Convert.ToBoolean(row["ValidationStatus"])
+                ValidationStatus = (string)row["ValidationStatus"]
             };
         }
     }

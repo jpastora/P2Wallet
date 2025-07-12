@@ -3,7 +3,7 @@
     @P_UserID INT,
     @P_IBAN CHAR(22),
     @P_FinancialEntityID INT,
-    @P_Status BIT
+    @P_ValidationStatus VARCHAR(15)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -13,7 +13,7 @@ BEGIN
         UserID = @P_UserID,
         IBAN = @P_IBAN,
         FinancialEntityID = @P_FinancialEntityID,
-        Status = @P_Status
+        ValidationStatus = @P_ValidationStatus
     WHERE
         BankAccountID = @P_BankAccountID
 END

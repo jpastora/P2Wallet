@@ -5,9 +5,10 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        UserID, CreatedAt, EmailVerified, MobileVerified, BiometricVerified, UserStatus,
-        FullName, Email, MobilePhone, ProfilePhoto, IDPhotoFront, IDPhotoBack,
-        Latitude, Longitude, Password, UpdatedAt
+        UserID, CreatedAt, EmailVerified, MobileVerified, BiometricVerified, ValidationStatus,
+		SMSNotificaction, PushNotification, EmailNotification,
+        FullName, IDNumber, BirthDate, Email, MobilePhone, ProfilePhoto, IDPhotoFront, IDPhotoBack,
+        Latitude, Longitude, Password
     FROM 
         Users
     WHERE 

@@ -15,6 +15,6 @@ namespace DTOs
         public string ContactPhone { get; set; }
         public string Email { get; set; }
         public double CommissionPercentage { get; set; }
-        public bool ValidationStatus { get; set; }
+        public String ValidationStatus { get; set; }
     }
 }
