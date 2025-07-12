@@ -22,6 +22,8 @@ namespace DataAccess.CRUD
             var sqlOperation = new SqlOperation() { ProcedureName = "CREATE_USER_PR" };
 
             sqlOperation.AddStringParameter("@P_FullName", user.FullName);
+            sqlOperation.AddStringParameter("@P_IDNumber", user.IDNumber);
+            sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
             sqlOperation.AddStringParameter("@P_Email", user.Email);
             sqlOperation.AddStringParameter("@P_MobilePhone", user.MobilePhone);
             sqlOperation.AddStringParameter("@P_IDPhotoFront", user.IDPhotoFrontUrl);
@@ -111,6 +113,8 @@ namespace DataAccess.CRUD
             var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_USER_PR" };
             sqlOperation.AddIntParam("@P_UserID", user.ID);
             sqlOperation.AddStringParameter("@P_FullName", user.FullName);
+            sqlOperation.AddStringParameter("@P_IDNumber", user.IDNumber);
+            sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
             sqlOperation.AddStringParameter("@P_Email", user.Email);
             sqlOperation.AddStringParameter("@P_MobilePhone", user.MobilePhone);
             sqlOperation.AddStringParameter("@P_ProfilePhoto", user.ProfilePhotoUrl);
@@ -119,10 +123,10 @@ namespace DataAccess.CRUD
             sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", user.Longitude);
             sqlOperation.AddStringParameter("@P_Password", user.Password);
-            sqlOperation.AddBoolParam("@P_EmailVerified", user.EmailVerified);
-            sqlOperation.AddBoolParam("@P_MobileVerified", user.MobileVerified);
-            sqlOperation.AddBoolParam("@P_BiometricVerified", user.BiometricVerified);
-            sqlOperation.AddBoolParam("@P_UserStatus", user.UserStatus);
+            sqlOperation.AddStringParameter("@P_EmailVerified", user.EmailVerified);
+            sqlOperation.AddStringParameter("@P_MobileVerified", user.MobileVerified);
+            sqlOperation.AddStringParameter("@P_BiometricVerified", user.BiometricVerified);
+            sqlOperation.AddStringParameter("@P_UserStatus", user.ValidationStatus);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
         private User BuildUser(Dictionary<string, object> row)
@@ -131,6 +135,8 @@ namespace DataAccess.CRUD
             {
                 ID = (int)row["UserID"],
                 FullName = (string)row["FullName"],
+                IDNumber = (string)row["IDNumber"],
+                BirthDate = Convert.ToDateTime(row["BirthDate"]),
                 Email = (string)row["Email"],
                 MobilePhone = (string)row["MobilePhone"],
                 ProfilePhotoUrl = (string)row["ProfilePhoto"],
@@ -139,7 +145,10 @@ namespace DataAccess.CRUD
                 Latitude = Convert.ToDouble(row["Latitude"]),
                 Longitude = Convert.ToDouble(row["Longitude"]),
                 Password = (string)row["Password"],
-                UserStatus = (bool)row["UserStatus"]
+                ValidationStatus = (string)row["UserStatus"],
+                SMSNotification = (string)row["SMSNotification"],
+                EmailNotification = (string)row["EmailNotification"],
+                PushNotification = (string)row["PushNotification"]
 
             };
             return user;

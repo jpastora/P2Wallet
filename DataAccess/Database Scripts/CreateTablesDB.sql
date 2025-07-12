@@ -1,21 +1,26 @@
-﻿use [brightcodeProyectoII-db]
+﻿    use [yavidb]
 go
 
 CREATE TABLE Users (
     UserID INT PRIMARY KEY IDENTITY(1,1),
     FullName VARCHAR(100) NOT NULL,
+	IDNumber VARCHAR(50) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
+	BirthDate DATETIME NOT NULL,
     MobilePhone VARCHAR(15) NOT NULL UNIQUE,
     ProfilePhoto VARCHAR(300),
-    IDPhotoFront VARCHAR(300),
-    IDPhotoBack VARCHAR(300),
+    IDPhotoFront VARCHAR(300) NOT NULL,
+    IDPhotoBack VARCHAR(300) NOT NULL,
     Latitude DECIMAL(9,6) NOT NULL,
     Longitude DECIMAL(9,6) NOT NULL,
     Password VARCHAR(255) NOT NULL,
-    EmailVerified BIT DEFAULT 0,
-    MobileVerified BIT DEFAULT 0,
-    BiometricVerified BIT DEFAULT 0,
-    UserStatus BIT DEFAULT 0,
+    EmailVerified VARCHAR(15) DEFAULT 'Inactive' CHECK (EmailVerified IN ('Active', 'Inactive')),
+    MobileVerified VARCHAR(15) DEFAULT 'Inactive' CHECK (MobileVerified IN ('Active', 'Inactive')),
+    BiometricVerified VARCHAR(15) DEFAULT 'Inactive' CHECK (BiometricVerified IN ('Active', 'Inactive')),
+    ValidationStatus VARCHAR(15) DEFAULT 'Inactive' CHECK (ValidationStatus IN ('Active', 'Inactive')),
+	SMSNotificaction VARCHAR(15) DEFAULT 'Inactive' CHECK (SMSNotificaction IN ('Active', 'Inactive')),
+	PushNotification VARCHAR(15) DEFAULT 'Inactive' CHECK (PushNotification IN ('Active', 'Inactive')),
+	EmailNotification VARCHAR(15) DEFAULT 'Inactive' CHECK (EmailNotification IN ('Active', 'Inactive')),
     CreatedAt DATETIME DEFAULT GETDATE(),
 	UpdatedAt DATETIME
 );
@@ -26,10 +31,10 @@ CREATE TABLE FinancialEntities (
     TaxID VARCHAR(20) NOT NULL UNIQUE,
     Latitude DECIMAL(9,6) NOT NULL,
     Longitude DECIMAL(9,6) NOT NULL,
-    ContactPhone VARCHAR(15) NOT NULL,
+    ContactPhone VARCHAR(15) NOT NULL UNIQUE,
     Email VARCHAR(100) NOT NULL,
     CommissionPercentage DECIMAL(5,2),
-    ValidationStatus BIT DEFAULT 0,
+    ValidationStatus VARCHAR(15) DEFAULT 'Inactive' CHECK (ValidationStatus IN ('Active', 'Inactive')),
     CreatedAt DATETIME DEFAULT GETDATE(),
 	UpdatedAt DATETIME
 );
@@ -50,10 +55,10 @@ CREATE TABLE Merchants (
     LogoImage VARCHAR(300),
     Latitude DECIMAL(9,6) NOT NULL,
     Longitude DECIMAL(9,6) NOT NULL,
-    Phone VARCHAR(15) NOT NULL,
+    ContactPhone VARCHAR(15) NOT NULL UNIQUE,
     Email VARCHAR(100) NOT NULL,
     CommissionPercentage DECIMAL(5,2),
-    ValidationStatus BIT DEFAULT 0,
+    ValidationStatus VARCHAR(15) DEFAULT 'Inactive' CHECK (ValidationStatus IN ('Active', 'Inactive')),
     CreatedAt DATETIME DEFAULT GETDATE(),
 	UpdatedAt DATETIME
 );
@@ -72,7 +77,7 @@ CREATE TABLE BankAccounts (
     UserID INT NOT NULL,
     IBAN CHAR(22) NOT NULL,
     FinancialEntityID INT NOT NULL,
-    Status BIT DEFAULT 1,
+    ValidationStatus VARCHAR(15) DEFAULT 'Active' CHECK (ValidationStatus IN ('Active', 'Inactive')),
     RegisteredAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (UserID) REFERENCES Users(UserID),
     FOREIGN KEY (FinancialEntityID) REFERENCES FinancialEntities(FinancialEntityID)
@@ -99,7 +104,7 @@ CREATE TABLE Administrators (
     Name VARCHAR(20) NOT NULL,
     AccessUsername VARCHAR(50) NOT NULL,
     AccessPassword VARCHAR(255) NOT NULL,
-    AdminStatus BIT DEFAULT 1,
+    ValidationStatus VARCHAR(15) DEFAULT 'Active' CHECK (ValidationStatus IN ('Active', 'Inactive')),
     CreatedAt DATETIME DEFAULT GETDATE(),
 	UpdatedAt DATETIME
 );
@@ -110,10 +115,10 @@ CREATE TABLE FinancialPromotions (
     PromotionType VARCHAR(20) NOT NULL CHECK (PromotionType IN ('Time', 'Quantity')),
     DiscountPercentage DECIMAL(5,2) NOT NULL,
     MaxRefund DECIMAL(12,2) NOT NULL,
-    StartDate DATETIME,
-    EndDate DATETIME,
-    AvailableQuantity INT,
-    Status BIT DEFAULT 1,
+    StartDate DATETIME DEFAULT NULL,
+    EndDate DATETIME DEFAULT NULL,
+    AvailableQuantity INT DEFAULT NULL,
+    ValidationStatus VARCHAR(15) DEFAULT 'Active' CHECK (ValidationStatus IN ('Active', 'Inactive')),
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (FinancialEntityID) REFERENCES FinancialEntities(FinancialEntityID)
 );
@@ -124,10 +129,10 @@ CREATE TABLE MerchantPromotions (
     PromotionType VARCHAR(20) NOT NULL CHECK (PromotionType IN ('Time', 'Quantity')),
     DiscountPercentage DECIMAL(5,2) NOT NULL,
     MaxRefund DECIMAL(12,2) NOT NULL,
-    StartDate DATETIME,
-    EndDate DATETIME,
-    AvailableQuantity INT,
-    Status BIT DEFAULT 1,
+    StartDate DATETIME DEFAULT NULL,
+    EndDate DATETIME DEFAULT NULL,
+    AvailableQuantity INT DEFAULT NULL,
+    ValidationStatus VARCHAR(15) DEFAULT 'Active' CHECK (ValidationStatus IN ('Active', 'Inactive')),
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (MerchantID) REFERENCES Merchants(MerchantID)
 );

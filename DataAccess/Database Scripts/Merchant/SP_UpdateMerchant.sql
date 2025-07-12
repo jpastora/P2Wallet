@@ -5,10 +5,10 @@
     @P_LogoImage VARCHAR(300),
     @P_Latitude DECIMAL(9,6),
     @P_Longitude DECIMAL(9,6),
-    @P_Phone VARCHAR(15),
+    @P_ContactPhone VARCHAR(15),
     @P_Email VARCHAR(100),
     @P_CommissionPercentage DECIMAL(5,2),
-    @P_ValidationStatus BIT
+    @P_ValidationStatus VARCHAR(15)
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -20,7 +20,7 @@ BEGIN
         LogoImage = @P_LogoImage,
         Latitude = @P_Latitude,
         Longitude = @P_Longitude,
-        Phone = @P_Phone,
+        ContactPhone = @P_ContactPhone,
         Email = @P_Email,
         CommissionPercentage = @P_CommissionPercentage,
         ValidationStatus = @P_ValidationStatus,
