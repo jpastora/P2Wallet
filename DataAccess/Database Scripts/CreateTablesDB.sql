@@ -41,11 +41,11 @@ CREATE TABLE FinancialEntities (
 
 CREATE TABLE UserFinancialEntity (
     FinancialEntityID INT NOT NULL,
-    AccessUsername VARCHAR(50) NOT NULL,
-    AccessPassword VARCHAR(255) NOT NULL,
+    UserID INT NOT NULL UNIQUE,
     CreatedAt DATETIME DEFAULT GETDATE(),
-    PRIMARY KEY (AccessUsername, FinancialEntityID),
-    FOREIGN KEY (FinancialEntityID) REFERENCES FinancialEntities(FinancialEntityID)
+    PRIMARY KEY (UserID, FinancialEntityID),
+    FOREIGN KEY (FinancialEntityID) REFERENCES FinancialEntities(FinancialEntityID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 CREATE TABLE Merchants (
@@ -63,13 +63,13 @@ CREATE TABLE Merchants (
 	UpdatedAt DATETIME
 );
 
-CREATE TABLE UserMerchant (
-    MerchantID INT NOT NULL,
-    AccessUsername VARCHAR(50) NOT NULL,
-    AccessPassword VARCHAR(255) NOT NULL,
+CREATE TABLE UserFinancialEntity (
+    FinancialEntityID INT NOT NULL,
+    UserID INT NOT NULL UNIQUE,
     CreatedAt DATETIME DEFAULT GETDATE(),
-    PRIMARY KEY (AccessUsername, MerchantID),
-    FOREIGN KEY (MerchantID) REFERENCES Merchants(MerchantID)
+    PRIMARY KEY (UserID, FinancialEntityID),
+    FOREIGN KEY (FinancialEntityID) REFERENCES FinancialEntities(FinancialEntityID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 CREATE TABLE BankAccounts (
