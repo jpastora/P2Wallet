@@ -99,8 +99,6 @@ packages/
 ## Web
 node_modules/
 bower_components/
-wwwroot/lib/
-dist/
 build/
 *.log
 yarn.lock
