@@ -101,6 +101,21 @@ footer {
         border: none;
     }
 
-        .banner-content .btn-primary:hover {
+    .banner-content .btn-primary:hover {
             background-color: var(--accent-yellow);
-        }
+     }
+
+/*
+  Forzamos la apariencia del componente de autocompletado de Google
+  para que ignore los estilos de tema oscuro de Bootstrap.
+*/
+gmp-place-autocomplete::part(input) {
+    /* Color de texto oscuro estándar de Bootstrap */
+    color: #212529 !important;
+    /* Color de fondo blanco */
+    background-color: #ffffff !important;
+    /* Color de borde estándar */
+    border-color: #dee2e6 !important;
+    /* Propiedad específica para navegadores como Chrome/Safari para asegurar el color del texto */
+    -webkit-text-fill-color: #212529 !important;
+}

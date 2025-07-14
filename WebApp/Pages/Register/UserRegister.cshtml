@@ -1,0 +1,232 @@
+﻿@page
+@model WebApp.Pages.Register.UserRegisterModel
+@{
+    ViewData["Title"] = "Registro de Usuario";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Registro de Nuevo Usuario</h2>
+    <form id="registerForm" class="needs-validation" novalidate>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="fullName" class="form-label">Nombre Completo</label>
+                <input type="text" class="form-control" id="fullName" ColumnDataName="FullName" required />
+                <div class="invalid-feedback">El nombre es obligatorio.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" ColumnDataName="Email" required />
+                <div class="invalid-feedback">Introduce un correo válido.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="telefono" class="form-label">Teléfono</label>
+                <input type="text" class="form-control" id="telefono" ColumnDataName="MobilePhone" required />
+                <div class="invalid-feedback">El teléfono es obligatorio.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" ColumnDataName="Password" minlength="8" required />
+                <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres.</div>
+            </div>
+            <div class="col-md-6">
+                <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                <input type="password" class="form-control" id="confirmPassword" required />
+                <div class="invalid-feedback">Las contraseñas no coinciden.</div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="photo" class="form-label">Foto de Perfil</label>
+                <input type="file" class="form-control" id="photo" accept="image/*" />
+            </div>
+            <div class="col-12 text-center">
+                <img id="photoPreview" class="photo-preview d-none" alt="Vista previa de la foto" style="max-height: 150px; border-radius: 50%;" />
+            </div>
+
+            <div class="col-12 mt-4">
+                <label for="autocomplete" class="form-label">Buscar Dirección</label>
+                <div class="input-group">
+                    <gmp-place-autocomplete id="autocomplete" class="form-control" placeholder="Escribe una dirección o un lugar..."></gmp-place-autocomplete>
+                    <button class="btn btn-outline-secondary" type="button" id="btnSearchAddress">Buscar</button>
+                </div>
+            </div>
+            <div class="col-12 mt-2">
+                <div id="map" style="height: 400px; width: 100%; border-radius: 8px; cursor: pointer;"></div>
+                <small class="form-text text-muted">Busca, haz clic en el mapa o arrastra el pin para ajustar tu ubicación.</small>
+            </div>
+
+            <input type="hidden" id="txtLatitude" ColumnDataName="Latitude">
+            <input type="hidden" id="txtLongitude" ColumnDataName="Longitude">
+            <input type="hidden" id="photoUrl" ColumnDataName="ProfilePhotoUrl">
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+            </div>
+        </div>
+    </form>
+    <div id="alertPlaceholder" class="mt-4"></div>
+</div>
+
+@section Scripts {
+    <script>
+        // Esta función global es llamada por la API de Google cuando termina de cargar.
+        function initMap() {
+            // ---- 1. Selección de Elementos ----
+            const latInput = document.getElementById('txtLatitude');
+            const lngInput = document.getElementById('txtLongitude');
+            const mapDiv = document.getElementById('map');
+            const autocompleteElement = document.getElementById('autocomplete');
+            const searchButton = document.getElementById('btnSearchAddress');
+
+            if (!mapDiv) { return; }
+
+            const initialLocation = { lat: 4.60971, lng: -74.08175 }; // Bogotá, Colombia
+
+            // ---- 2. Creación del Mapa y Marcador ----
+            const map = new google.maps.Map(mapDiv, {
+                zoom: 12,
+                center: initialLocation,
+                mapId: 'YAVI_REGISTER_MAP'
+            });
+
+            const marker = new google.maps.marker.AdvancedMarkerElement({
+                map: map,
+                position: initialLocation,
+                gmpDraggable: true,
+            });
+
+            latInput.value = initialLocation.lat;
+            lngInput.value = initialLocation.lng;
+
+            // ---- 3. Función Auxiliar para Actualizar la Ubicación ----
+            function updateLocation(location) {
+                map.setCenter(location);
+                marker.position = location;
+                latInput.value = location.lat();
+                lngInput.value = location.lng();
+            }
+
+            // ---- 4. Lógica de Interacción del Mapa ----
+            const geocoder = new google.maps.Geocoder();
+
+            // A. Autocompletado con el nuevo componente web
+            autocompleteElement.addEventListener('gmp-placechange', (event) => {
+                const place = event.detail.place;
+                if (place.geometry && place.geometry.location) {
+                    updateLocation(place.geometry.location);
+                }
+            });
+
+            // B. Botón de Búsqueda Manual
+            searchButton.addEventListener('click', () => {
+                const address = autocompleteElement.value;
+                if (address) {
+                    geocoder.geocode({ 'address': address }, (results, status) => {
+                        if (status === 'OK') {
+                            updateLocation(results[0].geometry.location);
+                        } else {
+                            alert('La dirección no se encontró. Error: ' + status);
+                        }
+                    });
+                }
+            });
+
+            // C. Arrastrar el Marcador
+            marker.addListener('dragend', (event) => updateLocation(event.latLng));
+
+            // D. Clic en el Mapa (Pin Manual)
+            map.addListener('click', (event) => updateLocation(event.latLng));
+        }
+
+        // Lógica del formulario que se ejecuta una vez que el HTML está listo.
+        document.addEventListener('DOMContentLoaded', () => {
+            'use strict';
+            const form = document.getElementById('registerForm');
+            const photoInput = document.getElementById('photo');
+            const photoPreview = document.getElementById('photoPreview');
+            const pwdInput = document.getElementById('password');
+            const confirmPwdInput = document.getElementById('confirmPassword');
+
+            if (photoInput) {
+                photoInput.addEventListener('change', () => {
+                    const file = photoInput.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            photoPreview.src = e.target.result;
+                            photoPreview.classList.remove('d-none');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+        if (form) {
+            form.addEventListener('submit', async (e) => { // Convertimos la función a async para usar await
+                e.preventDefault();
+
+                // ---- Validaciones (sin cambios) ----
+                const pwdInput = document.getElementById('password');
+                const confirmPwdInput = document.getElementById('confirmPassword');
+                confirmPwdInput?.classList.remove('is-invalid');
+
+                if (pwdInput && confirmPwdInput && pwdInput.value !== confirmPwdInput.value) {
+                    confirmPwdInput.classList.add('is-invalid');
+                    return;
+                }
+                if (!form.checkValidity()) {
+                    e.stopPropagation();
+                    form.classList.add('was-validated');
+                    return;
+                }
+
+                // ---- Inicio del Proceso de Envío ----
+                const ctrlActions = new ControlActions();
+                const photoInput = document.getElementById('photo');
+                const photoFile = photoInput.files[0];
+
+                // Paso 1: Subir la foto a Cloudinary (si el usuario seleccionó una)
+                if (photoFile) {
+                    const formData = new FormData();
+                    formData.append('photo', photoFile);
+
+                    try {
+                        // Usamos fetch para subir el archivo. Es ideal para FormData.
+                        const response = await fetch('/api/cloudinary/Save', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Error al subir la imagen.');
+                        }
+
+                        const result = await response.json();
+                        // Guardamos la URL segura de la imagen en el campo oculto
+                        document.getElementById('photoUrl').value = result.secureUrl;
+
+                    } catch (error) {
+                        console.error(error);
+                        alert('Hubo un problema al subir tu foto. Inténtalo de nuevo.');
+                        return; // Detiene el proceso si la foto falla
+                    }
+                }
+
+                // Paso 2: Registrar al usuario (con la URL de la foto ya en el campo oculto)
+                console.log('Enviando datos del usuario...');
+                const userData = ctrlActions.GetDataForm('registerForm');
+                console.log('Datos a enviar:', userData);
+
+                ctrlActions.PostToAPI('User/Create', userData, function() {
+                    alert('¡Registro exitoso! Serás redirigido.');
+                    // Opcional: limpiar el formulario y redirigir al login
+                    form.reset();
+                    form.classList.remove('was-validated');
+                    document.getElementById('photoPreview').classList.add('d-none');
+                    // window.location.href = '/login'; // Descomenta para redirigir
+                });
+            });
+        }
+        });
+    </script>
+}
