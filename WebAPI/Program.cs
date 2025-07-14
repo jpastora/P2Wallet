@@ -1,5 +1,21 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// Define un nombre para la política de CORS
+var misOrigenes = "misOrigenes";
+
+// Agrega el servicio de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: misOrigenes,
+                      policy =>
+                      {
+                          // Permite solicitudes desde tu frontend local
+                          policy.WithOrigins("https://localhost:7059")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
 // Add services to the container.
 
 builder.Services.AddControllers();

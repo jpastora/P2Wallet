@@ -1,0 +1,51 @@
+﻿@page
+@model WebApp.Pages.loginModel
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<!-- CONTENIDO LOGIN -->
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6 col-lg-4 mx-auto">
+            <div class="card p-4 shadow-sm">
+                <h2 class="text-center mb-4">Iniciar Sesión</h2>
+                <form id="loginForm" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="email" required />
+                        <div class="invalid-feedback">Por favor, introduce un correo válido.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" required />
+                        <div class="invalid-feedback">Por favor, introduce tu contraseña.</div>
+                    </div>
+                    <div class="mb-3 form-check d-flex justify-content-between align-items-center">
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="rememberMe" />
+                            <label class="form-check-label" for="rememberMe">Recuérdame</label>
+                        </div>
+                        <a href="#">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+
+                    <hr class="divider" data-content="o" />
+
+                    <button type="button" id="facialLoginBtn" class="btn btn-outline-secondary w-100">
+                        Ingresar con Verificación Facial
+                    </button>
+                </form>
+
+                <p class="mt-3 text-center">
+                    ¿No tienes una cuenta?
+                    <a href="UINotFuntional/Register/user.html">Regístrate</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Login.js"></script> 
+}

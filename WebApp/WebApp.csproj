@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\login.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Pages\TempUI\CSS\comercio.css" />
     <Content Include="Pages\TempUI\CSS\entidades.css" />
     <Content Include="Pages\TempUI\CSS\login.css" />
@@ -24,7 +28,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="bootstrap" Version="5.3.7" />
     <PackageReference Include="CloudinaryDotNet" Version="1.27.6" />
+    <PackageReference Include="jQuery" Version="3.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\jquery-validation\dit\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\js\Login.js" />
   </ItemGroup>
 
 </Project>
