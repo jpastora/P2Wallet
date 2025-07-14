@@ -17,14 +17,14 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost]
-        [Route("save")]
+        [Route("Save")]
         public async Task<ActionResult> SaveImage(IFormFile photo)
         {
             try
             {
                 Cloudinary cloudinary = new Cloudinary(_cloudinaryUrl);
                 var fileName = photo.FileName;
-                var fileWithPath = Path.Combine("Uploads", fileName);
+                var fileWithPath = Path.Combine("Uploads", fileName); // Uploadas siempre termina sin datos, es temporal
                 var stream = new FileStream(fileWithPath, FileMode.Create);
                 photo.CopyTo(stream);
                 stream.Close();
@@ -41,9 +41,27 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpDelete]
+        [Route("Delete")]
+        public async Task<ActionResult> DeleteImage(string publicId)
+        {
+            try
+            {
+                Cloudinary cloudinary = new Cloudinary(_cloudinaryUrl);
+                var deleteParams = new DeletionParams(publicId);
+                var result = await cloudinary.DestroyAsync(deleteParams);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
 
     }
 }

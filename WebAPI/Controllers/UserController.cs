@@ -26,11 +26,6 @@ namespace WebAPI.Controllers
             {
                 return StatusCode(500, ex.Message);
             }
-
-
-
-
-
         }
 
         [HttpPost]
