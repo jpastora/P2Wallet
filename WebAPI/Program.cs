@@ -10,7 +10,7 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           // Permite solicitudes desde tu frontend local
-                          policy.WithOrigins("https://localhost:7059")
+                          policy.WithOrigins("https://p2wallet-webapp-e9h3c6c8gtdxaeg3.canadacentral-01.azurewebsites.net/")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
                       });
