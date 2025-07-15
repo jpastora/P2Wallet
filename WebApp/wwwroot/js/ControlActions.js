@@ -24,7 +24,7 @@
                 "processing": true,
                 "ajax": {
                     "url": self.GetUrlApiService(service),
-                    "dataSrc": "" // Usar "" cuando la respuesta del API es un array JSON directo.
+                    "dataSrc": "" 
                 },
                 "columns": columns
             });
@@ -119,11 +119,28 @@
     // FUNCIONES AUXILIARES PRIVADAS
     // ----------------
     function _handleSuccess(response, callBackFunction) {
+        let message = 'La transacción se completó correctamente.';
+        let icon = 'success';
+        let title = '¡Éxito!';
+
+        if (response) {
+            if (response.message) {
+                message = response.message;
+            }
+            if (response.icon) {
+                icon = response.icon;
+            }
+            if (response.title) {
+                title = response.title;
+            }
+        }
+
         Swal.fire(
-            '¡Éxito!',
-            'La transacción se completó correctamente.',
-            'success'
+            title,
+            message,
+            icon
         );
+
         if (callBackFunction) {
             callBackFunction(response);
         }
@@ -131,25 +148,40 @@
 
     function _handleError(jqXHR) {
         let message = "Ha ocurrido un error inesperado.";
+        let icon = 'error';
+        let title = 'Oops...';
+
         if (jqXHR.responseText) {
             try {
-                // Intenta parsear la respuesta como JSON
                 const responseJson = JSON.parse(jqXHR.responseText);
-                // Busca mensajes de error comunes en APIs de .NET
+
                 if (responseJson.title) {
-                    message = responseJson.title;
+                    title = responseJson.title;
                 }
+
                 if (responseJson.errors) {
                     message = Object.values(responseJson.errors).flat().join("<br/> ");
+                } else if (jqXHR.responseText) {
+                    const response = JSON.parse(jqXHR.responseText)
+                    if (response.message)
+                        message = response.message;
+                    else
+                        message = jqXHR.responseText;
                 }
+
+
+                if (responseJson.icon) {
+                    icon = responseJson.icon;
+                }
+
             } catch (e) {
-                // Si no es JSON, usa el texto plano.
                 message = jqXHR.responseText;
             }
         }
+
         Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
+            icon: icon,
+            title: title,
             html: message,
             footer: 'Yavi App'
         });

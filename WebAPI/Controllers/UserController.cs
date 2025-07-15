@@ -14,17 +14,27 @@ namespace WebAPI.Controllers
         [Route("Create")]
         public ActionResult CreateUser(User user)
         {
-
             try
             {
                 var userManager = new UserManager();
                 userManager.CreateUser(user);
-                return Ok("User created successfully.");
+                // Retornar un objeto JSON con message, icon y title
+                return Ok(new   
+                {
+                    message = "Usuario creado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
-
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                // Retornar un objeto JSON con message, icon y title para error
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
@@ -36,7 +46,7 @@ namespace WebAPI.Controllers
             {
                 var userManager = new UserManager();
                 userManager.UpdateUser(user);
-                return Ok("User updated successfully.");
+                return Ok(new { message = "User updated successfully." });
             }
             catch (Exception ex)
             {
@@ -109,7 +119,7 @@ namespace WebAPI.Controllers
             {
                 var userManager = new UserManager();
                 userManager.DeleteUser(user);
-                return Ok("User deleted successfully.");
+                return Ok(new { message = "User deleted successfully." });
             }
             catch (Exception ex)
             {
