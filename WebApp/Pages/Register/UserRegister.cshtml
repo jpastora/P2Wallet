@@ -222,6 +222,7 @@
                             const cloudinaryUrl = ctrlActions.GetUrlApiService('cloudinary/Save');
                             const response = await fetch(cloudinaryUrl, { method: 'POST', body: formData });
                             if (!response.ok) throw new Error('Error al subir la imagen.');
+                            
                             const result = await response.json();
                             document.getElementById('photoUrl').value = result.secureUrl;
                         } catch (error) {
