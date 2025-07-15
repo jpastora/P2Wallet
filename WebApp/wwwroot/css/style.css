@@ -105,17 +105,19 @@ footer {
             background-color: var(--accent-yellow);
      }
 
-/*
-  Forzamos la apariencia del componente de autocompletado de Google
-  para que ignore los estilos de tema oscuro de Bootstrap.
-*/
-gmp-place-autocomplete::part(input) {
-    /* Color de texto oscuro estándar de Bootstrap */
-    color: #212529 !important;
-    /* Color de fondo blanco */
-    background-color: #ffffff !important;
-    /* Color de borde estándar */
-    border-color: #dee2e6 !important;
-    /* Propiedad específica para navegadores como Chrome/Safari para asegurar el color del texto */
-    -webkit-text-fill-color: #212529 !important;
+/* Contenedor principal para el mapa y el buscador */
+#map-container {
+    position: relative; /* Establece el contexto para el posicionamiento absoluto */
+}
+
+/* Contenedor del buscador */
+#search-container {
+    position: absolute;
+    top: 10px; /* 10px desde la parte superior */
+    left: 50%; /* Centrado horizontalmente */
+    transform: translateX(-50%);
+    width: 80%; /* Ocupa el 80% del ancho del mapa */
+    max-width: 500px; /* Pero no más de 500px */
+    z-index: 10; /* Se asegura de que esté por encima del mapa */
+}
 }

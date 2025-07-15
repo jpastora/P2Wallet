@@ -23,7 +23,6 @@
                 <input type="text" class="form-control" id="telefono" ColumnDataName="MobilePhone" required />
                 <div class="invalid-feedback">El teléfono es obligatorio.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="password" class="form-label">Contraseña</label>
                 <input type="password" class="form-control" id="password" ColumnDataName="Password" minlength="8" required />
@@ -34,7 +33,6 @@
                 <input type="password" class="form-control" id="confirmPassword" required />
                 <div class="invalid-feedback">Las contraseñas no coinciden.</div>
             </div>
-
             <div class="col-md-6">
                 <label for="photo" class="form-label">Foto de Perfil</label>
                 <input type="file" class="form-control" id="photo" accept="image/*" />
@@ -43,22 +41,27 @@
                 <img id="photoPreview" class="photo-preview d-none" alt="Vista previa de la foto" style="max-height: 150px; border-radius: 50%;" />
             </div>
 
-            <div class="col-12 mt-4">
-                <label for="autocomplete" class="form-label">Buscar Dirección</label>
-                <div class="input-group">
-                    <gmp-place-autocomplete id="autocomplete" class="form-control" placeholder="Escribe una dirección o un lugar..."></gmp-place-autocomplete>
-                    <button class="btn btn-outline-secondary" type="button" id="btnSearchAddress">Buscar</button>
-                </div>
+            <!-- Dirección -->
+            <div class="col-md-8">
+                <label for="autocomplete" class="form-label">Dirección</label>
+                <input id="autocomplete" type="text" class="form-control" placeholder="Escribe tu dirección o lugar..." autocomplete="off" required />
+                <div class="invalid-feedback">La dirección es obligatoria.</div>
             </div>
-            <div class="col-12 mt-2">
-                <div id="map" style="height: 400px; width: 100%; border-radius: 8px; cursor: pointer;"></div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-light w-100" type="button" id="btnSearchAddress">Selecionar dirección</button>
+            </div>
+
+            <!-- Mapa -->
+            <div id="map-container" class="col-12 mt-3 position-relative">
+                <div id="map" style="height: 450px; width: 100%; border-radius: 8px;"></div>
+            </div>
+            <div class="col-12">
                 <small class="form-text text-muted">Busca, haz clic en el mapa o arrastra el pin para ajustar tu ubicación.</small>
             </div>
 
             <input type="hidden" id="txtLatitude" ColumnDataName="Latitude">
             <input type="hidden" id="txtLongitude" ColumnDataName="Longitude">
             <input type="hidden" id="photoUrl" ColumnDataName="ProfilePhotoUrl">
-
             <div class="col-12 mt-4">
                 <button type="submit" class="btn btn-primary w-100">Registrarse</button>
             </div>
@@ -69,76 +72,98 @@
 
 @section Scripts {
     <script>
-        // Esta función global es llamada por la API de Google cuando termina de cargar.
+        let map, marker, geocoder, placeAutocomplete;
+
         function initMap() {
-            // ---- 1. Selección de Elementos ----
             const latInput = document.getElementById('txtLatitude');
             const lngInput = document.getElementById('txtLongitude');
             const mapDiv = document.getElementById('map');
-            const autocompleteElement = document.getElementById('autocomplete');
+            const addressInput = document.getElementById('autocomplete');
             const searchButton = document.getElementById('btnSearchAddress');
+            const initialLocation = { lat: 9.934739, lng: -84.087502 };
 
-            if (!mapDiv) { return; }
-
-            const initialLocation = { lat: 4.60971, lng: -74.08175 }; // Bogotá, Colombia
-
-            // ---- 2. Creación del Mapa y Marcador ----
-            const map = new google.maps.Map(mapDiv, {
-                zoom: 12,
+            geocoder = new google.maps.Geocoder();
+            map = new google.maps.Map(mapDiv, {
+                zoom: 14,
                 center: initialLocation,
                 mapId: 'YAVI_REGISTER_MAP'
             });
 
-            const marker = new google.maps.marker.AdvancedMarkerElement({
-                map: map,
+            // Advanced Marker (nuevo recomendado)
+            marker = new google.maps.marker.AdvancedMarkerElement({
+                map,
                 position: initialLocation,
-                gmpDraggable: true,
+                gmpDraggable: true
             });
 
             latInput.value = initialLocation.lat;
             lngInput.value = initialLocation.lng;
 
-            // ---- 3. Función Auxiliar para Actualizar la Ubicación ----
-            function updateLocation(location) {
-                map.setCenter(location);
-                marker.position = location;
-                latInput.value = location.lat();
-                lngInput.value = location.lng();
-            }
-
-            // ---- 4. Lógica de Interacción del Mapa ----
-            const geocoder = new google.maps.Geocoder();
-
-            // A. Autocompletado con el nuevo componente web
-            autocompleteElement.addEventListener('gmp-placechange', (event) => {
+            // NUEVO AUTOCOMPLETE con PlaceAutocompleteElement
+            // Esto crea el autocomplete "invisible" y lo vincula al input que ya tienes.
+            placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+            placeAutocomplete.input = addressInput;
+            placeAutocomplete.addEventListener('gmp-placechange', (event) => {
                 const place = event.detail.place;
-                if (place.geometry && place.geometry.location) {
-                    updateLocation(place.geometry.location);
+                if (place && place.geometry && place.geometry.location) {
+                    const location = place.geometry.location;
+                    map.setCenter(location);
+                    marker.position = location;
+                    latInput.value = location.lat();
+                    lngInput.value = location.lng();
                 }
             });
 
-            // B. Botón de Búsqueda Manual
-            searchButton.addEventListener('click', () => {
-                const address = autocompleteElement.value;
-                if (address) {
-                    geocoder.geocode({ 'address': address }, (results, status) => {
-                        if (status === 'OK') {
-                            updateLocation(results[0].geometry.location);
+            // Buscar dirección manualmente
+            searchButton.addEventListener('click', function () {
+                if (addressInput.value) {
+                    geocoder.geocode({ address: addressInput.value }, function (results, status) {
+                        if (status === 'OK' && results[0]) {
+                            const loc = results[0].geometry.location;
+                            map.setCenter(loc);
+                            marker.position = loc;
+                            latInput.value = loc.lat();
+                            lngInput.value = loc.lng();
                         } else {
-                            alert('La dirección no se encontró. Error: ' + status);
+                            alert('La dirección no se encontró: ' + status);
                         }
                     });
                 }
             });
 
-            // C. Arrastrar el Marcador
-            marker.addListener('dragend', (event) => updateLocation(event.latLng));
+            // Buscar al presionar Enter
+            addressInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchButton.click();
+                }
+            });
 
-            // D. Clic en el Mapa (Pin Manual)
-            map.addListener('click', (event) => updateLocation(event.latLng));
+            // Actualizar lat/lng al mover el AdvancedMarker
+            marker.addListener('dragend', (event) => {
+                const pos = event.latLng;
+                latInput.value = pos.lat();
+                lngInput.value = pos.lng();
+                geocoder.geocode({ location: pos }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        addressInput.value = results[0].formatted_address;
+                    }
+                });
+            });
+
+            // Clic en el mapa mueve el marcador
+            map.addListener('click', (event) => {
+                marker.position = event.latLng;
+                latInput.value = event.latLng.lat();
+                lngInput.value = event.latLng.lng();
+                geocoder.geocode({ location: event.latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        addressInput.value = results[0].formatted_address;
+                    }
+                });
+            });
         }
 
-        // Lógica del formulario que se ejecuta una vez que el HTML está listo.
         document.addEventListener('DOMContentLoaded', () => {
             'use strict';
             const form = document.getElementById('registerForm');
@@ -146,6 +171,16 @@
             const photoPreview = document.getElementById('photoPreview');
             const pwdInput = document.getElementById('password');
             const confirmPwdInput = document.getElementById('confirmPassword');
+            const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+            function showAlert(message, type = 'success') {
+                if (!alertPlaceholder) return;
+                alertPlaceholder.innerHTML = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>`;
+            }
 
             if (photoInput) {
                 photoInput.addEventListener('change', () => {
@@ -161,75 +196,53 @@
                 });
             }
 
-        if (form) {
-            form.addEventListener('submit', async (e) => { // Convertimos la función a async para usar await
-                e.preventDefault();
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    confirmPwdInput.classList.remove('is-invalid');
 
-                // ---- Validaciones (sin cambios) ----
-                const pwdInput = document.getElementById('password');
-                const confirmPwdInput = document.getElementById('confirmPassword');
-                confirmPwdInput?.classList.remove('is-invalid');
-
-                if (pwdInput && confirmPwdInput && pwdInput.value !== confirmPwdInput.value) {
-                    confirmPwdInput.classList.add('is-invalid');
-                    return;
-                }
-                if (!form.checkValidity()) {
-                    e.stopPropagation();
-                    form.classList.add('was-validated');
-                    return;
-                }
-
-                // ---- Inicio del Proceso de Envío ----
-                const ctrlActions = new ControlActions();
-                const photoInput = document.getElementById('photo');
-                const photoFile = photoInput.files[0];
-
-                // Paso 1: Subir la foto a Cloudinary (si el usuario seleccionó una)
-                if (photoFile) {
-                    const formData = new FormData();
-                    formData.append('photo', photoFile);
-
-                    try {
-                        // Usamos fetch para subir el archivo. Es ideal para FormData.
-                const ctrlActions = new ControlActions();
-                const cloudinaryUrl = ctrlActions.GetUrlApiService('cloudinary/Save');
-
-                const response = await fetch(cloudinaryUrl, {
-                method: 'POST',
-                body: formData,
-                });
-
-                        if (!response.ok) {
-                            throw new Error('Error al subir la imagen.');
-                        }
-
-                        const result = await response.json();
-                        // Guardamos la URL segura de la imagen en el campo oculto
-                        document.getElementById('photoUrl').value = result.secureUrl;
-
-                    } catch (error) {
-                        console.error(error);
-                        alert('Hubo un problema al subir tu foto. Inténtalo de nuevo.');
-                        return; // Detiene el proceso si la foto falla
+                    if (pwdInput.value !== confirmPwdInput.value) {
+                        confirmPwdInput.classList.add('is-invalid');
+                        showAlert('Las contraseñas no coinciden.', 'danger');
+                        return;
                     }
-                }
+                    if (!form.checkValidity()) {
+                        e.stopPropagation();
+                        form.classList.add('was-validated');
+                        return;
+                    }
 
-                // Paso 2: Registrar al usuario (con la URL de la foto ya en el campo oculto)
-                console.log('Enviando datos del usuario...');
-                const userData = ctrlActions.GetDataForm('registerForm');
-                console.log('Datos a enviar:', userData);
+                    const ctrlActions = new ControlActions();
+                    const photoFile = photoInput.files[0];
 
-                ctrlActions.PostToAPI('User/Create', userData, function() {
-                    alert('¡Registro exitoso! Serás redirigido.');
-                    // Opcional: limpiar el formulario y redirigir al login
-                    form.reset();
-                    form.classList.remove('was-validated');
-                    document.getElementById('photoPreview').classList.add('d-none');
-                    // window.location.href = '/login'; // Descomenta para redirigir
+                    if (photoFile) {
+                        const formData = new FormData();
+                        formData.append('photo', photoFile);
+                        try {
+                            const cloudinaryUrl = ctrlActions.GetUrlApiService('cloudinary/Save');
+                            const response = await fetch(cloudinaryUrl, { method: 'POST', body: formData });
+                            if (!response.ok) throw new Error('Error al subir la imagen.');
+                            const result = await response.json();
+                            document.getElementById('photoUrl').value = result.secureUrl;
+                        } catch (error) {
+                            console.error(error);
+                            showAlert('Hubo un problema al subir tu foto.', 'danger');
+                            return;
+                        }
+                    }
+
+                    const userData = ctrlActions.GetDataForm('registerForm');
+                    ctrlActions.PostToAPI('User/Create', userData, () => {
+                        showAlert('¡Registro exitoso!', 'success');
+                        form.reset();
+                        form.classList.remove('was-validated');
+                        photoPreview.classList.add('d-none');
+                    });
                 });
-            });
-        }
+            }
         });
     </script>
+    @inject IConfiguration Configuration
+    <script src="https://maps.googleapis.com/maps/api/js?key=@Configuration["GoogleMaps:ApiKey"]&libraries=places,marker,geocoding&callback=initMap"
+            async defer loading="async"></script>
 }
