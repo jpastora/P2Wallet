@@ -13,7 +13,7 @@ namespace DTOs
         public DateTime BirthDate { get; set; }
         public string Email { get; set; }
         public string MobilePhone { get; set; }
-        public string? ProfilePhotoUrl { get; set; }
+        public string ProfilePhotoUrl { get; set; }
         public string? IDPhotoFrontUrl { get; set; }
         public string? IDPhotoBackUrl { get; set; }
         public double Latitude { get; set; }
