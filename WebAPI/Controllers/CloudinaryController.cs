@@ -23,21 +23,18 @@ namespace WebAPI.Controllers
             try
             {
                 Cloudinary cloudinary = new Cloudinary(_cloudinaryUrl);
-                var fileName = photo.FileName;
-                var fileWithPath = Path.Combine("Uploads", fileName); // Uploadas siempre termina sin datos, es temporal
-                var stream = new FileStream(fileWithPath, FileMode.Create);
-                photo.CopyTo(stream);
-                stream.Close();
+
+                await using var stream = photo.OpenReadStream();
                 var uploadParams = new ImageUploadParams
                 {
-                    File = new FileDescription(fileWithPath),
+                    File = new FileDescription(photo.FileName, stream),
                     UseFilename = true,
                     Overwrite = true,
                     Folder = "Yavi"
                 };
+
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                System.IO.File.Delete(fileWithPath); // Limpia el archivo local después de subirlo
-                return Ok(uploadResult);    
+                return Ok(uploadResult);
             }
             catch (Exception ex)
             {
