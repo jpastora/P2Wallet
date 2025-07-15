@@ -192,10 +192,13 @@
 
                     try {
                         // Usamos fetch para subir el archivo. Es ideal para FormData.
-                        const response = await fetch('/api/cloudinary/Save', {
-                            method: 'POST',
-                            body: formData,
-                        });
+                const ctrlActions = new ControlActions();
+                const cloudinaryUrl = ctrlActions.GetUrlApiService('cloudinary/Save');
+
+                const response = await fetch(cloudinaryUrl, {
+                method: 'POST',
+                body: formData,
+                });
 
                         if (!response.ok) {
                             throw new Error('Error al subir la imagen.');
