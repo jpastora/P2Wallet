@@ -18,6 +18,22 @@ namespace CoreApp
             {
                 var userCrud = new UserCrudFactory();
 
+                // Asignar valores por defecto a campos opcionales si están vacíos
+                user.IDNumber ??= string.Empty;
+                user.BirthDate = user.BirthDate == default ? DateTime.Now : user.BirthDate;
+                user.ProfilePhotoUrl ??= string.Empty;
+                user.IDPhotoFrontUrl ??= string.Empty;
+                user.IDPhotoBackUrl ??= string.Empty;
+                user.Latitude = user.Latitude == 0 ? 0 : user.Latitude;
+                user.Longitude = user.Longitude == 0 ? 0 : user.Longitude;
+                user.EmailVerified ??= "Inactive";
+                user.MobileVerified ??= "Inactive";
+                user.BiometricVerified ??= "Inactive";
+                user.ValidationStatus ??= "Inactive";
+                user.SMSNotification ??= "Inactive";
+                user.EmailNotification ??= "Inactive";
+                user.PushNotification ??= "Inactive";
+
                 // Consultamos si en la base de datos existe un usuario con ese correo electrónico
                 var userExist = userCrud.RetrieveByEmail<User>(user);
 
