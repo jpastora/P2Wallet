@@ -11,7 +11,8 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins(
                 "https://p2wallet-webapp-e9h3c6c8gtdxaeg3.canadacentral-01.azurewebsites.net",
-                "https://localhost:7059"
+                "https://localhost:7059",
+                "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();

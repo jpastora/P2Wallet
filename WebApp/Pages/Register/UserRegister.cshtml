@@ -35,8 +35,12 @@
             </div>
             <div class="mb-3">
                 <label for="phone" class="form-label">Teléfono</label>
-                <input type="text" class="form-control" id="txtPhone" ColumnDataName="MobilePhone" required />
-                <div class="invalid-feedback">El teléfono debe ser correcto.</div>
+                <div class="input-group">
+                    <span class="input-group-text">+</span>
+                    <input type="text" class="form-control" id="txtCountryCode" value="506" style="max-width: 80px;" required />
+                    <input type="text" class="form-control" id="txtPhone" ColumnDataName="MobilePhone" required />
+                </div>
+                <div class="invalid-feedback">El teléfono debe ser correcto e incluir el código de país.</div>
             </div>
             <div class="mb-3 d-flex">
                 <button type="button" class="btn btn-outline-success me-2" id="btnSendSmsOTP">Enviar OTP SMS para verificar Teléfono</button>
@@ -175,6 +179,7 @@
             'use strict';
             const form = document.getElementById('registerForm');
             const emailInput = document.getElementById('txtEmail');
+            const countryCodeInput = document.getElementById('txtCountryCode');
             const phoneInput = document.getElementById('txtPhone');
             const pwdInput = document.getElementById('txtPassword');
             const confirmPwdInput = document.getElementById('txtConfirmPassword');
@@ -186,17 +191,13 @@
             }
 
             // --- FUNCIONES DE VALIDACIÓN ESPECÍFICAS Y CORRECTAS ---
-            //Valida que un correo electrónico tenga un formato válido y estándar
+            function validateEmail(email) {
+                var input = document.createElement('input');
+                input.type = 'email';
+                input.value = email;
+                return input.checkValidity();
+            }
 
-        function validateEmail(email) {
-            var input = document.createElement('input');
-            input.type = 'email';
-            input.value = email;
-            return input.checkValidity();
-        }
-
-            //Valida que el teléfono solo contenga números.
- 
             function validatePhone(phone) {
                 const regex = /^\d+$/;
                 return regex.test(phone);
@@ -258,16 +259,18 @@
             });
 
             btnSendSmsOTP.addEventListener('click', async function () {
+                const countryCode = countryCodeInput.value.trim();
                 const phone = phoneInput.value.trim();
-                if (!validatePhone(phone)) {
+                const fullPhone = `+${countryCode}${phone}`;
+                if (!/^\+\d{1,3}\d{8,}$/.test(fullPhone)) {
                     phoneInput.classList.add('is-invalid');
-                    showAlert('Ingresa un teléfono válido antes de solicitar el OTP SMS.', 'danger');
+                    showAlert('Ingresa un teléfono válido con código de país.', 'danger');
                     return;
                 }
                 btnSendSmsOTP.disabled = true;
                 btnSendSmsOTP.textContent = 'Enviando...';
                 try {
-                    const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/sms/enviar-sms?telefono=' + encodeURIComponent(phone), {
+                    const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/sms/enviar-sms?telefono=' + encodeURIComponent(fullPhone), {
                         method: 'POST'
                     });
                     let data = null;
@@ -276,7 +279,7 @@
                         showAlert((data.message || 'OTP enviado por SMS. Revisa tu teléfono.'), 'success');
                         smsOtpInput.disabled = false;
                         phoneInput.readOnly = true;
-                        smsOtpSentTo = phone;
+                        smsOtpSentTo = fullPhone;
                         btnSendSmsOTP.textContent = 'OTP SMS Enviado';
                     } else {
                         showAlert((data.message || 'Error enviando OTP SMS. Intenta de nuevo.'), 'danger');
@@ -360,7 +363,10 @@
                 }
 
                 // Validar formato de Teléfono
-                if (phoneInput.value && !validatePhone(phoneInput.value)) {
+                const countryCode = countryCodeInput.value.trim();
+                const phone = phoneInput.value.trim();
+                const fullPhone = `+${countryCode}${phone}`;
+                if (!validatePhone(phone) || !/^\+\d{1,3}\d{8,}$/.test(fullPhone)) {
                     phoneInput.classList.add('is-invalid');
                     isValid = false;
                 }
@@ -386,12 +392,12 @@
                 otpInput.classList.remove('is-invalid');
 
                 // Validar OTP SMS
-                if (!smsOtpInput.value || !smsOtpSentTo || phoneInput.value !== smsOtpSentTo) {
+                if (!smsOtpInput.value || !smsOtpSentTo || fullPhone !== smsOtpSentTo) {
                     smsOtpInput.classList.add('is-invalid');
                     showAlert('Debes solicitar y validar el código OTP SMS para este teléfono.', 'danger');
                     return;
                 }
-                const smsOtpValido = await verificarSmsOTP(phoneInput.value, smsOtpInput.value);
+                const smsOtpValido = await verificarSmsOTP(fullPhone, smsOtpInput.value);
                 if (!smsOtpValido) {
                     smsOtpInput.classList.add('is-invalid');
                     showAlert('El código OTP SMS es incorrecto o expiró.', 'danger');
