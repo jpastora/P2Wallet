@@ -37,7 +37,17 @@
         userDTO.FirstName = document.getElementById("txtFirstName").value;
         userDTO.LastName = document.getElementById("txtLastName").value;
         userDTO.Email = document.getElementById("txtEmail").value;
-        userDTO.MobilePhone = document.getElementById("txtPhone").value;
+        var phoneValue = document.getElementById("txtPhone").value.trim();
+        // Agregar código de país automáticamente si no está presente
+        if (!phoneValue.startsWith("+")) {
+            phoneValue = "+506" + phoneValue;
+        }
+        // Validar que el teléfono incluya el código de país y tenga el formato correcto
+        if (!/^\+\d{1,3}\d{8,}$/.test(phoneValue)) {
+            alert("El número telefónico debe incluir el código de país, por ejemplo: +506XXXXXXXX");
+            return;
+        }
+        userDTO.MobilePhone = phoneValue;
         userDTO.Latitude = parseFloat(document.getElementById("txtLatitude").value);
         userDTO.Longitude = parseFloat(document.getElementById("txtLongitude").value);
         userDTO.Password = document.getElementById("txtPassword").value;
@@ -52,6 +62,8 @@
         });
     }
 }
+
+
 
 
 
