@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CoreApp; // Para PasswordHelper
 
 namespace CoreApp
 {
@@ -22,7 +23,11 @@ namespace CoreApp
                 var userExist = userCrud.RetrieveByEmail<User>(user);
 
                 if (userExist == null)
+                {
+                    // Hash de la contraseña antes de guardar
+                    user.Password = PasswordHelper.HashPassword(user.Password);
                     userCrud.Create(user); // Si no existe, crea el usuario
+                }
                 else
                     throw new Exception("User already exists with this email."); // Si existe, lanza excepción
             }
