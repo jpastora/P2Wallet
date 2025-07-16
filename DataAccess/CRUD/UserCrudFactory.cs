@@ -31,7 +31,8 @@ namespace DataAccess.CRUD
             sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", user.Longitude);
             sqlOperation.AddStringParameter("@P_Password", user.Password);
-            sqlOperation.AddStringParameter("@P_Role", user.Role);
+            sqlOperation.AddStringParameter("@P_EmailVerified", "Active"); // Forzar Active
+            sqlOperation.AddStringParameter("@P_MobileVerified", "Active"); // Forzar Active
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
