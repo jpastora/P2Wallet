@@ -23,8 +23,13 @@
             </div>
             <div class="mb-3 d-flex">
                 <button type="button" class="btn btn-outline-primary me-2" id="btnSendOTP">Enviar OTP para verificar la cuenta</button>
-                <input type="text" class="form-control" id="otp" placeholder="Código OTP" style="max-width: 200px;" required />
+                <input type="text" class="form-control" id="otp" placeholder="Código OTP Email" style="max-width: 200px;" required />
                 <div class="invalid-feedback">El OTP es obligatorio.</div>
+            </div>
+            <div class="mb-3 d-flex">
+                <button type="button" class="btn btn-outline-success me-2" id="btnSendSmsOTP">Enviar OTP por SMS</button>
+                <input type="text" class="form-control" id="smsOtp" placeholder="Código OTP SMS" style="max-width: 200px;" required />
+                <div class="invalid-feedback">El OTP SMS es obligatorio.</div>
             </div>
             <div class="mb-3">
                 <label for="telefono" class="form-label">Teléfono</label>
@@ -203,10 +208,14 @@
                 confirmPwdInput.classList.toggle('is-invalid', pwdInput.value !== confirmPwdInput.value);
             });
 
-            // --- LÓGICA MEJORADA DE OTP ---
+            // --- LÓGICA MEJORADA DE OTP EMAIL Y SMS ---
             const btnSendOTP = document.getElementById('btnSendOTP');
             const otpInput = document.getElementById('otp');
             let otpSentTo = null;
+
+            const btnSendSmsOTP = document.getElementById('btnSendSmsOTP');
+            const smsOtpInput = document.getElementById('smsOtp');
+            let smsOtpSentTo = null;
 
             btnSendOTP.addEventListener('click', async function () {
                 const email = emailInput.value.trim();
@@ -222,11 +231,7 @@
                         method: 'POST'
                     });
                     let data = null;
-                    try {
-                        data = await response.json();
-                    } catch {
-                        data = {};
-                    }
+                    try { data = await response.json(); } catch { data = {}; }
                     if (response.ok) {
                         showAlert((data.message || 'OTP enviado a tu correo. Revisa tu bandeja de entrada o spam.'), 'success');
                         otpInput.disabled = false;
@@ -245,6 +250,39 @@
                 }
             });
 
+            btnSendSmsOTP.addEventListener('click', async function () {
+                const phone = phoneInput.value.trim();
+                if (!validatePhone(phone)) {
+                    phoneInput.classList.add('is-invalid');
+                    showAlert('Ingresa un teléfono válido antes de solicitar el OTP SMS.', 'danger');
+                    return;
+                }
+                btnSendSmsOTP.disabled = true;
+                btnSendSmsOTP.textContent = 'Enviando...';
+                try {
+                    const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/sms/enviar-sms?telefono=' + encodeURIComponent(phone), {
+                        method: 'POST'
+                    });
+                    let data = null;
+                    try { data = await response.json(); } catch { data = {}; }
+                    if (response.ok) {
+                        showAlert((data.message || 'OTP enviado por SMS. Revisa tu teléfono.'), 'success');
+                        smsOtpInput.disabled = false;
+                        phoneInput.readOnly = true;
+                        smsOtpSentTo = phone;
+                        btnSendSmsOTP.textContent = 'OTP SMS Enviado';
+                    } else {
+                        showAlert((data.message || 'Error enviando OTP SMS. Intenta de nuevo.'), 'danger');
+                        btnSendSmsOTP.disabled = false;
+                        btnSendSmsOTP.textContent = 'Enviar OTP por SMS';
+                    }
+                } catch {
+                    showAlert('Error enviando OTP SMS. Intenta de nuevo.', 'danger');
+                    btnSendSmsOTP.disabled = false;
+                    btnSendSmsOTP.textContent = 'Enviar OTP por SMS';
+                }
+            });
+
             async function verificarOTP(email, otp) {
                 const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/mail/verificar-otp?email=' + encodeURIComponent(email) + '&otp=' + encodeURIComponent(otp), {
                     method: 'POST'
@@ -258,7 +296,20 @@
                 return data.valido === true;
             }
 
-            // Si el usuario cambia el correo, reiniciar OTP
+            async function verificarSmsOTP(phone, otp) {
+                const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/sms/verificar-otp?telefono=' + encodeURIComponent(phone) + '&otp=' + encodeURIComponent(otp), {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    showAlert(data.message || 'El código OTP SMS es incorrecto o expiró.', 'danger');
+                    return false;
+                }
+                showAlert(data.message || 'OTP SMS verificado con éxito.', 'success');
+                return data.valido === true;
+            }
+
+            // Si el usuario cambia el correo o teléfono, reiniciar OTPs
             emailInput.addEventListener('input', () => {
                 emailInput.readOnly = false;
                 btnSendOTP.disabled = false;
@@ -268,6 +319,16 @@
                 otpSentTo = null;
             });
             otpInput.disabled = true;
+
+            phoneInput.addEventListener('input', () => {
+                phoneInput.readOnly = false;
+                btnSendSmsOTP.disabled = false;
+                btnSendSmsOTP.textContent = 'Enviar OTP por SMS';
+                smsOtpInput.value = '';
+                smsOtpInput.disabled = true;
+                smsOtpSentTo = null;
+            });
+            smsOtpInput.disabled = true;
 
             // --- VALIDACIÓN AL ENVIAR EL FORMULARIO ---
             form.addEventListener('submit', async (e) => {
@@ -303,7 +364,7 @@
                     isValid = false;
                 }
 
-                // Validar OTP
+                // Validar OTP EMAIL
                 if (!otpInput.value || !otpSentTo || emailInput.value !== otpSentTo) {
                     otpInput.classList.add('is-invalid');
                     showAlert('Debes solicitar y validar el código OTP para este correo.', 'danger');
@@ -317,6 +378,20 @@
                 }
                 otpInput.classList.remove('is-invalid');
 
+                // Validar OTP SMS
+                if (!smsOtpInput.value || !smsOtpSentTo || phoneInput.value !== smsOtpSentTo) {
+                    smsOtpInput.classList.add('is-invalid');
+                    showAlert('Debes solicitar y validar el código OTP SMS para este teléfono.', 'danger');
+                    return;
+                }
+                const smsOtpValido = await verificarSmsOTP(phoneInput.value, smsOtpInput.value);
+                if (!smsOtpValido) {
+                    smsOtpInput.classList.add('is-invalid');
+                    showAlert('El código OTP SMS es incorrecto o expiró.', 'danger');
+                    return;
+                }
+                smsOtpInput.classList.remove('is-invalid');
+
                 if (!isValid) {
                     showAlert('Por favor, corrige los campos marcados en rojo.', 'danger');
                     return;
@@ -327,9 +402,14 @@
                 form.reset();
                 emailInput.readOnly = false;
                 btnSendOTP.disabled = false;
-                btnSendOTP.textContent = 'Enviar OTP para verificar la cuenta';
+                btnSendOTP.textContent = 'Enviar codigo de validación de mail';
                 otpInput.disabled = true;
                 otpSentTo = null;
+                phoneInput.readOnly = false;
+                btnSendSmsOTP.disabled = false;
+                btnSendSmsOTP.textContent = 'Enviar codigo de validación de teléfono';
+                smsOtpInput.disabled = true;
+                smsOtpSentTo = null;
             });
         });
     </script>

@@ -26,6 +26,7 @@ namespace DTOs
         public string SMSNotification { get; set; }
         public string EmailNotification { get; set; }
         public string PushNotification { get; set; }
+        public string Role { get; set; }
 
     }
 }

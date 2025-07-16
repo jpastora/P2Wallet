@@ -13,6 +13,7 @@ builder.Services.AddCors(options =>
 // Add MemoryCache and EmailService
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<DataAccess.ServicesAccess.EmailService>();
+builder.Services.AddScoped<DataAccess.ServicesAccess.SmsService>();
 
 // Add services to the container.
 builder.Services.AddControllers();

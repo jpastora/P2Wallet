@@ -31,6 +31,8 @@ namespace DataAccess.CRUD
             sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", user.Longitude);
             sqlOperation.AddStringParameter("@P_Password", user.Password);
+            sqlOperation.AddStringParameter("@P_EmailVerified", "Active"); // Forzar Active
+            sqlOperation.AddStringParameter("@P_MobileVerified", "Active"); // Forzar Active
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -130,6 +132,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_SMSNotification", user.SMSNotification);
             sqlOperation.AddStringParameter("@P_EmailNotification", user.EmailNotification);
             sqlOperation.AddStringParameter("@P_PushNotification", user.PushNotification);
+            sqlOperation.AddStringParameter("@P_Role", user.Role);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -152,7 +155,8 @@ namespace DataAccess.CRUD
                 ValidationStatus = row.ContainsKey("UserStatus") ? Convert.ToString(row["UserStatus"]) : null,
                 SMSNotification = row.ContainsKey("SMSNotification") ? Convert.ToString(row["SMSNotification"]) : null,
                 EmailNotification = row.ContainsKey("EmailNotification") ? Convert.ToString(row["EmailNotification"]) : null,
-                PushNotification = row.ContainsKey("PushNotification") ? Convert.ToString(row["PushNotification"]) : null
+                PushNotification = row.ContainsKey("PushNotification") ? Convert.ToString(row["PushNotification"]) : null,
+                Role = row.ContainsKey("Role") ? Convert.ToString(row["Role"]) : null,
             };
             return user;
         }
