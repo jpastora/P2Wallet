@@ -4,6 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>6ea53862-0639-4dae-8a7c-5ee6092af876</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,6 +41,11 @@
 
   <ItemGroup>
     <None Include="wwwroot\js\Login.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreApp\CoreApp.csproj" />
+    <ProjectReference Include="..\DTOs\DTOs.csproj" />
   </ItemGroup>
 
 </Project>

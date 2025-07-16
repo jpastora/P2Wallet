@@ -8,12 +8,12 @@
 </button>
 
 <!-- Barra Navegación Inferior -->
-<nav class="nav-bottom bg-white shadow-lg">
-    <a href="/User/UserPanel" class="nav-item text-center @(currentPath == "/user/userpanel" ? "active" : "")"><i class="bi bi-house fs-5"></i><br>Inicio</a>
-    <a href="/User/Accounts" class="nav-item text-center @(currentPath == "/user/accounts" ? "active" : "")"><i class="bi bi-credit-card-2-front fs-5"></i><br>Cuentas</a>
-    <a href="/User/Statistics" class="nav-item text-center @(currentPath == "/user/statistics" ? "active" : "")"><i class="bi bi-pie-chart fs-5"></i><br>Estadísticas</a>
-    <a href="/User/Profile" class="nav-item text-center @(currentPath == "/user/profile" ? "active" : "")"><i class="bi bi-person fs-5"></i><br>Perfil</a>
-    <form method="post" asp-page="/Logout" style="display:inline;">
-        <button type="submit" class="nav-item text-center text-danger" style="background:none;border:none;padding:0;width:100%"><i class="bi bi-box-arrow-right fs-5"></i><br>Salir</button>
+<nav class="nav-bottom bg-white shadow-lg d-flex justify-content-between">
+    <a href="/User/UserPanel" class="nav-item flex-fill text-center @(currentPath == "/user/userpanel" ? "active" : "")"><i class="bi bi-house fs-5"></i><br>Inicio</a>
+    <a href="/User/Accounts" class="nav-item flex-fill text-center @(currentPath == "/user/accounts" ? "active" : "")"><i class="bi bi-credit-card-2-front fs-5"></i><br>Cuentas</a>
+    <a href="/User/Statistics" class="nav-item flex-fill text-center @(currentPath == "/user/statistics" ? "active" : "")"><i class="bi bi-pie-chart fs-5"></i><br>Estadísticas</a>
+    <a href="/User/Profile" class="nav-item flex-fill text-center @(currentPath == "/user/UserProfile" ? "active" : "")"><i class="bi bi-person fs-5"></i><br>Perfil</a>
+    <form method="post" asp-page="/Logout" class="flex-fill m-0 p-0" style="display: flex; align-items: center; justify-content: center;">
+        <button type="submit" class="nav-item text-center text-danger w-100" style="background:none;border:none;padding:0;"><i class="bi bi-box-arrow-right fs-5"></i><br>Salir</button>
     </form>
 </nav>

@@ -1,12 +1,16 @@
 ﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
 @model WebApp.Pages.User.UserPanelModel
 @{
+    var user = Model.CurrentUser;
+    var cuentas = Model.UserAccounts;
 }
 
 <!-- Encabezado -->
 <header class="p-4 text-center">
-    <img src="https://picsum.photos/seed/40/40" class="rounded-circle mb-2" alt="Usuario" />
-    <h4>Hola, Juan Pérez</h4>
+    <img src="@(user?.ProfilePhotoUrl ?? "https://picsum.photos/seed/40/40")" class="rounded-circle mb-2" alt="Usuario" width="100" height="100"/>
+    <h4>Hola, @(user?.FirstName ?? "Usuario")</h4>
 </header>
 
 <!-- Saldo -->
@@ -28,14 +32,20 @@
 <section class="container mb-4">
     <h5>Mis Cuentas</h5>
     <ul class="list-group">
-        <li class="list-group-item d-flex align-items-center">
-            <img src="https://picsum.photos/seed/banco2/40/40" class="me-3" alt="Banco" />
-            Banco Nacional •••• 1234
-        </li>
-        <li class="list-group-item d-flex align-items-center">
-            <img src="https://picsum.photos/seed/banco2/40/40" class="me-3" alt="Banco" />
-            Banco CR •••• 5678
-        </li>
+        @if (cuentas != null && cuentas.Count > 0)
+        {
+            foreach (var cuenta in cuentas)
+            {
+                <li class="list-group-item d-flex align-items-center">
+                    <img src="https://picsum.photos/seed/banco2/40/40" class="me-3" alt="Banco" />
+                    IBAN: @cuenta.IBAN
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item">No tienes cuentas registradas.</li>
+        }
         <li class="list-group-item">
             <a href="#" id="agregarCuenta" class="text-decoration-none text-primary"><i class="bi bi-plus-circle"></i> Agregar nueva cuenta</a>
         </li>
