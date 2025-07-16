@@ -7,8 +7,9 @@ BEGIN
     SELECT
         UserID, CreatedAt, EmailVerified, MobileVerified, BiometricVerified, ValidationStatus,
 		SMSNotificaction, PushNotification, EmailNotification,
-        FullName, IDNumber, BirthDate, Email, MobilePhone, ProfilePhoto, IDPhotoFront, IDPhotoBack,
-        Latitude, Longitude, Password, Role -- Columna añadida
+        FirstName, LastName,
+        IDNumber, BirthDate, Email, MobilePhone, ProfilePhoto, IDPhotoFront, IDPhotoBack,
+        Latitude, Longitude, Password, Role
     FROM
         Users
     WHERE

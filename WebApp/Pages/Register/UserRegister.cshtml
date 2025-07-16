@@ -11,39 +11,46 @@
     <h2 class="mb-4 text-center">Registro de Nuevo Usuario</h2>
     <form id="registerForm" class="needs-validation" novalidate>
         <div class="">
-            <div class="mb-3">
-                <label for="fullName" class="form-label">Nombre Completo</label>
-                <input type="text" class="form-control" id="fullName" ColumnDataName="FullName" required />
-                <div class="invalid-feedback">El nombre es obligatorio.</div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="firstName" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="txtFirstName" ColumnDataName="FirstName" required />
+                    <div class="invalid-feedback">El nombre es obligatorio.</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="lastName" class="form-label">Apellido</label>
+                    <input type="text" class="form-control" id="txtLastName" ColumnDataName="LastName" required />
+                    <div class="invalid-feedback">El apellido es obligatorio.</div>
+                </div>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
-                <input type="email" class="form-control" id="email" ColumnDataName="Email" required />
+                <input type="email" class="form-control" id="txtEmail" ColumnDataName="Email" required />
                 <div class="invalid-feedback">Introduce un correo válido.</div>
             </div>
             <div class="mb-3 d-flex">
-                <button type="button" class="btn btn-outline-primary me-2" id="btnSendOTP">Enviar OTP para verificar la cuenta</button>
-                <input type="text" class="form-control" id="otp" placeholder="Código OTP Email" style="max-width: 200px;" required />
+                <button type="button" class="btn btn-outline-primary me-2" id="btnSendOTP">Enviar OTP para verificar email</button>
+                <input type="text" class="form-control" id="otp" placeholder="Código OTP Email" style="max-width: 200px;" required disabled />
                 <div class="invalid-feedback">El OTP es obligatorio.</div>
             </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Teléfono</label>
+                <input type="text" class="form-control" id="txtPhone" ColumnDataName="MobilePhone" required />
+                <div class="invalid-feedback">El teléfono debe ser correcto.</div>
+            </div>
             <div class="mb-3 d-flex">
-                <button type="button" class="btn btn-outline-success me-2" id="btnSendSmsOTP">Enviar OTP por SMS</button>
-                <input type="text" class="form-control" id="smsOtp" placeholder="Código OTP SMS" style="max-width: 200px;" required />
+                <button type="button" class="btn btn-outline-success me-2" id="btnSendSmsOTP">Enviar OTP SMS para verificar Teléfono</button>
+                <input type="text" class="form-control" id="smsOtp" placeholder="Código OTP SMS" style="max-width: 200px;" required disabled />
                 <div class="invalid-feedback">El OTP SMS es obligatorio.</div>
             </div>
             <div class="mb-3">
-                <label for="telefono" class="form-label">Teléfono</label>
-                <input type="text" class="form-control" id="telefono" ColumnDataName="MobilePhone" required />
-                <div class="invalid-feedback">El teléfono debe ser correcto.</div>
-            </div>
-            <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="password" ColumnDataName="Password" minlength="8" required />
+                <input type="password" class="form-control" id="txtPassword" ColumnDataName="Password" minlength="8" required />
                 <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres.</div>
             </div>
             <div class="mb-3">
                 <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                <input type="password" class="form-control" id="confirmPassword" required />
+                <input type="password" class="form-control" id="txtConfirmPassword" required />
                 <div class="invalid-feedback">Las contraseñas no coinciden.</div>
             </div>
             <div class="mb-3">
