@@ -29,7 +29,7 @@ namespace WebApp.Pages
                 return Page();
 
             // Llamar al API de login
-            var client = _httpClientFactory.CreateClient();
+            using var client = new HttpClient();
             client.BaseAddress = new Uri("https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/");
             var loginData = new { email = Email, password = Password };
             var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
