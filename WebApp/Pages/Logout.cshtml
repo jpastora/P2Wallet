@@ -1,9 +1,2 @@
 @page
 @using Microsoft.AspNetCore.Authentication
-@functions {
-    public async Task<IActionResult> OnGetAsync()
-    {
-        await HttpContext.SignOutAsync("MyCookieAuth");
-        return RedirectToPage("/Index");
-    }
-}
