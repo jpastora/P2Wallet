@@ -31,8 +31,9 @@
         userDTO.EmailNotification = "Inactive";
         userDTO.PushNotification = "Inactive";
         userDTO.BirthDate = new Date("2000-01-01T00:00:00Z").toISOString();
+        userDTO.Role = "User";
 
-        //Atributos del formulario (IDs corregidos)
+        //Atributos del formulario 
         userDTO.FullName = document.getElementById("fullName").value;
         userDTO.Email = document.getElementById("email").value;
         userDTO.MobilePhone = document.getElementById("telefono").value;
