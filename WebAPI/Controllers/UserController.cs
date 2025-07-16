@@ -140,10 +140,15 @@ namespace WebAPI.Controllers
         {
             try
             {
-                // Extrae email y password del body JSON
-                var email = loginData.GetProperty("email").GetString();
-                var password = loginData.GetProperty("password").GetString();   
+                // Validate and extract email and password from the body JSON
+                if (!loginData.TryGetProperty("email", out JsonElement emailElement) || string.IsNullOrWhiteSpace(emailElement.GetString()))
+                    return BadRequest(new { message = "El campo 'email' es obligatorio y no puede estar vacío." });
 
+                if (!loginData.TryGetProperty("password", out JsonElement passwordElement) || string.IsNullOrWhiteSpace(passwordElement.GetString()))
+                    return BadRequest(new { message = "El campo 'password' es obligatorio y no puede estar vacío." });
+
+                var email = emailElement.GetString();
+                var password = passwordElement.GetString();
                 var user = new UserManager().RetrieveUserByEmail(new User { Email = email });
                 if (user == null || !PasswordHelper.VerifyPassword(password, user.Password))
                     return Unauthorized(new { message = "Usuario o contraseña incorrectos." });
