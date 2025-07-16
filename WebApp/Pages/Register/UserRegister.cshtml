@@ -1,68 +1,58 @@
 ﻿@page
 @model WebApp.Pages.Register.UserRegisterModel
+
 @{
     ViewData["Title"] = "Registro de Usuario";
 }
 
+<script src="~/js/User.js"></script>
+
 <div class="container py-5">
     <h2 class="mb-4 text-center">Registro de Nuevo Usuario</h2>
     <form id="registerForm" class="needs-validation" novalidate>
-        <div class="row g-3">
-            <div class="col-md-6">
+        <div class="">
+            <div class="mb-3">
                 <label for="fullName" class="form-label">Nombre Completo</label>
                 <input type="text" class="form-control" id="fullName" ColumnDataName="FullName" required />
                 <div class="invalid-feedback">El nombre es obligatorio.</div>
             </div>
-            <div class="col-md-6">
+            <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
                 <input type="email" class="form-control" id="email" ColumnDataName="Email" required />
                 <div class="invalid-feedback">Introduce un correo válido.</div>
             </div>
-            <div class="col-md-6">
+            <div class="mb-3">
                 <label for="telefono" class="form-label">Teléfono</label>
                 <input type="text" class="form-control" id="telefono" ColumnDataName="MobilePhone" required />
-                <div class="invalid-feedback">El teléfono es obligatorio.</div>
+                <div class="invalid-feedback">El teléfono debe ser correcto.</div>
             </div>
-            <div class="col-md-6">
+            <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
                 <input type="password" class="form-control" id="password" ColumnDataName="Password" minlength="8" required />
                 <div class="invalid-feedback">La contraseña debe tener al menos 8 caracteres.</div>
             </div>
-            <div class="col-md-6">
+            <div class="mb-3">
                 <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
                 <input type="password" class="form-control" id="confirmPassword" required />
                 <div class="invalid-feedback">Las contraseñas no coinciden.</div>
             </div>
-            <div class="col-md-6">
-                <label for="photo" class="form-label">Foto de Perfil</label>
-                <input type="file" class="form-control" id="photo" accept="image/*" />
-            </div>
-            <div class="col-12 text-center">
-                <img id="photoPreview" class="photo-preview d-none" alt="Vista previa de la foto" style="max-height: 150px; border-radius: 50%;" />
-            </div>
-
-            <!-- Dirección -->
-            <div class="col-md-8">
+            <div class="mb-3">
                 <label for="autocomplete" class="form-label">Dirección</label>
                 <input id="autocomplete" type="text" class="form-control" placeholder="Escribe tu dirección o lugar..." autocomplete="off" required />
                 <div class="invalid-feedback">La dirección es obligatoria.</div>
             </div>
-            <div class="col-md-4 d-flex align-items-end">
+            <div class="mb-3 d-flex align-items-end">
                 <button class="btn btn-light w-100" type="button" id="btnSearchAddress">Selecionar dirección</button>
             </div>
-
-            <!-- Mapa -->
-            <div id="map-container" class="col-12 mt-3 position-relative">
-                <div id="map" style="height: 450px; width: 100%; border-radius: 8px;"></div>
-            </div>
-            <div class="col-12">
-                <small class="form-text text-muted">Busca, haz clic en el mapa o arrastra el pin para ajustar tu ubicación.</small>
-            </div>
-
             <input type="hidden" id="txtLatitude" ColumnDataName="Latitude">
             <input type="hidden" id="txtLongitude" ColumnDataName="Longitude">
-            <input type="hidden" id="photoUrl" ColumnDataName="ProfilePhotoUrl">
-            <div class="col-12 mt-4">
+            <div class="mb-3">
+                <div id="map-container" class="position-relative">
+                    <div id="map" style="height: 450px; width: 100%; border-radius: 8px;"></div>
+                </div>
+                <small class="form-text text-muted">Busca, haz clic en el mapa o arrastra el pin para ajustar tu ubicación.</small>
+            </div>
+            <div class="mb-4">
                 <button type="submit" class="btn btn-primary w-100">Registrarse</button>
             </div>
         </div>
@@ -71,7 +61,8 @@
 </div>
 
 @section Scripts {
-    <script>
+    @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+    <script type="text/javascript">
         let map, marker, geocoder, placeAutocomplete;
 
         function initMap() {
@@ -100,7 +91,6 @@
             lngInput.value = initialLocation.lng;
 
             // NUEVO AUTOCOMPLETE con PlaceAutocompleteElement
-            // Esto crea el autocomplete "invisible" y lo vincula al input que ya tienes.
             placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
             placeAutocomplete.input = addressInput;
             placeAutocomplete.addEventListener('gmp-placechange', (event) => {
@@ -167,83 +157,93 @@
         document.addEventListener('DOMContentLoaded', () => {
             'use strict';
             const form = document.getElementById('registerForm');
-            const photoInput = document.getElementById('photo');
-            const photoPreview = document.getElementById('photoPreview');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('telefono');
             const pwdInput = document.getElementById('password');
             const confirmPwdInput = document.getElementById('confirmPassword');
             const alertPlaceholder = document.getElementById('alertPlaceholder');
+            const userController = new UserViewController();
 
-            function showAlert(message, type = 'success') {
-                if (!alertPlaceholder) return;
-                alertPlaceholder.innerHTML = `
-                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                        ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>`;
+            function showAlert(message, type = 'danger') {
+                alertPlaceholder.innerHTML = `<div class="alert alert-${type} alert-dismissible" role="alert">${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
             }
 
-            if (photoInput) {
-                photoInput.addEventListener('change', () => {
-                    const file = photoInput.files[0];
-                    if (file && file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = e => {
-                            photoPreview.src = e.target.result;
-                            photoPreview.classList.remove('d-none');
-                        };
-                        reader.readAsDataURL(file);
+            // --- FUNCIONES DE VALIDACIÓN ESPECÍFICAS Y CORRECTAS ---
+            //Valida que un correo electrónico tenga un formato válido y estándar
+
+        function validateEmail(email) {
+            var input = document.createElement('input');
+            input.type = 'email';
+            input.value = email;
+            return input.checkValidity();
+        }
+
+            //Valida que el teléfono solo contenga números.
+ 
+            function validatePhone(phone) {
+                const regex = /^\d+$/;
+                return regex.test(phone);
+            }
+
+            // --- VALIDACIÓN EN TIEMPO REAL ---
+            emailInput.addEventListener('input', () => {
+                emailInput.classList.toggle('is-invalid', !validateEmail(emailInput.value));
+            });
+
+            phoneInput.addEventListener('input', () => {
+                phoneInput.classList.toggle('is-invalid', !validatePhone(phoneInput.value));
+            });
+
+            confirmPwdInput.addEventListener('input', () => {
+                confirmPwdInput.classList.toggle('is-invalid', pwdInput.value !== confirmPwdInput.value);
+            });
+
+            // --- VALIDACIÓN AL ENVIAR EL FORMULARIO ---
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                let isValid = true;
+
+                // Validar todos los campos requeridos
+                form.querySelectorAll('[required]').forEach(input => {
+                    if (!input.value.trim()) {
+                        input.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('is-invalid');
                     }
                 });
-            }
 
-            if (form) {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    confirmPwdInput.classList.remove('is-invalid');
+                // Validar formato de Email
+                if (emailInput.value && !validateEmail(emailInput.value)) {
+                    emailInput.classList.add('is-invalid');
+                    isValid = false;
+                }
 
-                    if (pwdInput.value !== confirmPwdInput.value) {
-                        confirmPwdInput.classList.add('is-invalid');
-                        showAlert('Las contraseñas no coinciden.', 'danger');
-                        return;
-                    }
-                    if (!form.checkValidity()) {
-                        e.stopPropagation();
-                        form.classList.add('was-validated');
-                        return;
-                    }
+                // Validar formato de Teléfono
+                if (phoneInput.value && !validatePhone(phoneInput.value)) {
+                    phoneInput.classList.add('is-invalid');
+                    isValid = false;
+                }
 
-                    const ctrlActions = new ControlActions();
-                    const photoFile = photoInput.files[0];
+                // Validar coincidencia de contraseñas
+                if (pwdInput.value !== confirmPwdInput.value) {
+                    confirmPwdInput.classList.add('is-invalid');
+                    isValid = false;
+                }
 
-                    if (photoFile) {
-                        const formData = new FormData();
-                        formData.append('photo', photoFile);
-                        try {
-                            const cloudinaryUrl = ctrlActions.GetUrlApiService('cloudinary/Save');
-                            const response = await fetch(cloudinaryUrl, { method: 'POST', body: formData });
-                            if (!response.ok) throw new Error('Error al subir la imagen.');
-                            
-                            const result = await response.json();
-                            document.getElementById('photoUrl').value = result.secureUrl;
-                        } catch (error) {
-                            console.error(error);
-                            showAlert('Hubo un problema al subir tu foto.', 'danger');
-                            return;
-                        }
-                    }
+                if (!isValid) {
+                    showAlert('Por favor, corrige los campos marcados en rojo.', 'danger');
+                    return;
+                }
 
-                    const userData = ctrlActions.GetDataForm('registerForm');
-                    ctrlActions.PostToAPI('User/Create', userData, () => {
-                        showAlert('¡Registro exitoso!', 'success');
-                        form.reset();
-                        form.classList.remove('was-validated');
-                        photoPreview.classList.add('d-none');
-                    });
-                });
-            }
+                // Si todo es válido, puedes proceder a enviar los datos.
+                userController.Create();
+                form.reset();
+            });
         });
     </script>
-    @inject IConfiguration Configuration
-    <script src="https://maps.googleapis.com/maps/api/js?key=@Configuration["GoogleMaps:ApiKey"]&libraries=places,marker,geocoding&callback=initMap"
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=@(Configuration["GoogleMaps:ApiKey"])&libraries=places,marker,geocoding&callback=initMap"
             async defer loading="async"></script>
 }

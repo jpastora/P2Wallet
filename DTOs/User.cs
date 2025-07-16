@@ -19,10 +19,10 @@ namespace DTOs
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public string Password { get; set; }
-        public String EmailVerified { get; set; }
-        public String MobileVerified { get; set; }
-        public String BiometricVerified { get; set; }
-        public String ValidationStatus { get; set; }
+        public string EmailVerified { get; set; }
+        public string MobileVerified { get; set; }
+        public string BiometricVerified { get; set; }
+        public string ValidationStatus { get; set; }
         public string SMSNotification { get; set; }
         public string EmailNotification { get; set; }
         public string PushNotification { get; set; }

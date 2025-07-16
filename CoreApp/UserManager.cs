@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace CoreApp
 {
     // Administra las operaciones relacionadas con usuarios.
@@ -22,7 +21,11 @@ namespace CoreApp
                 var userExist = userCrud.RetrieveByEmail<User>(user);
 
                 if (userExist == null)
+                {
+                    // Hash de la contraseña antes de guardar
+                    user.Password = PasswordHelper.HashPassword(user.Password);
                     userCrud.Create(user); // Si no existe, crea el usuario
+                }
                 else
                     throw new Exception("User already exists with this email."); // Si existe, lanza excepción
             }
@@ -49,8 +52,8 @@ namespace CoreApp
         // Recupera un usuario por su correo electrónico.
         public User RetrieveUserByEmail(User user)
         {
-                var userCrud = new UserCrudFactory();
-                return userCrud.RetrieveByEmail<User>(user); // Recupera el usuario por correo electrónico
+            var userCrud = new UserCrudFactory();
+            return userCrud.RetrieveByEmail<User>(user); // Recupera el usuario por correo electrónico
         }
 
         // Actualiza la información de un usuario existente.

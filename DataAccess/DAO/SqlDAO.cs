@@ -19,7 +19,7 @@ namespace DataAccess.DAO
 
             private SqlDAO()
             {
-                _connectionString = @"Data Source=srv-sqldatabase-dbjpastora1.database.windows.net;Initial Catalog=yavidb;Persist Security Info=True;User ID=sysman;Password=Cenfortec123!;Trust Server Certificate=True";
+                _connectionString = @"Data Source=srv-sqldatabase-dbjpastora1.database.windows.net;Initial Catalog=yavidb;Persist Security Info=True;User ID=sysman;Password=Cenfotec12345!;Trust Server Certificate=True";
             }
 
             public static SqlDAO GetInstance()
