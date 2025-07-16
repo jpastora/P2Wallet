@@ -20,7 +20,7 @@
         userDTO.IDNumber = ""
         userDTO.Created = "2000-01-01";
         userDTO.Updated = "2000-01-01";
-        userDTO.ProfilePhotoUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg",
+        userDTO.ProfilePhotoUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg";
         userDTO.IDPhotoFrontUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg";
         userDTO.IDPhotoBackUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg";
         userDTO.EmailVerified = "Active";
