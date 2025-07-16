@@ -7,6 +7,8 @@ namespace CoreApp
         // Hash a password using PBKDF2
         public static string HashPassword(string password)
         {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentException("Password cannot be null or empty.", nameof(password));
             // Parameters
             int saltSize = 16; // 128 bit
             int keySize = 32;  // 256 bit
