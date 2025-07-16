@@ -90,7 +90,7 @@ namespace DataAccess.CRUD
                 UserID = (int)row["UserID"],
                 IBAN = (string)row["IBAN"],
                 FinancialEntityID = (int)row["FinancialEntityID"],
-                ValidationStatus = (string)row["Status"]
+                ValidationStatus = (string)row["ValidationStatus"]
             };
         }
     }

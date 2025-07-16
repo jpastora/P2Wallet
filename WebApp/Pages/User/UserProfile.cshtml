@@ -1,0 +1,90 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@model WebApp.Pages.User.UserProfileModel
+@{
+}
+<!-- CONTENIDO -->
+<div class="container py-4 mb-5">
+    <!-- Resumen de Perfil -->
+    <div class="text-center mb-4">
+        <img src="https://picsum.photos/seed/perfil/120" alt="Foto de perfil" class="rounded-circle profile-img mb-2">
+        <h4>Juan Pérez</h4>
+        <p class="text-muted">juan.perez@email.com</p>
+    </div>
+
+    <!-- Datos Personales -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Datos Personales</strong></div>
+        <div class="card-body">
+            <form id="formPerfil">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Nombre Completo</label>
+                    <input type="text" class="form-control" id="nombre" value="Juan Pérez">
+                </div>
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="text" class="form-control" id="telefono" value="+506 8888 9999">
+                </div>
+                <div class="mb-3">
+                    <label for="correo" class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="correo" value="juan.perez@email.com" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Seguridad -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Seguridad</strong></div>
+        <div class="card-body">
+            <button class="btn btn-outline-secondary w-100 mb-3" id="btnCambiarClave">Cambiar Contraseña</button>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="biometrico">
+                <label class="form-check-label" for="biometrico">Ingreso Biométrico</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Notificaciones</strong></div>
+        <div class="card-body">
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="notifEmail" checked>
+                <label class="form-check-label" for="notifEmail">Notificaciones por Email</label>
+            </div>
+            <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="notifPush">
+                <label class="form-check-label" for="notifPush">Transacciones Push</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="notifOfertas">
+                <label class="form-check-label" for="notifOfertas">Ofertas y Promociones</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Roles Administrativos -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Comercio: Tech Store
+                    <button class="btn btn-sm btn-outline-primary ir-panel" data-nombre="Tech Store">Ir al Panel</button>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    Entidad: Banco X
+                    <button class="btn btn-sm btn-outline-primary ir-panel" data-nombre="Banco X">Ir al Panel</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Cerrar Sesión -->
+    <div class="d-grid">
+        <button class="btn btn-danger" id="btnCerrarSesion">Cerrar Sesión</button>
+    </div>
+</div>
