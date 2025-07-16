@@ -9,7 +9,7 @@ namespace WebApp.Pages
     {
         public async Task<IActionResult> OnGet()
         {
-            await HttpContext.SignOutAsync("MyCookieAuth");
+            await HttpContext.SignOutAsync("MyCookieAuth"); // Nombre del esquema de autenticación
             return RedirectToPage("/Index");
         }
     }
