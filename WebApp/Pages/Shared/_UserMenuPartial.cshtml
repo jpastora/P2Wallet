@@ -1,0 +1,16 @@
+﻿@{
+    var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+}
+<!-- FAB Escanear QR -->
+<button id="escanearQR" class="btn btn-primary fab">
+    <i class="bi bi-qr-code-scan fs-4"></i>
+</button>
+
+<!-- Barra Navegación Inferior -->
+<nav class="nav-bottom bg-white shadow-lg">
+    <a href="/User/UserPanel" class="nav-item text-center @(currentPath == "/user/userpanel" ? "active" : "")"><i class="bi bi-house fs-5"></i><br>Inicio</a>
+    <a href="/User/Accounts" class="nav-item text-center @(currentPath == "/user/accounts" ? "active" : "")"><i class="bi bi-credit-card-2-front fs-5"></i><br>Cuentas</a>
+    <a href="/User/Statistics" class="nav-item text-center @(currentPath == "/user/statistics" ? "active" : "")"><i class="bi bi-pie-chart fs-5"></i><br>Estadísticas</a>
+    <a href="/User/Profile" class="nav-item text-center @(currentPath == "/user/profile" ? "active" : "")"><i class="bi bi-person fs-5"></i><br>Perfil</a>
+    <a href="/Logout" class="nav-item text-center text-danger"><i class="bi bi-box-arrow-right fs-5"></i><br>Salir</a>
+</nav>
