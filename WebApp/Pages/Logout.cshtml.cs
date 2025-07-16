@@ -7,9 +7,9 @@ namespace WebApp.Pages
 {
     public class LogoutModel : PageModel
     {
-        public async Task<IActionResult> OnGet()
+        public async Task<IActionResult> OnPost()
         {
-            await HttpContext.SignOutAsync("MyCookieAuth"); // Nombre del esquema de autenticación
+            await HttpContext.SignOutAsync("MyCookieAuth");
             return RedirectToPage("/Index");
         }
     }

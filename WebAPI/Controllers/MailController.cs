@@ -17,23 +17,25 @@ namespace WebAPI.Controllers
         [HttpPost("enviar")]
         public async Task<IActionResult> EnviarOTP([FromQuery] string email)
         {
-            await _emailService.EnviarOTPAsync(email);
-            return Ok("OTP enviado correctamente");
+            var enviado = await _emailService.EnviarOTPAsync(email);
+            if (enviado)
+                return Ok(new { message = "OTP enviada correctamente. Revisa tu correo." });
+            else
+                return StatusCode(500, new { message = "No se pudo enviar el OTP. Intenta más tarde." });
         }
 
         [HttpPost("verificar-otp")]
         public IActionResult VerificarOTP([FromQuery] string email, [FromQuery] string otp)
         {
-            // Recuperar el OTP de la cache y comparar
             if (_emailService.TryGetOTP(email, out var otpGuardado))
             {
                 if (otpGuardado == otp)
                 {
-                    return Ok(new { valido = true });
+                    return Ok(new { valido = true, message = "OTP verificado con éxito." });
                 }
-                return BadRequest(new { valido = false, mensaje = "OTP incorrecto" });
+                return BadRequest(new { valido = false, message = "OTP incorrecto." });
             }
-            return BadRequest(new { valido = false, mensaje = "OTP expirado o no encontrado" });
+            return BadRequest(new { valido = false, message = "OTP expirado o no encontrado." });
         }
     }
 }

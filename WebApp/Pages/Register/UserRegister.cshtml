@@ -203,6 +203,72 @@
                 confirmPwdInput.classList.toggle('is-invalid', pwdInput.value !== confirmPwdInput.value);
             });
 
+            // --- LÓGICA MEJORADA DE OTP ---
+            const btnSendOTP = document.getElementById('btnSendOTP');
+            const otpInput = document.getElementById('otp');
+            let otpSentTo = null;
+
+            btnSendOTP.addEventListener('click', async function () {
+                const email = emailInput.value.trim();
+                if (!validateEmail(email)) {
+                    emailInput.classList.add('is-invalid');
+                    showAlert('Ingresa un correo válido antes de solicitar el OTP.', 'danger');
+                    return;
+                }
+                btnSendOTP.disabled = true;
+                btnSendOTP.textContent = 'Enviando...';
+                try {
+                    const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/mail/enviar?email=' + encodeURIComponent(email), {
+                        method: 'POST'
+                    });
+                    let data = null;
+                    try {
+                        data = await response.json();
+                    } catch {
+                        data = {};
+                    }
+                    if (response.ok) {
+                        showAlert((data.message || 'OTP enviado a tu correo. Revisa tu bandeja de entrada o spam.'), 'success');
+                        otpInput.disabled = false;
+                        emailInput.readOnly = true;
+                        otpSentTo = email;
+                        btnSendOTP.textContent = 'OTP Enviado';
+                    } else {
+                        showAlert((data.message || 'Error enviando OTP. Intenta de nuevo.'), 'danger');
+                        btnSendOTP.disabled = false;
+                        btnSendOTP.textContent = 'Enviar OTP para verificar la cuenta';
+                    }
+                } catch {
+                    showAlert('Error enviando OTP. Intenta de nuevo.', 'danger');
+                    btnSendOTP.disabled = false;
+                    btnSendOTP.textContent = 'Enviar OTP para verificar la cuenta';
+                }
+            });
+
+            async function verificarOTP(email, otp) {
+                const response = await fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/mail/verificar-otp?email=' + encodeURIComponent(email) + '&otp=' + encodeURIComponent(otp), {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    showAlert(data.message || 'El código OTP es incorrecto o expiró.', 'danger');
+                    return false;
+                }
+                showAlert(data.message || 'OTP verificado con éxito.', 'success');
+                return data.valido === true;
+            }
+
+            // Si el usuario cambia el correo, reiniciar OTP
+            emailInput.addEventListener('input', () => {
+                emailInput.readOnly = false;
+                btnSendOTP.disabled = false;
+                btnSendOTP.textContent = 'Enviar OTP para verificar la cuenta';
+                otpInput.value = '';
+                otpInput.disabled = true;
+                otpSentTo = null;
+            });
+            otpInput.disabled = true;
+
             // --- VALIDACIÓN AL ENVIAR EL FORMULARIO ---
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -238,14 +304,12 @@
                 }
 
                 // Validar OTP
-                const otpInput = document.getElementById('otp');
-                if (!otpInput.value) {
+                if (!otpInput.value || !otpSentTo || emailInput.value !== otpSentTo) {
                     otpInput.classList.add('is-invalid');
-                    showAlert('Debes ingresar el código OTP.', 'danger');
+                    showAlert('Debes solicitar y validar el código OTP para este correo.', 'danger');
                     return;
                 }
-                const email = emailInput.value;
-                const otpValido = await verificarOTP(email, otpInput.value);
+                const otpValido = await verificarOTP(emailInput.value, otpInput.value);
                 if (!otpValido) {
                     otpInput.classList.add('is-invalid');
                     showAlert('El código OTP es incorrecto o expiró.', 'danger');
@@ -261,6 +325,11 @@
                 // Si todo es válido, puedes proceder a enviar los datos.
                 userController.Create();
                 form.reset();
+                emailInput.readOnly = false;
+                btnSendOTP.disabled = false;
+                btnSendOTP.textContent = 'Enviar OTP para verificar la cuenta';
+                otpInput.disabled = true;
+                otpSentTo = null;
             });
         });
     </script>

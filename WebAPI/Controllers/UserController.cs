@@ -18,13 +18,15 @@ namespace WebAPI.Controllers
             try
             {
                 var userManager = new UserManager();
+                user.EmailVerified = "Active"; // Marcar como verificado por OTP
                 userManager.CreateUser(user);
                 // Retorna un objeto JSON con mensaje de éxito
                 return Ok(new   
                 {
                     message = "Usuario creado exitosamente.",
                     icon = "success",
-                    title = "¡Éxito!"
+                    title = "¡Éxito!",
+                    emailVerified = user.EmailVerified
                 });
             }
             catch (Exception ex)
