@@ -2,6 +2,7 @@
 using DTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace WebAPI.Controllers
 {
@@ -132,30 +133,27 @@ namespace WebAPI.Controllers
             }
         }
 
-        // Inicia sesión de usuario validando email y contraseña
+        // Inicia sesión de usuario validando solo email y contraseña
         [HttpPost]
         [Route("Login")]
-        public ActionResult Login([FromBody] User loginUser)
+        public ActionResult Login([FromBody] JsonElement loginData)
         {
             try
             {
-                var userManager = new UserManager();
-                // Busca el usuario por email
-                var user = userManager.RetrieveUserByEmail(new User { Email = loginUser.Email });
-                if (user == null)
-                {
-                    // Usuario no encontrado
+                // Validate and extract email and password from the body JSON
+                if (!loginData.TryGetProperty("email", out JsonElement emailElement) || string.IsNullOrWhiteSpace(emailElement.GetString()))
+                    return BadRequest(new { message = "El campo 'email' es obligatorio y no puede estar vacío." });
+
+                if (!loginData.TryGetProperty("password", out JsonElement passwordElement) || string.IsNullOrWhiteSpace(passwordElement.GetString()))
+                    return BadRequest(new { message = "El campo 'password' es obligatorio y no puede estar vacío." });
+
+                var email = emailElement.GetString();
+                var password = passwordElement.GetString();
+                var user = new UserManager().RetrieveUserByEmail(new User { Email = email });
+                if (user == null || !PasswordHelper.VerifyPassword(password, user.Password))
                     return Unauthorized(new { message = "Usuario o contraseña incorrectos." });
-                }
-                // Verifica la contraseña usando el hash almacenado
-                bool valid = PasswordHelper.VerifyPassword(loginUser.Password, user.Password);
-                if (!valid)
-                {
-                    // Contraseña incorrecta
-                    return Unauthorized(new { message = "Usuario o contraseña incorrectos." });
-                }
-                // Por seguridad, no retornar el hash de la contraseña
-                user.Password = null;
+
+                user.Password = null; // No exponer el hash
                 return Ok(user);
             }
             catch (Exception ex)
