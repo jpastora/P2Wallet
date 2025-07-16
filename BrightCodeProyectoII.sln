@@ -35,9 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6_Docker", "6_Docker", "{A7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Biometrics", "Biometrics", "{82521F1A-E0F1-495C-9A93-85530D8443ED}"
 	ProjectSection(SolutionItems) = preProject
-		..\Proyecto II\Python\.dockerignore = ..\Proyecto II\Python\.dockerignore
 		app.py = app.py
-		..\Proyecto II\Python\Dockerfile = ..\Proyecto II\Python\Dockerfile
 		requirements.txt = requirements.txt
 	EndProjectSection
 EndProject
