@@ -27,6 +27,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
             sqlOperation.AddStringParameter("@P_Email", user.Email);
             sqlOperation.AddStringParameter("@P_MobilePhone", user.MobilePhone);
+            sqlOperation.AddStringParameter("@P_ProfilePhoto", user.ProfilePhotoUrl);
             sqlOperation.AddStringParameter("@P_IDPhotoFront", user.IDPhotoFrontUrl);
             sqlOperation.AddStringParameter("@P_IDPhotoBack", user.IDPhotoBackUrl);
             sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
