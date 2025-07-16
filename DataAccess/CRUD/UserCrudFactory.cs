@@ -126,30 +126,33 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_EmailVerified", user.EmailVerified);
             sqlOperation.AddStringParameter("@P_MobileVerified", user.MobileVerified);
             sqlOperation.AddStringParameter("@P_BiometricVerified", user.BiometricVerified);
-            sqlOperation.AddStringParameter("@P_UserStatus", user.ValidationStatus);
+            sqlOperation.AddStringParameter("@P_ValidationStatus", user.ValidationStatus);
+            sqlOperation.AddStringParameter("@P_SMSNotification", user.SMSNotification);
+            sqlOperation.AddStringParameter("@P_EmailNotification", user.EmailNotification);
+            sqlOperation.AddStringParameter("@P_PushNotification", user.PushNotification);
+
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
         private User BuildUser(Dictionary<string, object> row)
         {
             var user = new User()
             {
-                ID = (int)row["UserID"],
-                FullName = (string)row["FullName"],
-                IDNumber = (string)row["IDNumber"],
-                BirthDate = Convert.ToDateTime(row["BirthDate"]),
-                Email = (string)row["Email"],
-                MobilePhone = (string)row["MobilePhone"],
-                ProfilePhotoUrl = (string)row["ProfilePhoto"],
-                IDPhotoFrontUrl = (string)row["IDPhotoFront"],
-                IDPhotoBackUrl = (string)row["IDPhotoBack"],
-                Latitude = Convert.ToDouble(row["Latitude"]),
-                Longitude = Convert.ToDouble(row["Longitude"]),
-                Password = (string)row["Password"],
-                ValidationStatus = (string)row["UserStatus"],
-                SMSNotification = (string)row["SMSNotification"],
-                EmailNotification = (string)row["EmailNotification"],
-                PushNotification = (string)row["PushNotification"]
-
+                ID = row.ContainsKey("UserID") ? (row["UserID"] is DBNull ? 0 : (int)row["UserID"]) : 0,
+                FullName = row.ContainsKey("FullName") ? Convert.ToString(row["FullName"]) : null,
+                IDNumber = row.ContainsKey("IDNumber") ? Convert.ToString(row["IDNumber"]) : null,
+                BirthDate = row.ContainsKey("BirthDate") ? (row["BirthDate"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(row["BirthDate"])) : DateTime.MinValue,
+                Email = row.ContainsKey("Email") ? Convert.ToString(row["Email"]) : null,
+                MobilePhone = row.ContainsKey("MobilePhone") ? Convert.ToString(row["MobilePhone"]) : null,
+                ProfilePhotoUrl = row.ContainsKey("ProfilePhoto") ? Convert.ToString(row["ProfilePhoto"]) : null,
+                IDPhotoFrontUrl = row.ContainsKey("IDPhotoFront") ? Convert.ToString(row["IDPhotoFront"]) : null,
+                IDPhotoBackUrl = row.ContainsKey("IDPhotoBack") ? Convert.ToString(row["IDPhotoBack"]) : null,
+                Latitude = row.ContainsKey("Latitude") ? (row["Latitude"] is DBNull ? 0 : Convert.ToDouble(row["Latitude"])) : 0,
+                Longitude = row.ContainsKey("Longitude") ? (row["Longitude"] is DBNull ? 0 : Convert.ToDouble(row["Longitude"])) : 0,
+                Password = row.ContainsKey("Password") ? Convert.ToString(row["Password"]) : null,
+                ValidationStatus = row.ContainsKey("UserStatus") ? Convert.ToString(row["UserStatus"]) : null,
+                SMSNotification = row.ContainsKey("SMSNotification") ? Convert.ToString(row["SMSNotification"]) : null,
+                EmailNotification = row.ContainsKey("EmailNotification") ? Convert.ToString(row["EmailNotification"]) : null,
+                PushNotification = row.ContainsKey("PushNotification") ? Convert.ToString(row["PushNotification"]) : null
             };
             return user;
         }

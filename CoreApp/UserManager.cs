@@ -64,6 +64,11 @@ namespace CoreApp
             try
             {
                 var userCrud = new UserCrudFactory();
+                // Si el campo Password no es nulo ni vacío, hashearlo antes de actualizar
+                if (!string.IsNullOrWhiteSpace(user.Password))
+                {
+                    user.Password = PasswordHelper.HashPassword(user.Password);
+                }
                 userCrud.Update(user); // Actualiza el usuario en la base de datos
             }
             catch (Exception ex)
