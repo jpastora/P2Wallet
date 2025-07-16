@@ -21,6 +21,11 @@
                 <input type="email" class="form-control" id="email" ColumnDataName="Email" required />
                 <div class="invalid-feedback">Introduce un correo válido.</div>
             </div>
+            <div class="mb-3 d-flex">
+                <button type="button" class="btn btn-outline-primary me-2" id="btnSendOTP">Enviar OTP para verificar la cuenta</button>
+                <input type="text" class="form-control" id="otp" placeholder="Código OTP" style="max-width: 200px;" required />
+                <div class="invalid-feedback">El OTP es obligatorio.</div>
+            </div>
             <div class="mb-3">
                 <label for="telefono" class="form-label">Teléfono</label>
                 <input type="text" class="form-control" id="telefono" ColumnDataName="MobilePhone" required />
@@ -231,6 +236,22 @@
                     confirmPwdInput.classList.add('is-invalid');
                     isValid = false;
                 }
+
+                // Validar OTP
+                const otpInput = document.getElementById('otp');
+                if (!otpInput.value) {
+                    otpInput.classList.add('is-invalid');
+                    showAlert('Debes ingresar el código OTP.', 'danger');
+                    return;
+                }
+                const email = emailInput.value;
+                const otpValido = await verificarOTP(email, otpInput.value);
+                if (!otpValido) {
+                    otpInput.classList.add('is-invalid');
+                    showAlert('El código OTP es incorrecto o expiró.', 'danger');
+                    return;
+                }
+                otpInput.classList.remove('is-invalid');
 
                 if (!isValid) {
                     showAlert('Por favor, corrige los campos marcados en rojo.', 'danger');
