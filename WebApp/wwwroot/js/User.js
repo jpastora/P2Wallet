@@ -34,12 +34,13 @@
         userDTO.Role = "User";
 
         //Atributos del formulario 
-        userDTO.FullName = document.getElementById("fullName").value;
-        userDTO.Email = document.getElementById("email").value;
-        userDTO.MobilePhone = document.getElementById("telefono").value;
+        userDTO.FirstName = document.getElementById("txtFirstName").value;
+        userDTO.LastName = document.getElementById("txtLastName").value;
+        userDTO.Email = document.getElementById("txtEmail").value;
+        userDTO.MobilePhone = document.getElementById("txtPhone").value;
         userDTO.Latitude = parseFloat(document.getElementById("txtLatitude").value);
         userDTO.Longitude = parseFloat(document.getElementById("txtLongitude").value);
-        userDTO.Password = document.getElementById("password").value;
+        userDTO.Password = document.getElementById("txtPassword").value;
 
         //Enviar la data al API
         var ca = new ControlActions();

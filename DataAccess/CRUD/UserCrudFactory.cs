@@ -21,7 +21,8 @@ namespace DataAccess.CRUD
             var user = baseDTO as User;
             var sqlOperation = new SqlOperation() { ProcedureName = "CREATE_USER_PR" };
 
-            sqlOperation.AddStringParameter("@P_FullName", user.FullName);
+            sqlOperation.AddStringParameter("@P_FirstName", user.FirstName);
+            sqlOperation.AddStringParameter("@P_LastName", user.LastName);
             sqlOperation.AddStringParameter("@P_IDNumber", user.IDNumber);
             sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
             sqlOperation.AddStringParameter("@P_Email", user.Email);
@@ -31,8 +32,8 @@ namespace DataAccess.CRUD
             sqlOperation.AddDoubleParam("@P_Latitude", user.Latitude);
             sqlOperation.AddDoubleParam("@P_Longitude", user.Longitude);
             sqlOperation.AddStringParameter("@P_Password", user.Password);
-            sqlOperation.AddStringParameter("@P_EmailVerified", "Active"); // Forzar Active
-            sqlOperation.AddStringParameter("@P_MobileVerified", "Active"); // Forzar Active
+            sqlOperation.AddStringParameter("@P_EmailVerified", "Active"); 
+            sqlOperation.AddStringParameter("@P_MobileVerified", "Active"); 
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -114,7 +115,8 @@ namespace DataAccess.CRUD
             var user = baseDTO as User;
             var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_USER_PR" };
             sqlOperation.AddIntParam("@P_UserID", user.ID);
-            sqlOperation.AddStringParameter("@P_FullName", user.FullName);
+            sqlOperation.AddStringParameter("@P_FirstName", user.FirstName);
+            sqlOperation.AddStringParameter("@P_LastName", user.LastName);
             sqlOperation.AddStringParameter("@P_IDNumber", user.IDNumber);
             sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
             sqlOperation.AddStringParameter("@P_Email", user.Email);
@@ -141,7 +143,8 @@ namespace DataAccess.CRUD
             var user = new User()
             {
                 ID = row.ContainsKey("UserID") ? (row["UserID"] is DBNull ? 0 : (int)row["UserID"]) : 0,
-                FullName = row.ContainsKey("FullName") ? Convert.ToString(row["FullName"]) : null,
+                FirstName = row.ContainsKey("FirstName") ? Convert.ToString(row["FirstName"]) : null,
+                LastName = row.ContainsKey("LastName") ? Convert.ToString(row["LastName"]) : null,
                 IDNumber = row.ContainsKey("IDNumber") ? Convert.ToString(row["IDNumber"]) : null,
                 BirthDate = row.ContainsKey("BirthDate") ? (row["BirthDate"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(row["BirthDate"])) : DateTime.MinValue,
                 Email = row.ContainsKey("Email") ? Convert.ToString(row["Email"]) : null,

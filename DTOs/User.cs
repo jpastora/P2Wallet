@@ -8,7 +8,8 @@ namespace DTOs
 {
     public class User : BaseDTO
     {
-        public string FullName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string IDNumber { get; set; }
         public DateTime BirthDate { get; set; }
         public string Email { get; set; }

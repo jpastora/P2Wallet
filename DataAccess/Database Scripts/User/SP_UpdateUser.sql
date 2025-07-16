@@ -1,6 +1,7 @@
 ﻿CREATE OR ALTER PROCEDURE UPDATE_USER_PR
     @P_UserID INT,
-    @P_FullName VARCHAR(100),
+    @P_FirstName VARCHAR(50),
+    @P_LastName VARCHAR(50),
 	@P_IDNumber VARCHAR(50),
 	@P_BirthDate DATETIME,
     @P_Email VARCHAR(100),
@@ -18,14 +19,15 @@
 	@P_SMSNotification VARCHAR(15),
 	@P_PushNotification VARCHAR(15),
 	@P_EmailNotification VARCHAR(15),
-    @P_Role VARCHAR(35) -- Parámetro añadido
+    @P_Role VARCHAR(35)
 AS
 BEGIN
     SET NOCOUNT ON;
 
     UPDATE Users
     SET
-        FullName = @P_FullName,
+        FirstName = @P_FirstName,
+        LastName = @P_LastName,
 		IDNumber = @P_IDNumber,
 		BirthDate = @P_BirthDate,
         Email = @P_Email,
@@ -43,7 +45,7 @@ BEGIN
 		SMSNotificaction = @P_SMSNotification,
 		PushNotification = @P_PushNotification,
 		EmailNotification = @P_EmailNotification,
-        Role = @P_Role, -- Columna añadida
+        Role = @P_Role,
         UpdatedAt = GETDATE()
     WHERE
         UserID = @P_UserID
