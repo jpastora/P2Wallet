@@ -31,6 +31,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "99_Testing", "99_Testing", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTester", "DevTester\DevTester.csproj", "{5A66CA5A-1356-478C-8245-4C47ABCD3B86}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "6_Docker", "6_Docker", "{A73E76A8-6F7C-4790-825C-E3B924B4CC57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Biometrics", "Biometrics", "{82521F1A-E0F1-495C-9A93-85530D8443ED}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\OneDrive\Documents\CENFOTEC\Cuatri II - 2025\Proyecto II\Python\app.py = ..\..\..\OneDrive\Documents\CENFOTEC\Cuatri II - 2025\Proyecto II\Python\app.py
+		..\..\..\OneDrive\Documents\CENFOTEC\Cuatri II - 2025\Proyecto II\Python\Dockerfile = ..\..\..\OneDrive\Documents\CENFOTEC\Cuatri II - 2025\Proyecto II\Python\Dockerfile
+		..\..\..\OneDrive\Documents\CENFOTEC\Cuatri II - 2025\Proyecto II\Python\requirements.txt = ..\..\..\OneDrive\Documents\CENFOTEC\Cuatri II - 2025\Proyecto II\Python\requirements.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +86,7 @@ Global
 		{0B5C8ACC-3381-4A07-A0A2-D8C0382DD2F7} = {121BDF24-4C2C-4C34-9D96-BDF430413455}
 		{1A41DEB0-395B-4624-A469-8BB99FF36865} = {30FB45F7-118C-49CD-8A44-056ED995CA70}
 		{5A66CA5A-1356-478C-8245-4C47ABCD3B86} = {8045ABED-0DA5-4EA7-8142-53E38136C086}
+		{82521F1A-E0F1-495C-9A93-85530D8443ED} = {A73E76A8-6F7C-4790-825C-E3B924B4CC57}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DCCCB549-AAB1-4A01-BB0C-C5AFA7444417}
