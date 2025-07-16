@@ -29,7 +29,7 @@ namespace WebApp.Pages
                 return Page();
 
             // Llamar al API de login
-            using var client = new HttpClient();
+            var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri("https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/");
             var loginData = new { email = Email, password = Password };
             var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
@@ -37,7 +37,7 @@ namespace WebApp.Pages
 
             if (response.IsSuccessStatusCode)
             {
-                // Login exitoso, crear cookie de autenticación
+                // Login exitoso, crear cookie de autenticaciÃ³n
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, Email)
@@ -60,11 +60,11 @@ namespace WebApp.Pages
                     if (errorObj.TryGetProperty("message", out var msg))
                         ErrorMessage = msg.GetString();
                     else
-                        ErrorMessage = "Usuario o contraseña incorrectos.";
+                        ErrorMessage = "Usuario o contraseÃ±a incorrectos.";
                 }
                 catch
                 {
-                    ErrorMessage = "Usuario o contraseña incorrectos.";
+                    ErrorMessage = "Usuario o contraseÃ±a incorrectos.";
                 }
                 return Page();
             }
