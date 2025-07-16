@@ -161,12 +161,10 @@
 
                 if (responseJson.errors) {
                     message = Object.values(responseJson.errors).flat().join("<br/> ");
-                } else if (jqXHR.responseText) {
-                    const response = JSON.parse(jqXHR.responseText)
-                    if (response.message)
-                        message = response.message;
-                    else
-                        message = jqXHR.responseText;
+                } else if (responseJson.message) {
+                    message = responseJson.message;
+                } else {
+                    message = jqXHR.responseText;
                 }
 
 
