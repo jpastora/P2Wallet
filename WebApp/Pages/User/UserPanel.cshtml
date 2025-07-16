@@ -1,0 +1,71 @@
+﻿@page
+@model WebApp.Pages.User.UserPanelModel
+@{
+}
+
+<!-- Encabezado -->
+<header class="p-4 text-center">
+    <img src="https://picsum.photos/seed/40/40" class="rounded-circle mb-2" alt="Usuario" />
+    <h4>Hola, Juan Pérez</h4>
+</header>
+
+<!-- Saldo -->
+<section class="container mb-4">
+    <div class="card text-center shadow saldo-card">
+        <div class="card-body">
+            <h6 class="text-muted">Saldo Total Disponible</h6>
+            <h2 class="text-primary fw-bold">₡1,234.000.56</h2>
+            <div class="d-flex justify-content-around mt-4">
+                <button class="btn btn-outline-primary"><i class="bi bi-arrow-up-circle"></i> Enviar</button>
+                <button class="btn btn-outline-success"><i class="bi bi-arrow-down-circle"></i> Recibir</button>
+                <button class="btn btn-outline-warning"><i class="bi bi-credit-card"></i> Pagar</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mis Cuentas -->
+<section class="container mb-4">
+    <h5>Mis Cuentas</h5>
+    <ul class="list-group">
+        <li class="list-group-item d-flex align-items-center">
+            <img src="https://picsum.photos/seed/banco2/40/40" class="me-3" alt="Banco" />
+            Banco Nacional •••• 1234
+        </li>
+        <li class="list-group-item d-flex align-items-center">
+            <img src="https://picsum.photos/seed/banco2/40/40" class="me-3" alt="Banco" />
+            Banco CR •••• 5678
+        </li>
+        <li class="list-group-item">
+            <a href="#" id="agregarCuenta" class="text-decoration-none text-primary"><i class="bi bi-plus-circle"></i> Agregar nueva cuenta</a>
+        </li>
+    </ul>
+</section>
+
+<!-- Actividad Reciente -->
+<section class="container mb-5">
+    <h5>Actividad Reciente</h5>
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div><i class="bi bi-shop me-2 text-secondary"></i>Pago en Super Tienda</div>
+            <div>₡4,500.00 <small class="text-muted d-block">01/07/2025</small></div>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div><i class="bi bi-arrow-down-left me-2 text-success"></i>Transferencia Recibida</div>
+            <div>₡150,000.00 <small class="text-muted d-block">30/06/2025</small></div>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div><i class="bi bi-cash me-2 text-warning"></i>Pago de Servicio</div>
+            <div>₡25,000.50 <small class="text-muted d-block">29/06/2025</small></div>
+        </li>
+        <li class="list-group-item text-center">
+            <a href="#" id="verHistorial">Ver todo el historial</a>
+        </li>
+    </ul>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+</section>

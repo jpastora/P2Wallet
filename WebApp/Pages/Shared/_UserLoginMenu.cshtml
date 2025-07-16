@@ -1,0 +1,12 @@
+﻿@{
+    var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+}
+<button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Login / Registro</button>
+<ul class="dropdown-menu dropdown-menu-end">
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item @(currentPath == "/user/userprofile" ? "active" : "")" href="/User/UserProfile">Perfil</a></li>
+    <li><a class="dropdown-item" href="#">Registro Comercio</a></li>
+    <li><a class="dropdown-item" href="#">Registro Banco</a></li>
+    <li><a class="dropdown-item" href="/Logout">Salir</a></li>
+</ul>
+
