@@ -10,6 +10,14 @@
     var discountPercentage = Model.DiscountPercentage;
     var discountAmount = Model.DiscountAmount;
     var discountSource = Model.DiscountSource;
+    string EstadoEspanol(string status) => status switch
+    {
+        "Completed" => "Completada",
+        "Pending" => "Pendiente",
+        "Failed" => "Fallida",
+        "Cancelled" => "Cancelada",
+        _ => status
+    };
 }
 
 <link rel="stylesheet" href="~/css/UserTransactionInvoice.css" />
@@ -28,7 +36,7 @@
                     <div><span>Comercio:</span> @merchant</div>
                     <div><span>Cuenta:</span> @iban</div>
                     <div><span>Banco:</span> @bank</div>
-                    <div><span>Estado:</span> @txn.TransactionStatus</div>
+                    <div><span>Estado:</span> @EstadoEspanol(txn.TransactionStatus)</div>
                 </div>
                 <div class="factura-fecha">
                     <span>Fecha:</span> @txn.Timestamp.ToString("dd/MM/yyyy HH:mm")
