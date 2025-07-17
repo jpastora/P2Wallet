@@ -1,61 +1,56 @@
 ﻿@page
 @model WebApp.Pages.Security.UserBiometricVerificationsModel
 @{
-    ViewData["Title"] = "Validación de Usuario";
+    ViewData["Title"] = "Validacion de Usuario";
 }
 
 <div class="container py-5 text-center">
 
     <h3 class="mb-4">Verificación Biométrica</h3>
 
-    <form id="verifyForm">
+    <!-- Selfie -->
+    <div id="selfieSection" class="mb-5">
+        <h5>1. Captura tu Selfie</h5>
+        <video id="selfieVideo" autoplay playsinline muted></video>
+        <canvas id="selfieCanvas" class="d-none"></canvas>
 
-        <!-- Selfie -->
-        <div id="selfieSection" class="mb-5">
-            <h5>1. Captura tu Selfie</h5>
-            <video id="selfieVideo" autoplay playsinline muted></video>
-            <canvas id="selfieCanvas" class="d-none"></canvas>
+        <button id="btnTakeSelfie" class="btn btn-primary mt-3" onclick="takePhoto('selfie')">Tomar Selfie</button>
+        <button id="btnConfirmSelfie" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('selfie')">Confirmar</button>
+        <button id="btnRetakeSelfie" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('selfie')">Tomar de Nuevo</button>
 
-            <button id="btnTakeSelfie" class="btn btn-primary mt-3" type="button" onclick="takePhoto('selfie')">Tomar Selfie</button>
-            <button id="btnConfirmSelfie" class="btn btn-success mt-3 d-none" type="button" onclick="confirmPhoto('selfie')">Confirmar</button>
-            <button id="btnRetakeSelfie" class="btn btn-secondary mt-3 d-none" type="button" onclick="retakePhoto('selfie')">Tomar de Nuevo</button>
+        <input type="hidden" id="selfieInput" name="SelfieImage" />
+    </div>
 
-            <input type="hidden" id="selfieInput" name="SelfieImage" />
+    <!-- Frente de la cédula -->
+    <div id="frontIdSection" class="mb-5 d-none">
+        <h5>2. Foto del Frente de la Cédula</h5>
+        <div class="id-frame mb-2">
+            <video id="frontIdVideo" autoplay playsinline muted></video>
+            <canvas id="frontIdCanvas" class="d-none"></canvas>
         </div>
 
-        <!-- Frente de la cédula -->
-        <div id="frontIdSection" class="mb-5 d-none">
-            <h5>2. Foto del Frente de la Cédula</h5>
-            <div class="id-frame mb-2">
-                <video id="frontIdVideo" autoplay playsinline muted></video>
-                <canvas id="frontIdCanvas" class="d-none"></canvas>
-            </div>
+        <button id="btnTakeFront" class="btn btn-primary mt-3" onclick="takePhoto('front')">Tomar Frente</button>
+        <button id="btnConfirmFront" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('front')">Confirmar</button>
+        <button id="btnRetakeFront" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('front')">Tomar de Nuevo</button>
 
-            <button id="btnTakeFront" class="btn btn-primary mt-3" type="button" onclick="takePhoto('front')">Tomar Frente</button>
-            <button id="btnConfirmFront" class="btn btn-success mt-3 d-none" type="button" onclick="confirmPhoto('front')">Confirmar</button>
-            <button id="btnRetakeFront" class="btn btn-secondary mt-3 d-none" type="button" onclick="retakePhoto('front')">Tomar de Nuevo</button>
+        <input type="hidden" id="frontIdInput" name="IdFrontImage" />
+    </div>
 
-            <input type="hidden" id="frontIdInput" name="IdFrontImage" />
+    <!-- Reverso de la cédula -->
+    <div id="backIdSection" class="mb-5 d-none">
+        <h5>3. Foto del Reverso de la Cédula</h5>
+        <div class="id-frame mb-2">
+            <video id="backIdVideo" autoplay playsinline muted></video>
+            <canvas id="backIdCanvas" class="d-none"></canvas>
         </div>
 
-        <!-- Reverso de la cédula -->
-        <div id="backIdSection" class="mb-5 d-none">
-            <h5>3. Foto del Reverso de la Cédula</h5>
-            <div class="id-frame mb-2">
-                <video id="backIdVideo" autoplay playsinline muted></video>
-                <canvas id="backIdCanvas" class="d-none"></canvas>
-            </div>
+        <button id="btnTakeBack" class="btn btn-primary mt-3" onclick="takePhoto('back')">Tomar Reverso</button>
+        <button id="btnConfirmBack" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('back')">Confirmar</button>
+        <button id="btnRetakeBack" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('back')">Tomar de Nuevo</button>
 
-            <button id="btnTakeBack" class="btn btn-primary mt-3" type="button" onclick="takePhoto('back')">Tomar Reverso</button>
-            <button id="btnConfirmBack" class="btn btn-success mt-3 d-none" type="button" onclick="confirmPhoto('back')">Confirmar</button>
-            <button id="btnRetakeBack" class="btn btn-secondary mt-3 d-none" type="button" onclick="retakePhoto('back')">Tomar de Nuevo</button>
+        <input type="hidden" id="backIdInput" name="IdBackImage" />
+    </div>
 
-            <input type="hidden" id="backIdInput" name="IdBackImage" />
-        </div>
-
-        <!-- Resultado del servidor -->
-        <div id="result" class="alert alert-info mt-3 d-none"></div>
-    </form>
 </div>
 
 @section Scripts {
@@ -84,20 +79,13 @@
             back: document.getElementById('backIdInput')
         };
 
-        function showAlert(message, type = 'danger') {
-            const resultDiv = document.getElementById('result');
-            resultDiv.className = `alert alert-${type}`;
-            resultDiv.classList.remove('d-none');
-            resultDiv.textContent = message;
-        }
-
         async function startCamera(type) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia(constraints[type]);
                 videoElements[type].srcObject = stream;
             } catch (error) {
-                console.error("Error al iniciar cámara:", error);
-                showAlert("No se pudo acceder a la cámara. Intenta desde un celular.");
+                console.error(Error con cámara ${type}:, error);
+                alert('No se pudo acceder a la cámara. Intenta desde un celular.');
             }
         }
 
@@ -113,15 +101,18 @@
             const dataUrl = canvas.toDataURL('image/jpeg');
             inputElements[type].value = dataUrl;
 
+            // Mostrar canvas con imagen, ocultar video
             canvas.classList.remove('d-none');
             video.classList.add('d-none');
 
-            document.getElementById('btnTake' + capitalize(type)).classList.add('d-none');
-            document.getElementById('btnConfirm' + capitalize(type)).classList.remove('d-none');
-            document.getElementById('btnRetake' + capitalize(type)).classList.remove('d-none');
+            // Botones Confirmar / Tomar de nuevo
+            document.getElementById(btnTake${capitalize(type)}).classList.add('d-none');
+            document.getElementById(btnConfirm${capitalize(type)}).classList.remove('d-none');
+            document.getElementById(btnRetake${capitalize(type)}).classList.remove('d-none');
         }
 
         function confirmPhoto(type) {
+            // Parar cámara actual
             stopCamera(type);
 
             if (type === 'selfie') {
@@ -133,8 +124,8 @@
                 document.getElementById('backIdSection').classList.remove('d-none');
                 startCamera('back');
             } else if (type === 'back') {
-                document.getElementById('backIdSection').classList.add('d-none');
-                submitVerification();
+                alert('¡Capturas completadas!');
+                sendImagesToVerify();
             }
         }
 
@@ -142,13 +133,16 @@
             const canvas = canvasElements[type];
             const video = videoElements[type];
 
+            // Ocultar canvas, mostrar video
             canvas.classList.add('d-none');
             video.classList.remove('d-none');
 
-            document.getElementById('btnTake' + capitalize(type)).classList.remove('d-none');
-            document.getElementById('btnConfirm' + capitalize(type)).classList.add('d-none');
-            document.getElementById('btnRetake' + capitalize(type)).classList.add('d-none');
+            // Botones
+            document.getElementById(btnTake${capitalize(type)}).classList.remove('d-none');
+            document.getElementById(btnConfirm${capitalize(type)}).classList.add('d-none');
+            document.getElementById(btnRetake${capitalize(type)}).classList.add('d-none');
 
+            // Reiniciar input
             inputElements[type].value = '';
         }
 
@@ -164,82 +158,63 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        function dataURLtoBlob(dataurl) {
-            const arr = dataurl.split(',');
-            if (arr.length !== 2) return null;
-
-            const mimeMatch = arr[0].match(/:(.*?);/);
-            const mime = mimeMatch ? mimeMatch[1] : '';
-            const bstr = atob(arr[1]);
-            let n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
-            }
-            return new Blob([u8arr], { type: mime });
-        }
-
-        function submitVerification() {
-            const selfie = inputElements.selfie.value;
-            const front = inputElements.front.value;
-            const back = inputElements.back.value;
-
-            if (!selfie || !front || !back) {
-                showAlert("Faltan imágenes por capturar.");
-                return;
-            }
-
-            const selfieBlob = dataURLtoBlob(selfie);
-            const frontBlob = dataURLtoBlob(front);
-            const backBlob = dataURLtoBlob(back);
-
-            if (!selfieBlob || !frontBlob || !backBlob) {
-                showAlert("Error al procesar las imágenes.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('selfie', selfieBlob, 'selfie.jpg');
-            formData.append('id_image', frontBlob, 'id_front.jpg'); 
-            formData.append('id_back', backBlob, 'id_back.jpg');
-
-            showAlert("Procesando verificación...", "info");
-
-            fetch('http://localhost:5000/verify', {
-                method: 'POST',
-                body: formData
-            })
-            .then(async response => {
-                const body = await response.json();
-                if (!response.ok) {
-                    throw new Error(body.error || 'Error en la verificación.');
-                }
-
-                const verified = body.verified ? 'Verificación Exitosa' : 'Verificación Fallida';
-                const details = `
-                    ${verified}
-                    Distancia: ${body.distance}
-                    Threshold: ${body.threshold}
-                    Modelo: ${body.model}
-                    Cédula: ${body.ocr_data.numero_cedula}
-                    Nacimiento: ${body.ocr_data.fecha_nacimiento}
-                    Vencimiento: ${body.ocr_data.fecha_vencimiento}
-                `;
-                showAlert(details, 'success');
-            })
-            .catch(error => {
-                console.error(error);
-                showAlert(error.message || 'Error desconocido.');
-            });
-        }
-
         window.addEventListener('load', () => {
+            // Al iniciar solo el selfie visible y cámara encendida
             document.getElementById('selfieSection').classList.remove('d-none');
             document.getElementById('frontIdSection').classList.add('d-none');
             document.getElementById('backIdSection').classList.add('d-none');
             startCamera('selfie');
         });
+
+                function dataURLtoFile(dataurl, filename) {
+            const arr = dataurl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+
+            return new File([u8arr], filename, { type: mime });
+        }
+
+        async function sendImagesToVerify() {
+            const selfieData = document.getElementById('selfieInput').value;
+            const frontData = document.getElementById('frontIdInput').value;
+            const backData = document.getElementById('backIdInput').value;
+
+            if (!selfieData || !frontData || !backData) {
+                alert("Faltan imágenes por capturar.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('selfie', dataURLtoFile(selfieData, 'selfie.jpg'));
+            formData.append('id_image', dataURLtoFile(frontData, 'frontal.jpg'));
+            formData.append('id_back', dataURLtoFile(backData, 'reverso.jpg'));
+
+            try {
+                const response = await fetch('https://7a3dca7e0584.ngrok-free.app/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert("Error en la verificación: " + result.error);
+                } else {
+                    console.log("Resultado:", result);
+                    alert("Verificación completada:\n" + JSON.stringify(result, null, 2));
+                }
+            } catch (error) {
+                console.error("Error al enviar imágenes:", error);
+                alert("Ocurrió un error al comunicarse con el servidor.");
+            }
+        }
+
+
     </script>
 }
-
-
