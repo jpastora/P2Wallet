@@ -3,9 +3,11 @@ using DataAccess.DAO.DataAccess.DAO;
 using DTOs;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace DataAccess.CRUD
 {
@@ -26,9 +28,13 @@ namespace DataAccess.CRUD
             sqlOperation.AddIntParam("@P_BankAccountID", transaction.BankAccountID);
             sqlOperation.AddDoubleParam("@P_GrossAmount", transaction.GrossAmount);
             sqlOperation.AddDoubleParam("@P_NetAmount", transaction.NetAmount);
-            sqlOperation.AddDoubleParam("@P_DiscountApplied", transaction.DiscountApplied);
             sqlOperation.AddDoubleParam("@P_CommissionApplied", transaction.CommissionApplied);
+            sqlOperation.AddDoubleParam("@P_SalesTaxAmount", transaction.SalesTaxAmount);
+            sqlOperation.AddDoubleParam("@P_TaxRateApplied", transaction.TaxRateApplied);
+            sqlOperation.Parameters.Add(new SqlParameter("@P_Timestamp", transaction.Timestamp));
             sqlOperation.AddStringParameter("@P_TransactionStatus", transaction.TransactionStatus);
+            sqlOperation.Parameters.Add(new SqlParameter("@P_FinancialPromotionID", (object?)transaction.FinancialPromotionID ?? DBNull.Value));
+            sqlOperation.Parameters.Add(new SqlParameter("@P_MerchantPromotionID", (object?)transaction.MerchantPromotionID ?? DBNull.Value));
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -84,26 +90,51 @@ namespace DataAccess.CRUD
             sqlOperation.AddIntParam("@P_BankAccountID", transaction.BankAccountID);
             sqlOperation.AddDoubleParam("@P_GrossAmount", transaction.GrossAmount);
             sqlOperation.AddDoubleParam("@P_NetAmount", transaction.NetAmount);
-            sqlOperation.AddDoubleParam("@P_DiscountApplied", transaction.DiscountApplied);
             sqlOperation.AddDoubleParam("@P_CommissionApplied", transaction.CommissionApplied);
+            sqlOperation.AddDoubleParam("@P_SalesTaxAmount", transaction.SalesTaxAmount);
+            sqlOperation.AddDoubleParam("@P_TaxRateApplied", transaction.TaxRateApplied);
+            sqlOperation.Parameters.Add(new SqlParameter("@P_Timestamp", transaction.Timestamp));
             sqlOperation.AddStringParameter("@P_TransactionStatus", transaction.TransactionStatus);
+            sqlOperation.Parameters.Add(new SqlParameter("@P_FinancialPromotionID", (object?)transaction.FinancialPromotionID ?? DBNull.Value));
+            sqlOperation.Parameters.Add(new SqlParameter("@P_MerchantPromotionID", (object?)transaction.MerchantPromotionID ?? DBNull.Value));
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
         private Transaction BuildTransaction(Dictionary<string, object> row)
         {
+            double GetDouble(string key)
+            {
+                return row.ContainsKey(key) && row[key] != DBNull.Value ? Convert.ToDouble(row[key]) : 0.0;
+            }
+            int? GetNullableInt(string key)
+            {
+                return row.ContainsKey(key) && row[key] != DBNull.Value ? (int?)Convert.ToInt32(row[key]) : null;
+            }
+            string GetString(string key)
+            {
+                return row.ContainsKey(key) && row[key] != DBNull.Value ? row[key].ToString() : string.Empty;
+            }
+            DateTime GetDateTime(string key)
+            {
+                return row.ContainsKey(key) && row[key] != DBNull.Value ? Convert.ToDateTime(row[key]) : DateTime.MinValue;
+            }
+
             return new Transaction
             {
-                ID = (int)row["TransactionID"],
-                UserID = (int)row["UserID"],
-                MerchantID = (int)row["MerchantID"],
-                BankAccountID = (int)row["BankAccountID"],
-                GrossAmount = Convert.ToDouble(row["GrossAmount"]),
-                NetAmount = Convert.ToDouble(row["NetAmount"]),
-                DiscountApplied = Convert.ToDouble(row["DiscountApplied"]),
-                CommissionApplied = Convert.ToDouble(row["CommissionApplied"]),
-                TransactionStatus = (string)row["TransactionStatus"]
+                ID = row.ContainsKey("TransactionID") ? Convert.ToInt32(row["TransactionID"]) : 0,
+                UserID = row.ContainsKey("UserID") ? Convert.ToInt32(row["UserID"]) : 0,
+                MerchantID = row.ContainsKey("MerchantID") ? Convert.ToInt32(row["MerchantID"]) : 0,
+                BankAccountID = row.ContainsKey("BankAccountID") ? Convert.ToInt32(row["BankAccountID"]) : 0,
+                GrossAmount = GetDouble("GrossAmount"),
+                NetAmount = GetDouble("NetAmount"),
+                CommissionApplied = GetDouble("CommissionApplied"),
+                SalesTaxAmount = GetDouble("SalesTaxAmount"),
+                TaxRateApplied = GetDouble("TaxRateApplied"),
+                Timestamp = GetDateTime("Timestamp"),
+                TransactionStatus = GetString("TransactionStatus"),
+                FinancialPromotionID = GetNullableInt("FinancialPromotionID"),
+                MerchantPromotionID = GetNullableInt("MerchantPromotionID")
             };
         }
     }

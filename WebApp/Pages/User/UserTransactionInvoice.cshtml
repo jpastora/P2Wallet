@@ -6,63 +6,87 @@
     var merchant = Model.MerchantName;
     var iban = Model.IBAN;
     var bank = Model.BankName;
-    string ColonSymbol = "\u20A1"; // Unicode para el símbolo de colón
+    var discountName = Model.DiscountName;
+    var discountPercentage = Model.DiscountPercentage;
+    var discountAmount = Model.DiscountAmount;
+    var discountSource = Model.DiscountSource;
 }
 
+<link rel="stylesheet" href="~/css/UserTransactionInvoice.css" />
+
 <div class="container py-4 mb-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Factura de Transacción</h3>
+    <div class="factura-box">
+        <div class="factura-header">
+            Factura de Transacción
         </div>
-        <div class="card-body">
-            @if (txn != null)
-            {
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>ID Transacción:</strong> @txn.ID<br />
-                        <strong>Usuario:</strong> @user?.FirstName @user?.LastName<br />
-                        <strong>Comercio:</strong> @merchant<br />
-                        <strong>Cuenta:</strong> @iban<br />
-                        <strong>Banco:</strong> @bank<br />
-                        <strong>Estado:</strong> @txn.TransactionStatus
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <strong>Fecha:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
-                    </div>
+        @if (txn != null)
+        {
+            <div class="factura-info-row">
+                <div class="factura-info-list">
+                    <div><span>ID Transacción:</span> @txn.ID</div>
+                    <div><span>Usuario:</span> @user?.FirstName @user?.LastName</div>
+                    <div><span>Comercio:</span> @merchant</div>
+                    <div><span>Cuenta:</span> @iban</div>
+                    <div><span>Banco:</span> @bank</div>
+                    <div><span>Estado:</span> @txn.TransactionStatus</div>
                 </div>
-                <hr />
-                <table class="table table-bordered">
-                    <thead>
+                <div class="factura-fecha">
+                    <span>Fecha:</span> @txn.Timestamp.ToString("dd/MM/yyyy HH:mm")
+                </div>
+            </div>
+            <div class="factura-table-responsive">
+            <table class="factura-table">
+                <tbody>
+                    <tr>
+                        <td><strong>Monto Bruto</strong></td>
+                        <td class="factura-monto">&#8353;@txn.GrossAmount.ToString("N2")</td>
+                    </tr>
+                    @if (discountAmount.HasValue && discountAmount.Value > 0)
+                    {
                         <tr>
-                            <th>Descripción</th>
-                            <th>Monto</th>
+                            <td>Descuento en colones</td>
+                            <td class="factura-monto factura-descuento">-&#8353;@discountAmount.Value.ToString("N2")</td>
                         </tr>
-                    </thead>
-                    <tbody>
+                    }
+                    @if (discountPercentage.HasValue && discountPercentage.Value > 0)
+                    {
                         <tr>
-                            <td>Monto Bruto</td>
-                            <td><span class="text-monospace">&#8353;</span>@txn.GrossAmount.ToString("N2")</td>
+                            <td>Porcentaje de descuento</td>
+                            <td>@discountPercentage.Value.ToString("N2")%</td>
                         </tr>
+                    }
+                    @if (!string.IsNullOrEmpty(discountName))
+                    {
                         <tr>
-                            <td>Descuento Aplicado</td>
-                            <td>-<span class="text-monospace">&#8353;</span>@txn.DiscountApplied.ToString("N2")</td>
+                            <td>Nombre del descuento</td>
+                            <td>@discountName</td>
                         </tr>
+                    }
+                    @if (!string.IsNullOrEmpty(discountSource))
+                    {
                         <tr>
-                            <td>Comisión Aplicada</td>
-                            <td>-<span class="text-monospace">&#8353;</span>@txn.CommissionApplied.ToString("N2")</td>
+                            <td>Comercio/Entidad del descuento</td>
+                            <td>@discountSource</td>
                         </tr>
-                        <tr class="table-primary">
-                            <td><strong>Monto Neto</strong></td>
-                            <td><strong><span class="text-monospace">&#8353;</span>@txn.NetAmount.ToString("N2")</strong></td>
-                        </tr>
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <div class="alert alert-danger">No se encontró la transacción.</div>
-            }
-            <a asp-page="/User/UserTransactionID" class="btn btn-secondary mt-3">Volver al historial</a>
-        </div>
+                    }
+                    <tr>
+                        <td>Impuestos</td>
+                        <td class="factura-monto factura-impuesto">&#8353;@txn.SalesTaxAmount.ToString("N2")</td>
+                    </tr>
+                    <tr class="factura-total-row">
+                        <td><strong>Monto Final</strong></td>
+                        <td class="factura-monto"><strong>&#8353;@txn.NetAmount.ToString("N2")</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+            <div class="factura-btn-row">
+                <a asp-page="/User/UserTransactionID" class="factura-btn">Volver al historial</a>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">No se encontró la transacción.</div>
+        }
     </div>
 </div>

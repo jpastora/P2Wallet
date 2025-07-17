@@ -1,0 +1,10 @@
+@media (max-width: 768px) {
+    .container.py-4.mb-5 {
+        padding-left: 0.2rem !important;
+        padding-right: 0.2rem !important;
+    }
+    .table th, .table td {
+        font-size: 0.95rem;
+        padding: 0.5rem 0.3rem;
+    }
+}
