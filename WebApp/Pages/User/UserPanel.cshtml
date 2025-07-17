@@ -1,10 +1,9 @@
 ﻿@page
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
 @model WebApp.Pages.User.UserPanelModel
 @{
     var user = Model.CurrentUser;
     var cuentas = Model.UserAccounts;
+    ViewData["Title"] = "Panel de Usuario";
 }
 
 <!-- Encabezado -->
