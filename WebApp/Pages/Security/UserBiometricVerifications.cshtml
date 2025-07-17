@@ -1,0 +1,101 @@
+﻿@page
+@model WebApp.Pages.Security.UserBiometricVerificationsModel
+@{
+    ViewData["Title"] = "Validacion de Usuario";
+}
+
+<div class="container py-5 text-center">
+
+    <h3 class="mb-4">Verificación Biométrica</h3>
+
+    <!-- Selfie -->
+    <div id="selfieSection" class="mb-5">
+        <h5>1. Captura tu Selfie</h5>
+        <video id="selfieVideo" autoplay playsinline muted></video>
+        <button class="btn btn-primary mt-3" onclick="captureImage('selfie')">Tomar Selfie</button>
+        <canvas id="selfieCanvas" class="d-none"></canvas>
+        <input type="hidden" id="selfieInput" name="SelfieImage" />
+    </div>
+
+    <!-- Frente de la cédula -->
+    <div id="frontIdSection" class="mb-5">
+        <h5>2. Foto del Frente de la Cédula</h5>
+        <div class="id-frame mb-2">
+            <video id="frontIdVideo" autoplay playsinline muted></video>
+        </div>
+        <button class="btn btn-primary" onclick="captureImage('front')">Tomar Frente</button>
+        <canvas id="frontIdCanvas" class="d-none"></canvas>
+        <input type="hidden" id="frontIdInput" name="IdFrontImage" />
+    </div>
+
+    <!-- Reverso de la cédula -->
+    <div id="backIdSection" class="mb-5">
+        <h5>3. Foto del Reverso de la Cédula</h5>
+        <div class="id-frame mb-2">
+            <video id="backIdVideo" autoplay playsinline muted></video>
+        </div>
+        <button class="btn btn-primary" onclick="captureImage('back')">Tomar Reverso</button>
+        <canvas id="backIdCanvas" class="d-none"></canvas>
+        <input type="hidden" id="backIdInput" name="IdBackImage" />
+    </div>
+
+
+</div>
+
+@section Scripts {
+    <script>
+        const constraints = {
+            selfie: { video: { facingMode: "user" } },
+            front: { video: { facingMode: { exact: "environment" } } },
+            back: { video: { facingMode: { exact: "environment" } } }
+        };
+
+        const videoElements = {
+            selfie: document.getElementById('selfieVideo'),
+            front: document.getElementById('frontIdVideo'),
+            back: document.getElementById('backIdVideo')
+        };
+
+        const canvasElements = {
+            selfie: document.getElementById('selfieCanvas'),
+            front: document.getElementById('frontIdCanvas'),
+            back: document.getElementById('backIdCanvas')
+        };
+
+        const inputElements = {
+            selfie: document.getElementById('selfieInput'),
+            front: document.getElementById('frontIdInput'),
+            back: document.getElementById('backIdInput')
+        };
+
+        async function startCamera(type) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints[type]);
+                videoElements[type].srcObject = stream;
+            } catch (error) {
+                console.error(`Error con cámara ${type}:`, error);
+                alert('No se pudo acceder a la cámara. Intenta desde un celular.');
+            }
+        }
+
+        function captureImage(type) {
+            const video = videoElements[type];
+            const canvas = canvasElements[type];
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            inputElements[type].value = dataUrl;
+        }
+
+        window.addEventListener('load', () => {
+            startCamera('selfie');
+            startCamera('front');
+            startCamera('back');
+        });
+    </script>
+}
+
