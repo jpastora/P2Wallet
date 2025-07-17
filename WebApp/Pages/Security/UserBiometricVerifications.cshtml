@@ -1,169 +1,69 @@
 ﻿@page
 @model WebApp.Pages.Security.UserBiometricVerificationsModel
 @{
-    ViewData["Title"] = "Validacion de Usuario";
+    ViewData["Title"] = "Validación de Usuario";
 }
 
 <div class="container py-5 text-center">
 
     <h3 class="mb-4">Verificación Biométrica</h3>
 
-    <!-- Selfie -->
-    <div id="selfieSection" class="mb-5">
-        <h5>1. Captura tu Selfie</h5>
-        <video id="selfieVideo" autoplay playsinline muted></video>
-        <canvas id="selfieCanvas" class="d-none"></canvas>
+    <form id="verifyForm">
 
-        <button id="btnTakeSelfie" class="btn btn-primary mt-3" onclick="takePhoto('selfie')">Tomar Selfie</button>
-        <button id="btnConfirmSelfie" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('selfie')">Confirmar</button>
-        <button id="btnRetakeSelfie" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('selfie')">Tomar de Nuevo</button>
+        <!-- Selfie -->
+        <div id="selfieSection" class="mb-5">
+            <h5>1. Captura tu Selfie</h5>
+            <video id="selfieVideo" autoplay playsinline muted></video>
+            <canvas id="selfieCanvas" class="d-none"></canvas>
 
-        <input type="hidden" id="selfieInput" name="SelfieImage" />
-    </div>
+            <button id="btnTakeSelfie" class="btn btn-primary mt-3" type="button" onclick="takePhoto('selfie')">Tomar Selfie</button>
+            <button id="btnConfirmSelfie" class="btn btn-success mt-3 d-none" type="button" onclick="confirmPhoto('selfie')">Confirmar</button>
+            <button id="btnRetakeSelfie" class="btn btn-secondary mt-3 d-none" type="button" onclick="retakePhoto('selfie')">Tomar de Nuevo</button>
 
-    <!-- Frente de la cédula -->
-    <div id="frontIdSection" class="mb-5 d-none">
-        <h5>2. Foto del Frente de la Cédula</h5>
-        <div class="id-frame mb-2">
-            <video id="frontIdVideo" autoplay playsinline muted></video>
-            <canvas id="frontIdCanvas" class="d-none"></canvas>
+            <input type="hidden" id="selfieInput" name="SelfieImage" />
         </div>
 
-        <button id="btnTakeFront" class="btn btn-primary mt-3" onclick="takePhoto('front')">Tomar Frente</button>
-        <button id="btnConfirmFront" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('front')">Confirmar</button>
-        <button id="btnRetakeFront" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('front')">Tomar de Nuevo</button>
+        <!-- Frente de la cédula -->
+        <div id="frontIdSection" class="mb-5 d-none">
+            <h5>2. Foto del Frente de la Cédula</h5>
+            <div class="id-frame mb-2">
+                <video id="frontIdVideo" autoplay playsinline muted></video>
+                <canvas id="frontIdCanvas" class="d-none"></canvas>
+            </div>
 
-        <input type="hidden" id="frontIdInput" name="IdFrontImage" />
-    </div>
+            <button id="btnTakeFront" class="btn btn-primary mt-3" type="button" onclick="takePhoto('front')">Tomar Frente</button>
+            <button id="btnConfirmFront" class="btn btn-success mt-3 d-none" type="button" onclick="confirmPhoto('front')">Confirmar</button>
+            <button id="btnRetakeFront" class="btn btn-secondary mt-3 d-none" type="button" onclick="retakePhoto('front')">Tomar de Nuevo</button>
 
-    <!-- Reverso de la cédula -->
-    <div id="backIdSection" class="mb-5 d-none">
-        <h5>3. Foto del Reverso de la Cédula</h5>
-        <div class="id-frame mb-2">
-            <video id="backIdVideo" autoplay playsinline muted></video>
-            <canvas id="backIdCanvas" class="d-none"></canvas>
+            <input type="hidden" id="frontIdInput" name="IdFrontImage" />
         </div>
 
-        <button id="btnTakeBack" class="btn btn-primary mt-3" onclick="takePhoto('back')">Tomar Reverso</button>
-        <button id="btnConfirmBack" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('back')">Confirmar</button>
-        <button id="btnRetakeBack" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('back')">Tomar de Nuevo</button>
+        <!-- Reverso de la cédula -->
+        <div id="backIdSection" class="mb-5 d-none">
+            <h5>3. Foto del Reverso de la Cédula</h5>
+            <div class="id-frame mb-2">
+                <video id="backIdVideo" autoplay playsinline muted></video>
+                <canvas id="backIdCanvas" class="d-none"></canvas>
+            </div>
 
-        <input type="hidden" id="backIdInput" name="IdBackImage" />
-    </div>
+            <button id="btnTakeBack" class="btn btn-primary mt-3" type="button" onclick="takePhoto('back')">Tomar Reverso</button>
+            <button id="btnConfirmBack" class="btn btn-success mt-3 d-none" type="button" onclick="confirmPhoto('back')">Confirmar</button>
+            <button id="btnRetakeBack" class="btn btn-secondary mt-3 d-none" type="button" onclick="retakePhoto('back')">Tomar de Nuevo</button>
+
+            <input type="hidden" id="backIdInput" name="IdBackImage" />
+        </div>
+
+        <!-- Botón para enviar la verificación -->
+        <div class="mb-4 d-none" id="submitSection">
+            <button type="submit" class="btn btn-success">Enviar Verificación</button>
+        </div>
+
+        <!-- Resultado del servidor -->
+        <div id="result" class="alert alert-info mt-3 d-none"></div>
+    </form>
 
 </div>
 
 @section Scripts {
-    <script>
-        const constraints = {
-            selfie: { video: { facingMode: "user" } },
-            front: { video: { facingMode: { exact: "environment" } } },
-            back: { video: { facingMode: { exact: "environment" } } }
-        };
-
-        const videoElements = {
-            selfie: document.getElementById('selfieVideo'),
-            front: document.getElementById('frontIdVideo'),
-            back: document.getElementById('backIdVideo')
-        };
-
-        const canvasElements = {
-            selfie: document.getElementById('selfieCanvas'),
-            front: document.getElementById('frontIdCanvas'),
-            back: document.getElementById('backIdCanvas')
-        };
-
-        const inputElements = {
-            selfie: document.getElementById('selfieInput'),
-            front: document.getElementById('frontIdInput'),
-            back: document.getElementById('backIdInput')
-        };
-
-        async function startCamera(type) {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints[type]);
-                videoElements[type].srcObject = stream;
-            } catch (error) {
-                console.error(`Error con cámara ${type}:`, error);
-                alert('No se pudo acceder a la cámara. Intenta desde un celular.');
-            }
-        }
-
-        function takePhoto(type) {
-            const video = videoElements[type];
-            const canvas = canvasElements[type];
-            const ctx = canvas.getContext('2d');
-
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataUrl = canvas.toDataURL('image/jpeg');
-            inputElements[type].value = dataUrl;
-
-            // Mostrar canvas con imagen, ocultar video
-            canvas.classList.remove('d-none');
-            video.classList.add('d-none');
-
-            // Botones Confirmar / Tomar de nuevo
-            document.getElementById(`btnTake${capitalize(type)}`).classList.add('d-none');
-            document.getElementById(`btnConfirm${capitalize(type)}`).classList.remove('d-none');
-            document.getElementById(`btnRetake${capitalize(type)}`).classList.remove('d-none');
-        }
-
-        function confirmPhoto(type) {
-            // Parar cámara actual
-            stopCamera(type);
-
-            if (type === 'selfie') {
-                document.getElementById('selfieSection').classList.add('d-none');
-                document.getElementById('frontIdSection').classList.remove('d-none');
-                startCamera('front');
-            } else if (type === 'front') {
-                document.getElementById('frontIdSection').classList.add('d-none');
-                document.getElementById('backIdSection').classList.remove('d-none');
-                startCamera('back');
-            } else if (type === 'back') {
-                alert('¡Capturas completadas!');
-                // Aquí podrías enviar el formulario o procesar las imágenes
-            }
-        }
-
-        function retakePhoto(type) {
-            const canvas = canvasElements[type];
-            const video = videoElements[type];
-
-            // Ocultar canvas, mostrar video
-            canvas.classList.add('d-none');
-            video.classList.remove('d-none');
-
-            // Botones
-            document.getElementById(`btnTake${capitalize(type)}`).classList.remove('d-none');
-            document.getElementById(`btnConfirm${capitalize(type)}`).classList.add('d-none');
-            document.getElementById(`btnRetake${capitalize(type)}`).classList.add('d-none');
-
-            // Reiniciar input
-            inputElements[type].value = '';
-        }
-
-        function stopCamera(type) {
-            const stream = videoElements[type].srcObject;
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                videoElements[type].srcObject = null;
-            }
-        }
-
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        window.addEventListener('load', () => {
-            // Al iniciar solo el selfie visible y cámara encendida
-            document.getElementById('selfieSection').classList.remove('d-none');
-            document.getElementById('frontIdSection').classList.add('d-none');
-            document.getElementById('backIdSection').classList.add('d-none');
-            startCamera('selfie');
-        });
-    </script>
+    <script src="~/js/biometricVerification.js"></script>
 }
