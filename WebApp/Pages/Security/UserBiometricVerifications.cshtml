@@ -60,59 +60,184 @@
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const verifyButton = document.getElementById("verifyButton");
-            const resultDiv = document.getElementById("result");
+        const constraints = {
+            selfie: { video: { facingMode: "user" } },
+            front: { video: { facingMode: { exact: "environment" } } },
+            back: { video: { facingMode: { exact: "environment" } } }
+        };
 
-            async function dataURLToBlob(dataURL) {
-                const response = await fetch(dataURL);
-                return await response.blob();
+        const videoElements = {
+            selfie: document.getElementById('selfieVideo'),
+            front: document.getElementById('frontIdVideo'),
+            back: document.getElementById('backIdVideo')
+        };
+
+        const canvasElements = {
+            selfie: document.getElementById('selfieCanvas'),
+            front: document.getElementById('frontIdCanvas'),
+            back: document.getElementById('backIdCanvas')
+        };
+
+        const inputElements = {
+            selfie: document.getElementById('selfieInput'),
+            front: document.getElementById('frontIdInput'),
+            back: document.getElementById('backIdInput')
+        };
+
+        function showAlert(message, type = 'danger') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `alert alert-${type}`;
+            resultDiv.classList.remove('d-none');
+            resultDiv.textContent = message;
+        }
+
+        async function startCamera(type) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints[type]);
+                videoElements[type].srcObject = stream;
+            } catch (error) {
+                console.error("Error al iniciar cámara:", error);
+                showAlert("No se pudo acceder a la cámara. Intenta desde un celular.");
+            }
+        }
+
+        function takePhoto(type) {
+            const video = videoElements[type];
+            const canvas = canvasElements[type];
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+            inputElements[type].value = dataUrl;
+
+            canvas.classList.remove('d-none');
+            video.classList.add('d-none');
+
+            document.getElementById('btnTake' + capitalize(type)).classList.add('d-none');
+            document.getElementById('btnConfirm' + capitalize(type)).classList.remove('d-none');
+            document.getElementById('btnRetake' + capitalize(type)).classList.remove('d-none');
+        }
+
+        function confirmPhoto(type) {
+            stopCamera(type);
+
+            if (type === 'selfie') {
+                document.getElementById('selfieSection').classList.add('d-none');
+                document.getElementById('frontIdSection').classList.remove('d-none');
+                startCamera('front');
+            } else if (type === 'front') {
+                document.getElementById('frontIdSection').classList.add('d-none');
+                document.getElementById('backIdSection').classList.remove('d-none');
+                startCamera('back');
+            } else if (type === 'back') {
+                document.getElementById('backIdSection').classList.add('d-none');
+                submitVerification();
+            }
+        }
+
+        function retakePhoto(type) {
+            const canvas = canvasElements[type];
+            const video = videoElements[type];
+
+            canvas.classList.add('d-none');
+            video.classList.remove('d-none');
+
+            document.getElementById('btnTake' + capitalize(type)).classList.remove('d-none');
+            document.getElementById('btnConfirm' + capitalize(type)).classList.add('d-none');
+            document.getElementById('btnRetake' + capitalize(type)).classList.add('d-none');
+
+            inputElements[type].value = '';
+        }
+
+        function stopCamera(type) {
+            const stream = videoElements[type].srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                videoElements[type].srcObject = null;
+            }
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function dataURLtoBlob(dataurl) {
+            const arr = dataurl.split(',');
+            if (arr.length !== 2) return null;
+
+            const mimeMatch = arr[0].match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : '';
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        }
+
+        function submitVerification() {
+            const selfie = inputElements.selfie.value;
+            const front = inputElements.front.value;
+            const back = inputElements.back.value;
+
+            if (!selfie || !front || !back) {
+                showAlert("Faltan imágenes por capturar.");
+                return;
             }
 
-            verifyButton.addEventListener("click", async function () {
-                resultDiv.innerHTML = "Procesando verificación...";
+            const selfieBlob = dataURLtoBlob(selfie);
+            const frontBlob = dataURLtoBlob(front);
+            const backBlob = dataURLtoBlob(back);
 
-                try {
-                    const selfieDataURL = document.getElementById("selfie").src;
-                    const idFrontDataURL = document.getElementById("id_front").src;
-                    const idBackDataURL = document.getElementById("id_back").src;
+            if (!selfieBlob || !frontBlob || !backBlob) {
+                showAlert("Error al procesar las imágenes.");
+                return;
+            }
 
-                    const selfieBlob = await dataURLToBlob(selfieDataURL);
-                    const idFrontBlob = await dataURLToBlob(idFrontDataURL);
-                    const idBackBlob = await dataURLToBlob(idBackDataURL);
+            const formData = new FormData();
+            formData.append('selfie', selfieBlob, 'selfie.jpg');
+            formData.append('id_image', frontBlob, 'id_front.jpg'); 
+            formData.append('id_back', backBlob, 'id_back.jpg');
 
-                    const formData = new FormData();
-                    formData.append("selfie", selfieBlob, "selfie.jpg");
-                    formData.append("id_image", idFrontBlob, "id_front.jpg");
-                    formData.append("id_back", idBackBlob, "id_back.jpg");
+            showAlert("Procesando verificación...", "info");
 
-                    const response = await fetch("http://localhost:5000/verify", {
-                        method: "POST",
-                        body: formData
-                    });
-
-                    const body = await response.json();
-
-                    if (!response.ok) {
-                        resultDiv.innerHTML = "<strong>Error:</strong> " + (body.error || "Error desconocido");
-                        return;
-                    }
-
-                    // Mostrar resultado
-                    resultDiv.innerHTML =
-                        "<strong>Resultado:</strong> " + (body.verified ? "Verificación exitosa ✅" : "Verificación fallida ❌") + "<br>" +
-                        "<strong>Distancia:</strong> " + body.distance + "<br>" +
-                        "<strong>Threshold:</strong> " + body.threshold + "<br>" +
-                        "<strong>Modelo:</strong> " + body.model + "<br><br>" +
-                        "<strong>OCR:</strong><br>" +
-                        "Cédula: " + body.ocr_data.numero_cedula + "<br>" +
-                        "Nacimiento: " + body.ocr_data.fecha_nacimiento + "<br>" +
-                        "Vencimiento: " + body.ocr_data.fecha_vencimiento;
-
-                } catch (error) {
-                    resultDiv.innerHTML = "<strong>Error de red:</strong> " + error.message;
+            fetch('http://localhost:5000/verify', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async response => {
+                const body = await response.json();
+                if (!response.ok) {
+                    throw new Error(body.error || 'Error en la verificación.');
                 }
+
+                const verified = body.verified ? 'Verificación Exitosa' : 'Verificación Fallida';
+                const details = `
+                    ${verified}
+                    Distancia: ${body.distance}
+                    Threshold: ${body.threshold}
+                    Modelo: ${body.model}
+                    Cédula: ${body.ocr_data.numero_cedula}
+                    Nacimiento: ${body.ocr_data.fecha_nacimiento}
+                    Vencimiento: ${body.ocr_data.fecha_vencimiento}
+                `;
+                showAlert(details, 'success');
+            })
+            .catch(error => {
+                console.error(error);
+                showAlert(error.message || 'Error desconocido.');
             });
+        }
+
+        window.addEventListener('load', () => {
+            document.getElementById('selfieSection').classList.remove('d-none');
+            document.getElementById('frontIdSection').classList.add('d-none');
+            document.getElementById('backIdSection').classList.add('d-none');
+            startCamera('selfie');
         });
     </script>
 }
