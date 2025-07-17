@@ -1,0 +1,126 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@model WebApp.Pages.User.UserBankAccountModel
+@{
+    var cuentas = Model.UserAccounts;
+    var entidades = Model.FinancialEntities;
+    var mensaje = Model.Message;
+    string GetEstadoEspanol(string status) => status == "Active" ? "Activa" : "Inactiva";
+    string GetBotonEspanol(string status) => status == "Active" ? "Desactivar" : "Activar";
+    string GetBadgeClass(string status) => status == "Active" ? "badge bg-success" : "badge bg-secondary";
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            var errorMsg = '@TempData["ErrorMessage"]';
+            var successMsg = '@TempData["SuccessMessage"]';
+            if (errorMsg && errorMsg !== '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: errorMsg,
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+            if (successMsg && successMsg !== '') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito',
+                    html: successMsg,
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+            // Confirmación antes de eliminar
+            document.querySelectorAll('form[asp-page-handler="Delete"]').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Seguro que desea eliminar esta cuenta?',
+                        text: 'Esta acción no se puede deshacer.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
+
+<div class="container py-4 mb-5">
+    <h2 class="mb-4">Mis Cuentas Bancarias</h2>
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert alert-info">@mensaje</div>
+    }
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>IBAN</th>
+                <th>Entidad Financiera</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (cuentas != null && cuentas.Count > 0)
+        {
+            foreach (var cuenta in cuentas)
+            {
+                var entidad = entidades.FirstOrDefault(e => e.ID == cuenta.FinancialEntityID);
+                <tr>
+                    <td>@cuenta.IBAN</td>
+                    <td>@(entidad?.EntityName ?? "-")</td>
+                    <td>
+                        <span class="@GetBadgeClass(cuenta.ValidationStatus)">@GetEstadoEspanol(cuenta.ValidationStatus)</span>
+                    </td>
+                    <td>
+                        <form method="post" asp-page-handler="ToggleStatus" asp-route-id="@cuenta.ID" style="display:inline">
+                            <button type="submit" class="btn btn-sm btn-outline-warning me-1">
+                                @GetBotonEspanol(cuenta.ValidationStatus)
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center">No tienes cuentas bancarias registradas.</td></tr>
+        }
+        </tbody>
+    </table>
+    <hr />
+    <h4>Agregar Nueva Cuenta</h4>
+    <form method="post" asp-page-handler="Add" class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="NewAccount.IBAN" class="form-label">IBAN</label>
+            <input asp-for="NewAccount.IBAN" class="form-control" required />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="NewAccount.FinancialEntityID" class="form-label">Entidad Financiera</label>
+            <select asp-for="NewAccount.FinancialEntityID" class="form-select" required>
+                <option value="">Seleccione...</option>
+                @foreach (var entidad in entidades)
+                {
+                    <option value="@entidad.ID">@entidad.EntityName</option>
+                }
+            </select>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Agregar Cuenta</button>
+        </div>
+    </form>
+</div>
+
+
