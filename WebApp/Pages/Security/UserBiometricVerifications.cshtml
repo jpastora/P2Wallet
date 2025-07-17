@@ -14,9 +14,9 @@
             <video id="selfieVideo" autoplay playsinline muted></video>
             <canvas id="selfieCanvas" class="d-none"></canvas>
 
-            <button id="btnTakeSelfie" class="btn btn-primary mt-3" onclick="takePhoto('selfie')">Tomar Selfie</button>
-            <button id="btnConfirmSelfie" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('selfie')">Confirmar</button>
-            <button id="btnRetakeSelfie" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('selfie')">Tomar de Nuevo</button>
+            <button id="btnTakeSelfie" type="button" class="btn btn-primary mt-3" onclick="takePhoto('selfie')">Tomar Selfie</button>
+            <button id="btnConfirmSelfie" type="button" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('selfie')">Confirmar</button>
+            <button id="btnRetakeSelfie" type="button" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('selfie')">Tomar de Nuevo</button>
 
             <input type="hidden" id="selfie" name="selfie" />
         </div>
@@ -29,9 +29,9 @@
                 <canvas id="frontIdCanvas" class="d-none"></canvas>
             </div>
 
-            <button id="btnTakeFront" class="btn btn-primary mt-3" onclick="takePhoto('front')">Tomar Frente</button>
-            <button id="btnConfirmFront" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('front')">Confirmar</button>
-            <button id="btnRetakeFront" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('front')">Tomar de Nuevo</button>
+            <button id="btnTakeFront" type="button" class="btn btn-primary mt-3" onclick="takePhoto('front')">Tomar Frente</button>
+            <button id="btnConfirmFront" type="button" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('front')">Confirmar</button>
+            <button id="btnRetakeFront" type="button" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('front')">Tomar de Nuevo</button>
 
             <input type="hidden" id="id_image" name="id_image" />
         </div>
@@ -44,9 +44,9 @@
                 <canvas id="backIdCanvas" class="d-none"></canvas>
             </div>
 
-            <button id="btnTakeBack" class="btn btn-primary mt-3" onclick="takePhoto('back')">Tomar Reverso</button>
-            <button id="btnConfirmBack" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('back')">Confirmar</button>
-            <button id="btnRetakeBack" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('back')">Tomar de Nuevo</button>
+            <button id="btnTakeBack" type="button" class="btn btn-primary mt-3" onclick="takePhoto('back')">Tomar Reverso</button>
+            <button id="btnConfirmBack" type="button" class="btn btn-success mt-3 d-none" onclick="confirmPhoto('back')">Confirmar</button>
+            <button id="btnRetakeBack" type="button" class="btn btn-secondary mt-3 d-none" onclick="retakePhoto('back')">Tomar de Nuevo</button>
 
             <input type="hidden" id="id_back" name="id_back" />
         </div>
@@ -75,9 +75,9 @@
         };
 
         const inputElements = {
-            selfie: document.getElementById('selfieInput'),
-            front: document.getElementById('frontIdInput'),
-            back: document.getElementById('backIdInput')
+            selfie: document.getElementById('selfie'),
+            front: document.getElementById('id_image'),
+            back: document.getElementById('id_back')
         };
 
         async function startCamera(type) {
@@ -161,8 +161,29 @@
         document.getElementById('verifyForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const form = e.target;
-            const formData = new FormData(form);
+            const formData = new FormData();
+
+            // Convertir los base64 a blobs
+            function dataURLtoBlob(dataurl) {
+                const arr = dataurl.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], { type: mime });
+            }
+
+            const selfieBlob = dataURLtoBlob(document.getElementById('selfie').value);
+            const idImageBlob = dataURLtoBlob(document.getElementById('id_image').value);
+            const idBackBlob = dataURLtoBlob(document.getElementById('id_back').value);
+
+            // Agregar blobs como archivos reales
+            formData.append('selfie', selfieBlob, 'selfie.jpg');
+            formData.append('id_image', idImageBlob, 'id_image.jpg');
+            formData.append('id_back', idBackBlob, 'id_back.jpg');
 
             const resultDiv = document.getElementById('result');
             resultDiv.textContent = 'Procesando...';
@@ -184,6 +205,7 @@
                 resultDiv.innerHTML = `<strong>Error de red:</strong> ${error.message}`;
             }
         });
+
 
     </script>
 }
