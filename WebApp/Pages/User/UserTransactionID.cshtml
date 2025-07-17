@@ -8,10 +8,13 @@
     var bankNames = Model.BankNames;
 }
 
+<link rel="stylesheet" href="~/css/UserTransactionID.css" />
+
 <div class="container py-4 mb-5">
     <h2 class="mb-4">Mis Transacciones</h2>
     @if (transacciones != null && transacciones.Count > 0)
     {
+        <div class="table-responsive">
         <table class="table table-bordered table-hover">
             <thead class="table-light">
                 <tr>
@@ -19,10 +22,9 @@
                     <th>Comercio</th>
                     <th>Cuenta</th>
                     <th>Banco</th>
-                    <th>Monto Bruto</th>
-                    <th>Monto Neto</th>
-                    <th>Comisión</th>
-                    <th>Descuento</th>
+                    <th>Monto Pagado</th>
+                    <th>Impuesto de Venta</th>
+                    <th>Fecha</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
@@ -50,18 +52,18 @@
                     <td>@merchant</td>
                     <td>@iban</td>
                     <td>@bank</td>
-                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.GrossAmount.ToString("N2")</td>
                     <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.NetAmount.ToString("N2")</td>
-                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.CommissionApplied.ToString("N2")</td>
-                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.DiscountApplied.ToString("N2")</td>
+                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.SalesTaxAmount.ToString("N2")</td>
+                    <td>@txn.Timestamp.ToString("g")</td>
                     <td>@txn.TransactionStatus</td>
                     <td>
-                        <a asp-page="/User/UserTransactionInvoice" asp-route-id="@txn.ID" class="btn btn-sm btn-outline-info">Ver Factura</a>
+                        <a asp-page="/User/UserTransactionInvoice" asp-route-id="@txn.ID" class="btn btn-sm btn-outline-info">Ver Transacción</a>
                     </td>
                 </tr>
             }
             </tbody>
         </table>
+        </div>
     }
     else
     {

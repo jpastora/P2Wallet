@@ -14,6 +14,10 @@ namespace WebApp.Pages.User
         public string MerchantName { get; set; }
         public string IBAN { get; set; }
         public string BankName { get; set; }
+        public string DiscountName { get; set; }
+        public double? DiscountPercentage { get; set; }
+        public double? DiscountAmount { get; set; }
+        public string DiscountSource { get; set; }
 
         public IActionResult OnGet(int id)
         {
@@ -47,6 +51,39 @@ namespace WebApp.Pages.User
                         bankName = entity?.EntityName ?? "-";
                     }
                     BankName = bankName;
+
+                    // Lógica de descuento
+                    DiscountName = null;
+                    DiscountPercentage = null;
+                    DiscountAmount = null;
+                    DiscountSource = null;
+                    if (Transaction.MerchantPromotionID.HasValue)
+                    {
+                        var promoManager = new MerchantPromotionManager();
+                        var promo = promoManager.RetrievePromotionById(Transaction.MerchantPromotionID.Value);
+                        if (promo != null)
+                        {
+                            DiscountName = promo.MerchantPromotionName;
+                            DiscountPercentage = promo.DiscountPercentage;
+                            DiscountSource = merchant?.MerchantName ?? "Comercio";
+                        }
+                    }
+                    else if (Transaction.FinancialPromotionID.HasValue)
+                    {
+                        var promoManager = new FinancialPromotionManager();
+                        var promo = promoManager.RetrievePromotionById(Transaction.FinancialPromotionID.Value);
+                        if (promo != null)
+                        {
+                            DiscountName = promo.FinancialPromotionName;
+                            DiscountPercentage = promo.DiscountPercentage;
+                            DiscountSource = bankName;
+                        }
+                    }
+                    // Calcular descuento en colones si aplica
+                    if (DiscountPercentage.HasValue && DiscountPercentage.Value > 0)
+                    {
+                        DiscountAmount = Transaction.GrossAmount * (DiscountPercentage.Value / 100.0);
+                    }
                 }
             }
             return Page();

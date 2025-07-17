@@ -1,0 +1,10 @@
+﻿CREATE PROCEDURE DELETE_USER_MERCHANT_LINK_PR
+    @P_UserID INT,
+    @P_MerchantID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM UserMerchant
+    WHERE UserID = @P_UserID AND MerchantID = @P_MerchantID;
+END;
+GO

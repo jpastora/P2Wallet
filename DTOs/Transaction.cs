@@ -13,8 +13,12 @@ namespace DTOs
         public int BankAccountID { get; set; }
         public double GrossAmount { get; set; }
         public double NetAmount { get; set; }
-        public double DiscountApplied { get; set; }
         public double CommissionApplied { get; set; }
+        public double SalesTaxAmount { get; set; }
+        public double TaxRateApplied { get; set; }
+        public DateTime Timestamp { get; set; }
         public string TransactionStatus { get; set; }
+        public int? FinancialPromotionID { get; set; }
+        public int? MerchantPromotionID { get; set; }
     }
 }

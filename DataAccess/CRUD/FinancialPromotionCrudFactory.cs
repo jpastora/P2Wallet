@@ -22,6 +22,10 @@ namespace DataAccess.CRUD
             var operation = new SqlOperation { ProcedureName = "CREATE_FINANCIAL_PROMOTION_PR" };
 
             operation.AddIntParam("@P_FinancialEntityID", promo.FinancialEntityID);
+            operation.AddStringParameter("@P_FinancialPromotionName", promo.FinancialPromotionName);
+            operation.AddStringParameter("@P_FinancialPromotionDescription", promo.FinancialPromotionDescription);
+            operation.AddStringParameter("@P_FinancialPromotionTerms", promo.FinancialPromotionTerms);
+            operation.AddStringParameter("@P_FinancialPromotionImage", promo.FinancialPromotionImage);
             operation.AddStringParameter("@P_PromotionType", promo.PromotionType);
             operation.AddDoubleParam("@P_DiscountPercentage", promo.DiscountPercentage);
             operation.AddDoubleParam("@P_MaxRefund", promo.MaxRefund);
@@ -29,6 +33,7 @@ namespace DataAccess.CRUD
             operation.AddDateTimeParam("@P_EndDate", promo.EndDate);
             operation.AddIntParam("@P_AvailableQuantity", promo.AvailableQuantity);
             operation.AddStringParameter("@P_ValidationStatus", promo.ValidationStatus);
+            operation.AddDateTimeParam("@P_CreatedAt", promo.CreatedAt);
 
             _sqlDao.ExecuteProcedure(operation);
         }
@@ -48,6 +53,10 @@ namespace DataAccess.CRUD
 
             operation.AddIntParam("@P_PromotionID", promo.ID);
             operation.AddIntParam("@P_FinancialEntityID", promo.FinancialEntityID);
+            operation.AddStringParameter("@P_FinancialPromotionName", promo.FinancialPromotionName);
+            operation.AddStringParameter("@P_FinancialPromotionDescription", promo.FinancialPromotionDescription);
+            operation.AddStringParameter("@P_FinancialPromotionTerms", promo.FinancialPromotionTerms);
+            operation.AddStringParameter("@P_FinancialPromotionImage", promo.FinancialPromotionImage);
             operation.AddStringParameter("@P_PromotionType", promo.PromotionType);
             operation.AddDoubleParam("@P_DiscountPercentage", promo.DiscountPercentage);
             operation.AddDoubleParam("@P_MaxRefund", promo.MaxRefund);
@@ -55,6 +64,7 @@ namespace DataAccess.CRUD
             operation.AddDateTimeParam("@P_EndDate", promo.EndDate);
             operation.AddIntParam("@P_AvailableQuantity", promo.AvailableQuantity);
             operation.AddStringParameter("@P_ValidationStatus", promo.ValidationStatus);
+            operation.AddDateTimeParam("@P_CreatedAt", promo.CreatedAt);
 
             _sqlDao.ExecuteProcedure(operation);
         }
@@ -95,15 +105,19 @@ namespace DataAccess.CRUD
             {
                 ID = (int)row["PromotionID"],
                 FinancialEntityID = (int)row["FinancialEntityID"],
-                PromotionType = (string)row["PromotionType"],
+                FinancialPromotionName = row["FinancialPromotionName"].ToString(),
+                FinancialPromotionDescription = row["FinancialPromotionDescription"].ToString(),
+                FinancialPromotionTerms = row["FinancialPromotionTerms"].ToString(),
+                FinancialPromotionImage = row["FinancialPromotionImage"].ToString(),
+                PromotionType = row["PromotionType"].ToString(),
                 DiscountPercentage = Convert.ToDouble(row["DiscountPercentage"]),
                 MaxRefund = Convert.ToDouble(row["MaxRefund"]),
                 StartDate = Convert.ToDateTime(row["StartDate"]),
                 EndDate = Convert.ToDateTime(row["EndDate"]),
                 AvailableQuantity = Convert.ToInt32(row["AvailableQuantity"]),
-                ValidationStatus = (string)row["ValidationStatus"]
+                ValidationStatus = row["ValidationStatus"].ToString(),
+                CreatedAt = Convert.ToDateTime(row["CreatedAt"])
             };
         }
     }
-
 }
