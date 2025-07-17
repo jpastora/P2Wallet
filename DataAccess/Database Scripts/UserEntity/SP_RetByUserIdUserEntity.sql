@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+CREATE PROCEDURE SP_RetByUserIdUserEntity
+@UserId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
 
-namespace DataAccess.Database_Scripts.UserEntity
-{
-    internal class SP_CreateUserEntity
-    {
-    }
-}
+    SELECT *
+    FROM UserEntity
+    WHERE UserId = @UserId;
+END;
