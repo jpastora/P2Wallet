@@ -8,44 +8,44 @@ using System.Threading.Tasks;
 
 namespace CoreApp
 {
-    // Manages operations related to financial promotions.
+    // Gestiona las operaciones relacionadas con las promociones financieras.
     public class FinancialPromotionManager : BaseManager
     {
-        // Creates a new financial promotion.
+        // Crea una nueva promoción financiera.
         public void CreatePromotion(FinancialPromotion promotion)
         {
             try
             {
                 var crud = new FinancialPromotionCrudFactory();
-                crud.Create(promotion); // Inserts the promotion into the database
+                crud.Create(promotion); // Inserta la promoción en la base de datos
             }
             catch (Exception ex)
             {
-                ManageException(ex); // Handles the exception using the base method
+                ManageException(ex); // Maneja la excepción usando el método base
             }
         }
 
-        // Retrieves all financial promotions from the system.
+        // Recupera todas las promociones financieras del sistema.
         public List<FinancialPromotion> RetrieveAllPromotions()
         {
             var crud = new FinancialPromotionCrudFactory();
             return crud.RetrieveAll<FinancialPromotion>();
         }
 
-        // Retrieves a financial promotion by its ID.
+        // Recupera una promoción financiera por su ID.
         public FinancialPromotion RetrievePromotionById(int id)
         {
             var crud = new FinancialPromotionCrudFactory();
             return crud.RetrieveById<FinancialPromotion>(id);
         }
 
-        // Updates an existing financial promotion.
+        // Actualiza una promoción financiera existente.
         public void UpdatePromotion(FinancialPromotion promotion)
         {
             try
             {
                 var crud = new FinancialPromotionCrudFactory();
-                crud.Update(promotion); // Updates the promotion in the database
+                crud.Update(promotion); // Actualiza la promoción en la base de datos
             }
             catch (Exception ex)
             {
@@ -53,13 +53,13 @@ namespace CoreApp
             }
         }
 
-        // Deletes a financial promotion.
+        // Elimina una promoción financiera.
         public void DeletePromotion(FinancialPromotion promotion)
         {
             try
             {
                 var crud = new FinancialPromotionCrudFactory();
-                crud.Delete(promotion); // Removes the promotion from the database
+                crud.Delete(promotion); // Elimina la promoción de la base de datos
             }
             catch (Exception ex)
             {
