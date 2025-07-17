@@ -8,44 +8,44 @@ using System.Threading.Tasks;
 
 namespace CoreApp
 {
-    // Manages operations related to merchant promotions.
+    // Gestiona las operaciones relacionadas con las promociones de comerciantes.
     public class MerchantPromotionManager : BaseManager
     {
-        // Creates a new merchant promotion.
+        // Crea una nueva promoción para un comerciante.
         public void CreatePromotion(MerchantPromotion promotion)
         {
             try
             {
                 var crud = new MerchantPromotionCrudFactory();
-                crud.Create(promotion); // Inserts the promotion into the database
+                crud.Create(promotion); // Inserta la promoción en la base de datos
             }
             catch (Exception ex)
             {
-                ManageException(ex); // Handles the exception using the base method
+                ManageException(ex); // Maneja la excepción usando el método base
             }
         }
 
-        // Retrieves all merchant promotions from the system.
+        // Recupera todas las promociones de comerciantes del sistema.
         public List<MerchantPromotion> RetrieveAllPromotions()
         {
             var crud = new MerchantPromotionCrudFactory();
             return crud.RetrieveAll<MerchantPromotion>();
         }
 
-        // Retrieves a merchant promotion by its ID.
+        // Recupera una promoción de comerciante por su ID.
         public MerchantPromotion RetrievePromotionById(int id)
         {
             var crud = new MerchantPromotionCrudFactory();
             return crud.RetrieveById<MerchantPromotion>(id);
         }
 
-        // Updates an existing merchant promotion.
+        // Actualiza una promoción existente de comerciante.
         public void UpdatePromotion(MerchantPromotion promotion)
         {
             try
             {
                 var crud = new MerchantPromotionCrudFactory();
-                crud.Update(promotion); // Updates the promotion in the database
+                crud.Update(promotion); // Actualiza la promoción en la base de datos
             }
             catch (Exception ex)
             {
@@ -53,13 +53,13 @@ namespace CoreApp
             }
         }
 
-        // Deletes a merchant promotion.
+        // Elimina una promoción de comerciante.
         public void DeletePromotion(MerchantPromotion promotion)
         {
             try
             {
                 var crud = new MerchantPromotionCrudFactory();
-                crud.Delete(promotion); // Removes the promotion from the database
+                crud.Delete(promotion); // Elimina la promoción de la base de datos
             }
             catch (Exception ex)
             {
