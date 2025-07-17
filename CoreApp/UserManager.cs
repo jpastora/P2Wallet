@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 namespace CoreApp
 {
     // Administra las operaciones relacionadas con usuarios.
@@ -87,6 +88,17 @@ namespace CoreApp
             {
                 ManageException(ex); // Maneja la excepción usando el método base
             }
+        }
+
+        public List<Merchant> GetMerchantsForUser(int userId)
+        {
+            var userMerchantManager = new UserMerchantManager();
+            return userMerchantManager.GetMerchantsForUser(userId);
+        }
+        public List<FinancialEntity> GetEntitiesForUser(int userId)
+        {
+            var userEntityManager = new UserEntityManager();
+            return userEntityManager.GetFinancialEntitiesForUser(userId);
         }
     }
 }

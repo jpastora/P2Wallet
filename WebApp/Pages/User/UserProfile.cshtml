@@ -3,32 +3,43 @@
 @attribute [Authorize]
 @model WebApp.Pages.User.UserProfileModel
 @{
+    var profilePhoto = Model.ProfilePhotoUrl ?? "https://picsum.photos/seed/perfil/120";
 }
 <!-- CONTENIDO -->
 <div class="container py-4 mb-5">
     <!-- Resumen de Perfil -->
     <div class="text-center mb-4">
-        <img src="https://picsum.photos/seed/perfil/120" alt="Foto de perfil" class="rounded-circle profile-img mb-2">
-        <h4>Juan Pérez</h4>
-        <p class="text-muted">juan.perez@email.com</p>
+        <img src="@profilePhoto" alt="Foto de perfil" class="rounded-circle profile-img mb-2" style="width:100px;height:100px;object-fit:cover;">
+        <h4>@Model.FirstName</h4>
+        <p class="text-muted">@Model.Email</p>
+        <div class="d-flex justify-content-center gap-2 mt-2">
+            <a href="/User/UserPanel" class="btn btn-outline-primary btn-sm">Panel</a>
+            <a href="/User/UserBankAccount" class="btn btn-outline-primary btn-sm">Cuentas</a>
+            <a href="/User/UserTransactionID" class="btn btn-outline-primary btn-sm">Historial</a>
+        </div>
     </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-info">@Model.Message</div>
+    }
 
     <!-- Datos Personales -->
     <div class="card mb-4">
         <div class="card-header"><strong>Datos Personales</strong></div>
         <div class="card-body">
-            <form id="formPerfil">
+            <form method="post" asp-page-handler="SaveProfile" id="formPerfil">
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre Completo</label>
-                    <input type="text" class="form-control" id="nombre" value="Juan Pérez">
+                    <input type="text" class="form-control" id="nombre" name="FirstName" value="@Model.FirstName">
                 </div>
                 <div class="mb-3">
                     <label for="telefono" class="form-label">Teléfono</label>
-                    <input type="text" class="form-control" id="telefono" value="+506 8888 9999">
+                    <input type="text" class="form-control" id="telefono" name="MobilePhone" value="@Model.MobilePhone">
                 </div>
                 <div class="mb-3">
                     <label for="correo" class="form-label">Correo Electrónico</label>
-                    <input type="email" class="form-control" id="correo" value="juan.perez@email.com" readonly>
+                    <input type="email" class="form-control" id="correo" name="Email" value="@Model.Email" readonly>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
             </form>
@@ -39,7 +50,17 @@
     <div class="card mb-4">
         <div class="card-header"><strong>Seguridad</strong></div>
         <div class="card-body">
-            <button class="btn btn-outline-secondary w-100 mb-3" id="btnCambiarClave">Cambiar Contraseña</button>
+            <form method="post" asp-page-handler="ChangePassword">
+                <div class="mb-3">
+                    <label for="password" class="form-label">Nueva Contraseña</label>
+                    <input type="password" class="form-control" id="password" name="Password">
+                </div>
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                    <input type="password" class="form-control" id="confirmPassword" name="ConfirmPassword">
+                </div>
+                <button type="submit" class="btn btn-outline-secondary w-100 mb-3">Cambiar Contraseña</button>
+            </form>
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" id="biometrico">
                 <label class="form-check-label" for="biometrico">Ingreso Biométrico</label>
@@ -67,21 +88,40 @@
     </div>
 
     <!-- Roles Administrativos -->
-    <div class="card mb-4">
-        <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
-        <div class="card-body">
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Comercio: Tech Store
-                    <button class="btn btn-sm btn-outline-primary ir-panel" data-nombre="Tech Store">Ir al Panel</button>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Entidad: Banco X
-                    <button class="btn btn-sm btn-outline-primary ir-panel" data-nombre="Banco X">Ir al Panel</button>
-                </li>
-            </ul>
+    @if (Model.Role == "admin")
+    {
+        <div class="card mb-4">
+            <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
+            <div class="card-body">
+                <ul class="list-group">
+                    @if (Model.AdminMerchants != null && Model.AdminMerchants.Count > 0)
+                    {
+                        @foreach (var merchant in Model.AdminMerchants)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-shop me-2 text-secondary"></i>Comercio: <strong>@merchant.MerchantName</strong></span>
+                                <a href="/Admin/Merchant/@merchant.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                            </li>
+                        }
+                    }
+                    @if (Model.AdminEntities != null && Model.AdminEntities.Count > 0)
+                    {
+                        @foreach (var entity in Model.AdminEntities)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-bank me-2 text-primary"></i>Entidad: <strong>@entity.EntityName</strong></span>
+                                <a href="/Admin/Entity/@entity.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                            </li>
+                        }
+                    }
+                    @if ((Model.AdminMerchants == null || Model.AdminMerchants.Count == 0) && (Model.AdminEntities == null || Model.AdminEntities.Count == 0))
+                    {
+                        <li class="list-group-item">No tienes comercios ni entidades asignadas.</li>
+                    }
+                </ul>
+            </div>
         </div>
-    </div>
+    }
 
     <!-- Cerrar Sesión -->
     <div class="d-grid">
