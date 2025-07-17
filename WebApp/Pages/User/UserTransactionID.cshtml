@@ -6,6 +6,14 @@
     var merchantNames = Model.MerchantNames;
     var accountIBANs = Model.AccountIBANs;
     var bankNames = Model.BankNames;
+    string EstadoEspanol(string status) => status switch
+    {
+        "Completed" => "Completada",
+        "Pending" => "Pendiente",
+        "Failed" => "Fallida",
+        "Cancelled" => "Cancelada",
+        _ => status
+    };
 }
 
 <link rel="stylesheet" href="~/css/UserTransactionID.css" />
@@ -55,7 +63,7 @@
                     <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.NetAmount.ToString("N2")</td>
                     <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.SalesTaxAmount.ToString("N2")</td>
                     <td>@txn.Timestamp.ToString("g")</td>
-                    <td>@txn.TransactionStatus</td>
+                    <td>@EstadoEspanol(txn.TransactionStatus)</td>
                     <td>
                         <a asp-page="/User/UserTransactionInvoice" asp-route-id="@txn.ID" class="btn btn-sm btn-outline-info">Ver Transacción</a>
                     </td>
