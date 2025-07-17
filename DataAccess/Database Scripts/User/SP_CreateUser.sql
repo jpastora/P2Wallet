@@ -23,7 +23,7 @@
     @P_MobileVerified VARCHAR(15) = 'Inactive',
     @P_BiometricVerified VARCHAR(15) = 'Inactive',
     @P_ValidationStatus VARCHAR(15) = 'Inactive',
-    @P_SMSNotificaction VARCHAR(15) = 'Inactive',
+    @P_SMSNotification VARCHAR(15) = 'Inactive',
     @P_PushNotification VARCHAR(15) = 'Inactive',
     @P_EmailNotification VARCHAR(15) = 'Inactive'
 AS
