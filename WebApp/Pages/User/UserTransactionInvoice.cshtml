@@ -1,0 +1,68 @@
+@page "{id:int}"
+@model WebApp.Pages.User.UserTransactionInvoiceModel
+@{
+    var txn = Model.Transaction;
+    var user = Model.CurrentUser;
+    var merchant = Model.MerchantName;
+    var iban = Model.IBAN;
+    var bank = Model.BankName;
+    string ColonSymbol = "\u20A1"; // Unicode para el símbolo de colón
+}
+
+<div class="container py-4 mb-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Factura de Transacción</h3>
+        </div>
+        <div class="card-body">
+            @if (txn != null)
+            {
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>ID Transacción:</strong> @txn.ID<br />
+                        <strong>Usuario:</strong> @user?.FirstName @user?.LastName<br />
+                        <strong>Comercio:</strong> @merchant<br />
+                        <strong>Cuenta:</strong> @iban<br />
+                        <strong>Banco:</strong> @bank<br />
+                        <strong>Estado:</strong> @txn.TransactionStatus
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <strong>Fecha:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                <hr />
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Monto Bruto</td>
+                            <td><span class="text-monospace">&#8353;</span>@txn.GrossAmount.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Descuento Aplicado</td>
+                            <td>-<span class="text-monospace">&#8353;</span>@txn.DiscountApplied.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td>Comisión Aplicada</td>
+                            <td>-<span class="text-monospace">&#8353;</span>@txn.CommissionApplied.ToString("N2")</td>
+                        </tr>
+                        <tr class="table-primary">
+                            <td><strong>Monto Neto</strong></td>
+                            <td><strong><span class="text-monospace">&#8353;</span>@txn.NetAmount.ToString("N2")</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-danger">No se encontró la transacción.</div>
+            }
+            <a asp-page="/User/UserTransactionID" class="btn btn-secondary mt-3">Volver al historial</a>
+        </div>
+    </div>
+</div>

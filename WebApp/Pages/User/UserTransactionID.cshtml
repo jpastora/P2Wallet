@@ -1,0 +1,70 @@
+﻿@page
+@model WebApp.Pages.User.UserTransactionIDModel
+@{
+    var transacciones = Model.UserTransactions;
+    var user = Model.CurrentUser;
+    var merchantNames = Model.MerchantNames;
+    var accountIBANs = Model.AccountIBANs;
+    var bankNames = Model.BankNames;
+}
+
+<div class="container py-4 mb-5">
+    <h2 class="mb-4">Mis Transacciones</h2>
+    @if (transacciones != null && transacciones.Count > 0)
+    {
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Comercio</th>
+                    <th>Cuenta</th>
+                    <th>Banco</th>
+                    <th>Monto Bruto</th>
+                    <th>Monto Neto</th>
+                    <th>Comisión</th>
+                    <th>Descuento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var txn in transacciones)
+            {
+                var merchant = merchantNames.ContainsKey(txn.MerchantID) ? merchantNames[txn.MerchantID] : "-";
+                var iban = accountIBANs.ContainsKey(txn.BankAccountID) ? accountIBANs[txn.BankAccountID] : "-";
+                var bank = "-";
+                if (accountIBANs.ContainsKey(txn.BankAccountID))
+                {
+                    var account = txn.BankAccountID;
+                    var allAccounts = Model.AccountIBANs;
+                    var allBanks = Model.BankNames;
+                    var accountManager = new CoreApp.BankAccountManager();
+                    var acc = accountManager.RetrieveBankAccountById(account);
+                    if (acc != null && allBanks.ContainsKey(acc.FinancialEntityID))
+                    {
+                        bank = allBanks[acc.FinancialEntityID];
+                    }
+                }
+                <tr>
+                    <td>@txn.ID</td>
+                    <td>@merchant</td>
+                    <td>@iban</td>
+                    <td>@bank</td>
+                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.GrossAmount.ToString("N2")</td>
+                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.NetAmount.ToString("N2")</td>
+                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.CommissionApplied.ToString("N2")</td>
+                    <td><span style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.DiscountApplied.ToString("N2")</td>
+                    <td>@txn.TransactionStatus</td>
+                    <td>
+                        <a asp-page="/User/UserTransactionInvoice" asp-route-id="@txn.ID" class="btn btn-sm btn-outline-info">Ver Factura</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="alert alert-info">No tienes transacciones registradas.</div>
+    }
+</div>

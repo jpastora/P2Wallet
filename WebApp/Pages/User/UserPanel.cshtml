@@ -47,7 +47,7 @@
             <li class="list-group-item">No tienes cuentas registradas.</li>
         }
         <li class="list-group-item">
-            <a href="#" id="agregarCuenta" class="text-decoration-none text-primary"><i class="bi bi-plus-circle"></i> Agregar nueva cuenta</a>
+            <a href="/User/UserBankAccount" id="agregarCuenta" class="text-decoration-none text-primary"><i class="bi bi-plus-circle"></i> Agregar nueva cuenta</a>
         </li>
     </ul>
 </section>
@@ -56,26 +56,43 @@
 <section class="container mb-5">
     <h5>Actividad Reciente</h5>
     <ul class="list-group">
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div><i class="bi bi-shop me-2 text-secondary"></i>Pago en Super Tienda</div>
-            <div>₡4,500.00 <small class="text-muted d-block">01/07/2025</small></div>
-        </li>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div><i class="bi bi-arrow-down-left me-2 text-success"></i>Transferencia Recibida</div>
-            <div>₡150,000.00 <small class="text-muted d-block">30/06/2025</small></div>
-        </li>
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div><i class="bi bi-cash me-2 text-warning"></i>Pago de Servicio</div>
-            <div>₡25,000.50 <small class="text-muted d-block">29/06/2025</small></div>
-        </li>
+        @if (Model.LastTransactions != null && Model.LastTransactions.Count > 0)
+        {
+            foreach (var txn in Model.LastTransactions)
+            {
+                var merchant = Model.MerchantNames.ContainsKey(txn.MerchantID) ? Model.MerchantNames[txn.MerchantID] : "-";
+                var iban = Model.AccountIBANs.ContainsKey(txn.BankAccountID) ? Model.AccountIBANs[txn.BankAccountID] : "-";
+                var bank = "-";
+                if (Model.AccountIBANs.ContainsKey(txn.BankAccountID))
+                {
+                    var accountManager = new CoreApp.BankAccountManager();
+                    var acc = accountManager.RetrieveBankAccountById(txn.BankAccountID);
+                    if (acc != null && Model.BankNames.ContainsKey(acc.FinancialEntityID))
+                    {
+                        bank = Model.BankNames[acc.FinancialEntityID];
+                    }
+                }
+                <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <i class="bi bi-shop me-2 text-secondary"></i>
+                        <strong>@merchant</strong>
+                        <span class="text-muted small ms-2">IBAN: @iban</span>
+                        <span class="text-muted small ms-2">Banco: @bank</span>
+                    </div>
+                    <div class="d-flex align-items-center mt-2 mt-md-0">
+                        <span class="me-3" style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.NetAmount.ToString("N2")
+                        <small class="text-muted d-block ms-3">@txn.TransactionStatus</small>
+                        <a asp-page="/User/UserTransactionInvoice" asp-route-id="@txn.ID" class="btn btn-sm btn-outline-info ms-3">Ver Detalle</a>
+                    </div>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item">No hay transacciones recientes.</li>
+        }
         <li class="list-group-item text-center">
-            <a href="#" id="verHistorial">Ver todo el historial</a>
+            <a href="/User/UserTransactionID" id="verHistorial">Ver todo el historial</a>
         </li>
     </ul>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
-    <br>
 </section>
