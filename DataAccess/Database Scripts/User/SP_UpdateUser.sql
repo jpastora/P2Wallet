@@ -16,7 +16,7 @@
     @P_MobileVerified VARCHAR(15),
     @P_BiometricVerified VARCHAR(15),
     @P_ValidationStatus VARCHAR(15),
-    @P_SMSNotificaction VARCHAR(15),
+    @P_SMSNotification VARCHAR(15),
     @P_PushNotification VARCHAR(15),
     @P_EmailNotification VARCHAR(15),
     @P_Role VARCHAR(35)
