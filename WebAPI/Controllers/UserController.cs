@@ -59,7 +59,7 @@ namespace WebAPI.Controllers
         }
 
         // Actualiza la información biometrica de un usuario
-        [HttpPost]
+        [HttpPut]
         [Route("UpdateBiometricInfo")]
 
         public ActionResult UpdateBiometricInfo(User user)
