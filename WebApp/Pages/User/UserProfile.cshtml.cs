@@ -41,7 +41,7 @@ namespace WebApp.Pages.User
                     ProfilePhotoUrl = currentUser.ProfilePhotoUrl;
                     Role = currentUser.Role;
 
-                    if (Role == "admin")
+                    if (Role == "Admin")
                     {
                         AdminMerchants = userManager.GetMerchantsForUser(currentUser.ID);
                         AdminEntities = userManager.GetEntitiesForUser(currentUser.ID);
