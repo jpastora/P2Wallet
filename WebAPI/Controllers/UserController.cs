@@ -163,5 +163,28 @@ namespace WebAPI.Controllers
                 return StatusCode(500, new { message = ex.Message });
             }
         }
+
+        // Cambia la contraseña de un usuario
+        [HttpPost]
+        [Route("ChangePassword")]
+        public ActionResult ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                var userManager = new UserManager();
+                userManager.ChangeUserPassword(request.UserId, request.NewPassword);
+                return Ok(new { message = "Contraseña cambiada correctamente." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+    }
+
+    public class ChangePasswordRequest
+    {
+        public int UserId { get; set; }
+        public string NewPassword { get; set; }
     }
 }

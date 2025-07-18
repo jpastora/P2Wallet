@@ -100,5 +100,17 @@ namespace CoreApp
             var userEntityManager = new UserEntityManager();
             return userEntityManager.GetFinancialEntitiesForUser(userId);
         }
+        public void ChangeUserPassword(int userId, string newPassword)
+        {
+            try
+            {
+                var userCrud = new UserCrudFactory();
+                userCrud.ChangePassword(userId, PasswordHelper.HashPassword(newPassword));
+            }
+            catch (Exception ex)
+            {
+                ManageException(ex);
+            }
+        }
     }
 }
