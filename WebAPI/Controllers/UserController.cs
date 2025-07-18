@@ -155,7 +155,7 @@ namespace WebAPI.Controllers
                 if (user == null || !PasswordHelper.VerifyPassword(password, user.Password))
                     return Unauthorized(new { message = "Usuario o contraseña incorrectos." });
 
-                user.Password = null; // No exponer el hash
+                user.Password = null; 
                 return Ok(user);
             }
             catch (Exception ex)

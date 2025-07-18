@@ -1,7 +1,8 @@
-﻿CREATE PROCEDURE UPDATE_FINANCIAL_ENTITY_PR
+﻿CREATE OR ALTER PROCEDURE UPDATE_FINANCIAL_ENTITY_PR
     @P_FinancialEntityID INT,
     @P_EntityName VARCHAR(100),
     @P_TaxID VARCHAR(20),
+    @P_LogoImage VARCHAR(300), -- Parámetro añadido
     @P_Latitude DECIMAL(9,6),
     @P_Longitude DECIMAL(9,6),
     @P_ContactPhone VARCHAR(15),
@@ -11,11 +12,11 @@
 AS
 BEGIN
     SET NOCOUNT ON;
-
     UPDATE FinancialEntities
     SET
         EntityName = @P_EntityName,
         TaxID = @P_TaxID,
+        LogoImage = @P_LogoImage, -- Columna añadida
         Latitude = @P_Latitude,
         Longitude = @P_Longitude,
         ContactPhone = @P_ContactPhone,
@@ -24,6 +25,6 @@ BEGIN
         ValidationStatus = @P_ValidationStatus,
         UpdatedAt = GETDATE()
     WHERE
-        FinancialEntityID = @P_FinancialEntityID
-END
+        FinancialEntityID = @P_FinancialEntityID;
+END;
 GO

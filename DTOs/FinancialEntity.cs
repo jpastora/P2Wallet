@@ -16,5 +16,6 @@ namespace DTOs
         public string Email { get; set; }
         public double CommissionPercentage { get; set; }
         public String ValidationStatus { get; set; }
+        public string LogoImage { get; set; }
     }
 }
