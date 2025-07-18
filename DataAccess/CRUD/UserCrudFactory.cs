@@ -139,6 +139,7 @@ namespace DataAccess.CRUD
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
+
         public void ChangePassword(int userId, string newPassword)
         {
             var sqlOperation = new SqlOperation() { ProcedureName = "CHANGE_USER_PASSWORD_PR" };
@@ -146,6 +147,21 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_NewPassword", newPassword);
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
+
+
+        public void UpdateBiometricStatus(BaseDTO baseDTO)
+        {
+            var user = baseDTO as User;
+
+            var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_USER_PR" };
+            sqlOperation.AddIntParam("@P_UserID", user.ID);
+            sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
+            sqlOperation.AddStringParameter("@P_IDNumber", user.IDNumber);
+
+            _sqlDao.ExecuteProcedure(sqlOperation);
+        }
+
+
         private User BuildUser(Dictionary<string, object> row)
         {
             var user = new User()

@@ -411,7 +411,7 @@
                 }
 
                 // Si todo es válido, puedes proceder a enviar los datos.
-                userController.Create();
+                await userController.Create();
                 form.reset();
                 emailInput.readOnly = false;
                 btnSendOTP.disabled = false;
@@ -423,6 +423,29 @@
                 btnSendSmsOTP.textContent = 'Enviar codigo de validación de teléfono';
                 smsOtpInput.disabled = true;
                 smsOtpSentTo = null;
+
+                // Llamar al API de login
+                using var client = new HttpClient();
+                client.BaseAddress = new Uri("https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/");
+                var loginData = new { email = emailInput, password =  confirmPwdInput};
+                var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("api/User/Login", content);
+
+                // Leer el contenido de la respuesta
+                var responseString = await response.Content.ReadAsStringAsync();
+
+                //Console.WriteLine(responseString);
+
+                // Parsear el JSON para extraer los campos
+                using var doc = JsonDocument.Parse(responseString);
+                var root = doc.RootElement;
+
+                var biometricStatus = root.GetProperty("biometricVerified").GetString();
+
+                var userId = root.GetProperty("id").GetInt32();
+                return RedirectToPage("/Security/UserBiometricVerifications", new { id = userId });
+
+                
             });
         });
     </script>

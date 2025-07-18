@@ -58,6 +58,30 @@ namespace WebAPI.Controllers
             }
         }
 
+        // Actualiza la información biometrica de un usuario
+        [HttpPut]
+        [Route("UpdateBiometricInfo")]
+
+        public ActionResult UpdateBiometricInfo(User user)
+        {
+            try
+            {
+                var userManager = new UserManager();
+                userManager.UpdateBiometric(user);
+                // Retorna un objeto JSON con mensaje de éxito
+                return Ok(new
+                {
+                    message = "Información Biométrica verificada exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         // Recupera todos los usuarios
         [HttpGet]
         [Route("RetrieveAll")]
