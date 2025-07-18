@@ -62,12 +62,12 @@
         });
     }
 
-    this.UpdateBiometricInfo = function ()
+    this.UpdateBiometricInfo = function (user)
     {
         var userDTO = {};
 
         //Atributos por defecto
-        userDTO.ID = 17;
+        userDTO.ID = user.ID;
         userDTO.IDNumber = "";
         userDTO.Created = "2000-01-01";
         userDTO.Updated = "2000-01-01";
@@ -98,7 +98,7 @@
 
         ca.PutToAPI(urlService, userDTO, function ()
         {
-            console.log("Biometric information updated successfully for user ID: " + userId);
+            console.log("Biometric information updated successfully for user ID: " + userDTO.ID);
         });
 
     }

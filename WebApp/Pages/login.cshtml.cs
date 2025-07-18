@@ -1,73 +1,95 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Security.Claims;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
+    using System.Security.Claims;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+    using System.Text;
+    using System.Text.Json;
+    using System.Threading.Tasks;
 
-namespace WebApp.Pages
-{
-    public class loginModel : PageModel
+    namespace WebApp.Pages
     {
-        [BindProperty]
-        public string Email { get; set; }
-        [BindProperty]
-        public string Password { get; set; }
-        [BindProperty]
-        public bool RememberMe { get; set; }
-        public string ErrorMessage { get; set; }
-
-        public void OnGet() { }
-
-        public async Task<IActionResult> OnPostAsync()
+        public class loginModel : PageModel
         {
-            if (!ModelState.IsValid)
-                return Page();
+            [BindProperty]
+            public string Email { get; set; }
+            [BindProperty]
+            public string Password { get; set; }
+            [BindProperty]
+            public bool RememberMe { get; set; }
+            public string ErrorMessage { get; set; }
 
-            // Llamar al API de login
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri("https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/");
-            var loginData = new { email = Email, password = Password };
-            var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("api/User/Login", content);
+            public void OnGet() { }
 
-            if (response.IsSuccessStatusCode)
+            public async Task<IActionResult> OnPostAsync()
             {
-                // Login exitoso, crear cookie de autenticación
-                var claims = new List<Claim>
+                if (!ModelState.IsValid)
+                    return Page();
+
+                // Llamar al API de login
+                using var client = new HttpClient();
+                client.BaseAddress = new Uri("https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/");
+                var loginData = new { email = Email, password = Password };
+                var content = new StringContent(JsonSerializer.Serialize(loginData), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("api/User/Login", content);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    new Claim(ClaimTypes.Name, Email)
-                };
-                var claimsIdentity = new ClaimsIdentity(claims, "MyCookieAuth");
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = RememberMe
-                };
-                await HttpContext.SignInAsync("MyCookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
-                return RedirectToPage("/User/UserPanel");
-            }
-            else
-            {
-                // Mostrar error del API
-                var apiError = await response.Content.ReadAsStringAsync();
-                try
-                {
-                    var errorObj = JsonSerializer.Deserialize<JsonElement>(apiError);
-                    if (errorObj.TryGetProperty("message", out var msg))
-                        ErrorMessage = msg.GetString();
+                    // Leer el contenido de la respuesta
+                    var responseString = await response.Content.ReadAsStringAsync();
+
+                    //Console.WriteLine(responseString);
+
+                    // Parsear el JSON para extraer los campos
+                    using var doc = JsonDocument.Parse(responseString);
+                    var root = doc.RootElement;
+
+                    var biometricStatus = root.GetProperty("biometricVerified").GetString();
+
+                    if (biometricStatus == "Inactive")
+                    {
+                        // Si no tiene la parte biometrica verificada hace redirect a la pagina y le enviar el user ID para oder verificar la biometrica
+                        var userId = root.GetProperty("id").GetInt32();
+                        return RedirectToPage("/Security/UserBiometricVerifications", new { id = userId });
+                    }
                     else
-                        ErrorMessage = "Usuario o contraseña incorrectos.";
+                    {
+                        // Login exitoso y biometrica validado, crear cookie de autenticación
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, Email)
+                        };
+                        var claimsIdentity = new ClaimsIdentity(claims, "MyCookieAuth");
+                        var authProperties = new AuthenticationProperties
+                        {
+                            IsPersistent = RememberMe
+                        };
+                        await HttpContext.SignInAsync("MyCookieAuth", new ClaimsPrincipal(claimsIdentity), authProperties);
+                        return RedirectToPage("/User/UserPanel");
+                    }
+
+                    
                 }
-                catch
+                else
                 {
-                    ErrorMessage = "Usuario o contraseña incorrectos.";
+                    // Mostrar error del API
+                    var apiError = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var errorObj = JsonSerializer.Deserialize<JsonElement>(apiError);
+                        if (errorObj.TryGetProperty("message", out var msg))
+                            ErrorMessage = msg.GetString();
+                        else
+                            ErrorMessage = "Usuario o contraseña incorrectos.";
+                    }
+                    catch
+                    {
+                        ErrorMessage = "Usuario o contraseña incorrectos.";
+                    }
+                    return Page();
                 }
-                return Page();
             }
         }
     }
-}
