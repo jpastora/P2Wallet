@@ -42,7 +42,7 @@ namespace WebAPI.Controllers
         }
 
         // Actualiza un usuario existente
-        [HttpPost]
+        [HttpPut]
         [Route("Update")]
         public ActionResult UpdateUser(User user)
         {

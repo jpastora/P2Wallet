@@ -24,7 +24,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("Update")]
         public ActionResult UpdatePromotion(FinancialPromotion promotion)
         {

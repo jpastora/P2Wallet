@@ -26,7 +26,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPut]
         [Route("Update")]
         public ActionResult UpdateFinancialEntity(FinancialEntity financialEntity)
         {
