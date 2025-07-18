@@ -35,7 +35,7 @@ namespace WebApp.Pages.User
         public string Message { get; set; }
         public string ProfilePhotoUrl { get; set; }
         public string Role { get; set; }
-        public List<Merchant> AdminMerchants { get; set; } = new();
+        public List<DTOs.Merchant> AdminMerchants { get; set; } = new();
         public List<FinancialEntity> AdminEntities { get; set; } = new();
 
         public void OnGet()
