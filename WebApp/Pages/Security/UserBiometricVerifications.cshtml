@@ -2,7 +2,7 @@
 
 @model WebApp.Pages.Security.UserBiometricVerificationsModel
 @{
-    ViewData["Title"] = "Validacion de Usuario";
+    ViewData["Title"] = "Validacion Biométrica";
 }
 
 <script src="~/js/User.js"></script>
@@ -256,13 +256,13 @@
                         }
                     });
 
-                    // Cerrar sesión en el backend (POST a Logout)
-                   /* await fetch("/Logout", { method: "POST" });
+                    //Cerrar sesión en el backend (POST a Logout)
+                    await fetch("/Logout", { method: "POST" });
 
                     setTimeout(() => {
                         window.location.href = "/Login";
-                    }, 2000);
-                    */
+                    }, 5000);
+                    
                 }
 
             } catch (error) 
