@@ -73,11 +73,11 @@ namespace DataAccess.CRUD
                     MerchantName = row["MerchantName"].ToString(),
                     TaxID = row["TaxID"].ToString(),
                     LogoImage = row["LogoImage"].ToString(),
-                    Latitude = (double)row["Latitude"],
-                    Longitude = (double)row["Longitude"],
+                    Latitude = Convert.ToDouble(row["Latitude"]),
+                    Longitude = Convert.ToDouble(row["Longitude"]),
                     ContactPhone = row["ContactPhone"].ToString(),
                     Email = row["Email"].ToString(),
-                    CommissionPercentage = (double)row["CommissionPercentage"],
+                    CommissionPercentage = Convert.ToDouble(row["CommissionPercentage"]),
                     ValidationStatus = row["ValidationStatus"].ToString()
                 };
                 list.Add(merchant);

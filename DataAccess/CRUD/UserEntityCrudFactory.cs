@@ -72,11 +72,11 @@ namespace DataAccess.CRUD
                     ID = (int)row["FinancialEntityID"],
                     EntityName = row["EntityName"].ToString(),
                     TaxID = row["TaxID"].ToString(),
-                    Latitude = (double)row["Latitude"],
-                    Longitude = (double)row["Longitude"],
+                    Latitude = Convert.ToDouble(row["Latitude"]),
+                    Longitude = Convert.ToDouble(row["Longitude"]),
                     ContactPhone = row["ContactPhone"].ToString(),
                     Email = row["Email"].ToString(),
-                    CommissionPercentage = (double)row["CommissionPercentage"],
+                    CommissionPercentage = Convert.ToDouble(row["CommissionPercentage"]),
                     ValidationStatus = row["ValidationStatus"].ToString()
                 };
                 list.Add(entity);
