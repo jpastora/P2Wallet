@@ -28,6 +28,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_ContactPhone", entity.ContactPhone);
             sqlOperation.AddStringParameter("@P_Email", entity.Email);
             sqlOperation.AddDoubleParam("@P_CommissionPercentage", entity.CommissionPercentage);
+            sqlOperation.AddStringParameter("@P_LogoImage", entity.LogoImage);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -82,6 +83,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_Email", entity.Email);
             sqlOperation.AddDoubleParam("@P_CommissionPercentage", entity.CommissionPercentage);
             sqlOperation.AddStringParameter("@P_ValidationStatus", entity.ValidationStatus);
+            sqlOperation.AddStringParameter("@P_LogoImage", entity.LogoImage);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -97,7 +99,8 @@ namespace DataAccess.CRUD
                 ContactPhone = (string)row["ContactPhone"],
                 Email = (string)row["Email"],
                 CommissionPercentage = Convert.ToDouble(row["CommissionPercentage"]),
-                ValidationStatus = (string)row["ValidationStatus"]
+                ValidationStatus = (string)row["ValidationStatus"],
+                LogoImage = row.ContainsKey("LogoImage") ? row["LogoImage"].ToString() : string.Empty
             };
         }
     }

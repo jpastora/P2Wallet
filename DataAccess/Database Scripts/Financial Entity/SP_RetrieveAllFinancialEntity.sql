@@ -1,10 +1,11 @@
-﻿CREATE PROCEDURE RET_ALL_FINANCIAL_ENTITIES_PR
+﻿CREATE OR ALTER PROCEDURE RET_ALL_FINANCIAL_ENTITIES_PR
 AS
 BEGIN
+    SET NOCOUNT ON;
     SELECT 
-        FinancialEntityID, CreatedAt, ValidationStatus, 
-        EntityName, TaxID, Latitude, Longitude, 
-        ContactPhone, Email, CommissionPercentage
-    FROM FinancialEntities
-END
+        FinancialEntityID, EntityName, TaxID, LogoImage, -- Columna añadida
+        Latitude, Longitude, ContactPhone, Email, 
+        CommissionPercentage, ValidationStatus, CreatedAt, UpdatedAt
+    FROM FinancialEntities;
+END;
 GO
