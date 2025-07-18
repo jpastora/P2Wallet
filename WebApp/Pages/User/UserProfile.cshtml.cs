@@ -31,9 +31,10 @@ namespace WebApp.Pages.User
         public string Password { get; set; }
         [BindProperty]
         public string ConfirmPassword { get; set; }
+        [BindProperty]
+        public string ProfilePhotoUrl { get; set; }
         public string Email { get; set; }
         public string Message { get; set; }
-        public string ProfilePhotoUrl { get; set; }
         public string Role { get; set; }
         public List<DTOs.Merchant> AdminMerchants { get; set; } = new();
         public List<FinancialEntity> AdminEntities { get; set; } = new();
@@ -51,13 +52,13 @@ namespace WebApp.Pages.User
                     LastName = currentUser.LastName;
                     MobilePhone = currentUser.MobilePhone;
                     Email = currentUser.Email;
-                    ProfilePhotoUrl = currentUser.ProfilePhotoUrl;
                     Role = currentUser.Role;
                     Latitude = currentUser.Latitude;
                     Longitude = currentUser.Longitude;
                     EmailNotification = currentUser.EmailNotification;
                     PushNotification = currentUser.PushNotification;
                     SMSNotification = currentUser.SMSNotification;
+                    ProfilePhotoUrl = currentUser.ProfilePhotoUrl;
 
                     if (Role == "Admin")
                     {
@@ -77,16 +78,48 @@ namespace WebApp.Pages.User
                 var currentUser = userManager.RetrieveUserByEmail(new DTOs.User { Email = email });
                 if (currentUser != null)
                 {
+                    // Validación básica de teléfono
+                    if (!string.IsNullOrWhiteSpace(MobilePhone) && !MobilePhone.StartsWith("+"))
+                    {
+                        MobilePhone = "+506" + MobilePhone;
+                    }
+                    if (!string.IsNullOrWhiteSpace(MobilePhone) && !System.Text.RegularExpressions.Regex.IsMatch(MobilePhone, @"^\+\d{1,3}\d{8,}$"))
+                    {
+                        Message = "El número telefónico debe incluir el código de país, por ejemplo: +506XXXXXXXX";
+                        OnGet(); // Recargar datos completos
+                        return Page();
+                    }
+                    // Validación de latitud/longitud
+                    if (Latitude < -90 || Latitude > 90 || Longitude < -180 || Longitude > 180)
+                    {
+                        Message = "Ubicación inválida.";
+                        OnGet(); // Recargar datos completos
+                        return Page();
+                    }
+                    
+                    // Actualizar los datos del perfil
                     currentUser.FirstName = FirstName;
                     currentUser.LastName = LastName;
                     currentUser.MobilePhone = MobilePhone;
                     currentUser.Latitude = Latitude;
                     currentUser.Longitude = Longitude;
+                    
+                    // Solo actualizar ProfilePhotoUrl si se proporcionó un valor nuevo
+                    if (!string.IsNullOrWhiteSpace(ProfilePhotoUrl))
+                    {
+                        currentUser.ProfilePhotoUrl = ProfilePhotoUrl;
+                    }
+                    
+                    // Log de los datos enviados al SP
+                    Console.WriteLine($"UpdateUser: ID={currentUser.ID}, FirstName={currentUser.FirstName}, LastName={currentUser.LastName}, MobilePhone={currentUser.MobilePhone}, Latitude={currentUser.Latitude}, Longitude={currentUser.Longitude}, Email={currentUser.Email}, ProfilePhotoUrl={currentUser.ProfilePhotoUrl}, Password={currentUser.Password}, EmailVerified={currentUser.EmailVerified}, MobileVerified={currentUser.MobileVerified}, BiometricVerified={currentUser.BiometricVerified}, ValidationStatus={currentUser.ValidationStatus}, SMSNotification={currentUser.SMSNotification}, EmailNotification={currentUser.EmailNotification}, PushNotification={currentUser.PushNotification}, Role={currentUser.Role}");
+                    
                     userManager.UpdateUser(currentUser);
                     Message = "Datos personales actualizados correctamente.";
+                    
+                    // Recargar todos los datos del usuario después de la actualización
+                    OnGet();
                 }
             }
-            OnGet();
             return Page();
         }
 
@@ -106,7 +139,7 @@ namespace WebApp.Pages.User
                     Message = "Preferencias de notificación actualizadas.";
                 }
             }
-            OnGet();
+            OnGet(); // Recargar todos los datos
             return Page();
         }
 
@@ -115,7 +148,7 @@ namespace WebApp.Pages.User
             if (Password != ConfirmPassword)
             {
                 Message = "Las contraseñas no coinciden.";
-                OnGet();
+                OnGet(); // Recargar todos los datos
                 return Page();
             }
             var email = User.Identity?.Name;
@@ -130,7 +163,7 @@ namespace WebApp.Pages.User
                     Message = "Contraseña actualizada correctamente.";
                 }
             }
-            OnGet();
+            OnGet(); // Recargar todos los datos
             return Page();
         }
     }

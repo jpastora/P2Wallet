@@ -24,11 +24,31 @@
         <div class="alert alert-info">@Model.Message</div>
     }
 
+    <!-- Foto de Perfil -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Foto de Perfil</strong></div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="profilePhotoUrl" class="form-label">URL de Foto de Perfil</label>
+                <input type="text" class="form-control" id="profilePhotoUrl" name="ProfilePhotoUrl" value="@Model.ProfilePhotoUrl" readonly>
+            </div>
+            <div class="mb-3">
+                <label for="profilePhotoFile" class="form-label">Foto de Perfil (Imagen)</label>
+                <input type="file" class="form-control" id="profilePhotoFile" accept="image/*">
+                <button type="button" class="btn btn-primary mt-2" id="btnUploadProfilePhoto">Subir Foto</button>
+                <div class="mt-2 text-center">
+                    <img id="profilePhotoPreview" src="@Model.ProfilePhotoUrl" alt="Vista previa de la foto" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:8px;" />
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Datos Personales -->
     <div class="card mb-4">
         <div class="card-header"><strong>Datos Personales</strong></div>
         <div class="card-body">
             <form method="post" asp-page-handler="SaveProfile" id="formPerfil">
+                <input type="hidden" name="ProfilePhotoUrl" id="hiddenProfilePhotoUrl" value="@Model.ProfilePhotoUrl" />
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label for="nombre" class="form-label">Nombre</label>
@@ -152,6 +172,7 @@
 
 @section Scripts {
     @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript">
         // Copia la lógica de mapa de UserRegister aquí, ajustando los IDs si es necesario
         let map, marker, geocoder, placeAutocomplete;
@@ -243,6 +264,36 @@
             } else {
                 window.initMap = initMap;
             }
+            // Cloudinary upload logic for profile photo
+            document.getElementById('btnUploadProfilePhoto').addEventListener('click', function () {
+                var fileInput = document.getElementById('profilePhotoFile');
+                var file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire('Error', 'Selecciona una imagen primero.', 'error');
+                    return;
+                }
+                var formData = new FormData();
+                formData.append('photo', file);
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('profilePhotoUrl').value = url;
+                        document.getElementById('profilePhotoPreview').src = url;
+                        document.getElementById('hiddenProfilePhotoUrl').value = url; // Update hidden field
+                        Swal.fire('¡Éxito!', 'Foto de perfil subida correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo obtener la URL de la foto.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error al subir la imagen.', 'error');
+                });
+            });
         });
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=@(Configuration["GoogleMaps:ApiKey"])&libraries=places,marker,geocoding&callback=initMap" async defer loading="async"></script>
