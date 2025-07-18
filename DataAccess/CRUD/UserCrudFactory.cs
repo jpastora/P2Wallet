@@ -139,6 +139,15 @@ namespace DataAccess.CRUD
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
+
+        public void UpdateBiometricStatus(BaseDTO user)
+        {
+            //var user = baseDTO as User;
+            var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_USER_BIOMETRIC_STATUS_PR" };
+            sqlOperation.AddIntParam("@P_UserID", user.ID);
+            _sqlDao.ExecuteProcedure(sqlOperation);
+        }
+
         private User BuildUser(Dictionary<string, object> row)
         {
             var user = new User()

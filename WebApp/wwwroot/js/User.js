@@ -61,6 +61,47 @@
             console.log("User created successfully");
         });
     }
+
+    this.UpdateBiometricInfo = function ()
+    {
+        var userDTO = {};
+
+        //Atributos por defecto
+        userDTO.ID = 17;
+        userDTO.IDNumber = "";
+        userDTO.Created = "2000-01-01";
+        userDTO.Updated = "2000-01-01";
+        userDTO.ProfilePhotoUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg";
+        userDTO.IDPhotoFrontUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg";
+        userDTO.IDPhotoBackUrl = "https://res.cloudinary.com/dxn6cnvz7/image/upload/v1752335713/cld-sample-5.jpg";
+        userDTO.EmailVerified = "Active";
+        userDTO.MobileVerified = "Active";
+        userDTO.BiometricVerified = "Inactive";
+        userDTO.ValidationStatus = "Inactive";
+        userDTO.SMSNotification = "Inactive";
+        userDTO.EmailNotification = "Inactive";
+        userDTO.PushNotification = "Inactive";
+        userDTO.BirthDate = new Date("2000-01-01T00:00:00Z").toISOString();
+        userDTO.Role = "User";
+        userDTO.FirstName = "";
+        userDTO.LastName = "";
+        userDTO.Email = "";
+        var phoneValue = "";
+        userDTO.MobilePhone = "";
+        userDTO.Latitude = 0.00;
+        userDTO.Longitude = 0.00
+        userDTO.Password = "";
+
+
+        var ca = new ControlActions();
+        var urlService = this.ApiEndpoint + "/UpdateBiometricInfo";
+
+        ca.PutToAPI(urlService, userDTO, function ()
+        {
+            console.log("Biometric information updated successfully for user ID: " + userId);
+        });
+
+    }
 }
 
 

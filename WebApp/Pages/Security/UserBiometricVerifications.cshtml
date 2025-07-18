@@ -4,6 +4,8 @@
     ViewData["Title"] = "Validacion de Usuario";
 }
 
+<script src="~/js/User.js"></script>
+
 <div class="container py-5 text-center">
      <form id="verifyForm">
         <h3 class="mb-4">Verificación Biométrica</h3>
@@ -162,6 +164,7 @@
             e.preventDefault();
 
             const formData = new FormData();
+            const userController = new UserViewController();
 
             // Convertir los base64 a blobs
             function dataURLtoBlob(dataurl) {
@@ -189,7 +192,7 @@
             resultDiv.textContent = 'Procesando...';
 
             try {
-                const response = await fetch('https://7a3dca7e0584.ngrok-free.app/verify', {
+                const response = await fetch('http://localhost:5000/verify', {
                     method: 'POST',
                     body: formData
                 });
@@ -199,7 +202,10 @@
                 if (!response.ok) {
                     resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
                 } else {
-                    resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    //resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    //var userDTO = { ID: 17 };
+                    userController.UpdateBiometricInfo();
+
                 }
             } catch (error) {
                 resultDiv.innerHTML = `<strong>Error de red:</strong> ${error.message}`;

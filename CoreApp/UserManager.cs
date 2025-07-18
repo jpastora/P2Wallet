@@ -76,6 +76,20 @@ namespace CoreApp
             }
         }
 
+        // Actualiza la información biometrica de un usuario validado.
+        public void UpdateBiometric(User user)
+        {
+            try
+            {
+                var userCrud = new UserCrudFactory();
+                userCrud.UpdateBiometricStatus(user); // Actualiza la información biométrica del usuario
+            }
+            catch (Exception ex)
+            {
+                ManageException(ex); // Maneja la excepción usando el método base
+            }
+        }
+
         // Elimina un usuario del sistema.
         public void DeleteUser(User user)
         {
