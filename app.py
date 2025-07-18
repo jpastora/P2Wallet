@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify
 from deepface import DeepFace
 import cv2
 import numpy as np
-from io import BytesIO
 
 app = Flask(__name__)
 
@@ -26,8 +25,28 @@ def extract_face_from_id(img_id):
     (x, y, w, h) = faces[0]
     return img_id[y:y+h, x:x+w]
 
-@app.route('/verify', methods=['POST'])
+@app.route('/', methods=['GET'])
+def index():
+    return '''
+        <h1>Verificación Facial</h1>
+        <p>Usa el método POST en <code>/verify</code> para enviar una selfie y una imagen de ID.</p>
+        <p>Puedes usar Postman o cURL para enviar los archivos con los campos <code>selfie</code> e <code>id_image</code>.</p>
+        <p>Ejemplo con cURL:</p>
+        <pre>
+curl -X POST http://localhost:5000/verify \\
+  -F "selfie=@ruta/a/selfie.jpg" \\
+  -F "id_image=@ruta/a/id.jpg"
+        </pre>
+    '''
+
+@app.route('/verify', methods=['GET', 'POST'])
 def verify_faces():
+    if request.method == 'GET':
+        return '''
+            <h2>Ruta POST: /verify</h2>
+            <p>Envía una selfie y una imagen de ID como archivos usando POST.</p>
+        ''', 200
+
     if 'selfie' not in request.files or 'id_image' not in request.files:
         return jsonify({'error': 'Se requieren los archivos "selfie" e "id_image"'}), 400
 
