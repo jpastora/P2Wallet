@@ -28,6 +28,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_ContactPhone", merchant.ContactPhone);
             sqlOperation.AddStringParameter("@P_Email", merchant.Email);
             sqlOperation.AddDoubleParam("@P_CommissionPercentage", merchant.CommissionPercentage);
+            sqlOperation.AddStringParameter("@P_LogoImage", merchant.LogoImage);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
