@@ -10,7 +10,7 @@
     <!-- Resumen de Perfil -->
     <div class="text-center mb-4">
         <img src="@profilePhoto" alt="Foto de perfil" class="rounded-circle profile-img mb-2" style="width:100px;height:100px;object-fit:cover;">
-        <h4>@Model.FirstName</h4>
+        <h4>@Model.FirstName @Model.LastName</h4>
         <p class="text-muted">@Model.Email</p>
         <div class="d-flex justify-content-center gap-2 mt-2">
             <a href="/User/UserPanel" class="btn btn-outline-primary btn-sm">Panel</a>
@@ -29,9 +29,15 @@
         <div class="card-header"><strong>Datos Personales</strong></div>
         <div class="card-body">
             <form method="post" asp-page-handler="SaveProfile" id="formPerfil">
-                <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre Completo</label>
-                    <input type="text" class="form-control" id="nombre" name="FirstName" value="@Model.FirstName">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="nombre" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" name="FirstName" value="@Model.FirstName">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="apellido" class="form-label">Apellido</label>
+                        <input type="text" class="form-control" id="apellido" name="LastName" value="@Model.LastName">
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="telefono" class="form-label">Teléfono</label>
@@ -40,6 +46,21 @@
                 <div class="mb-3">
                     <label for="correo" class="form-label">Correo Electrónico</label>
                     <input type="email" class="form-control" id="correo" name="Email" value="@Model.Email" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input id="autocomplete" type="text" class="form-control" placeholder="Escribe tu dirección o lugar..." autocomplete="off" />
+                </div>
+                <div class="mb-3 d-flex align-items-end">
+                    <button class="btn btn-light w-100" type="button" id="btnSearchAddress">Seleccionar dirección</button>
+                </div>
+                <input type="hidden" id="txtLatitude" name="Latitude" value="@Model.Latitude">
+                <input type="hidden" id="txtLongitude" name="Longitude" value="@Model.Longitude">
+                <div class="mb-3">
+                    <div id="map-container" class="position-relative">
+                        <div id="map" style="height: 300px; width: 100%; border-radius: 8px;"></div>
+                    </div>
+                    <small class="form-text text-muted">Busca, haz clic en el mapa o arrastra el pin para ajustar tu ubicación.</small>
                 </div>
                 <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
             </form>
@@ -72,59 +93,157 @@
     <div class="card mb-4">
         <div class="card-header"><strong>Notificaciones</strong></div>
         <div class="card-body">
-            <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="notifEmail" checked>
-                <label class="form-check-label" for="notifEmail">Notificaciones por Email</label>
-            </div>
-            <div class="form-check form-switch mb-2">
-                <input class="form-check-input" type="checkbox" id="notifPush">
-                <label class="form-check-label" for="notifPush">Transacciones Push</label>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" id="notifOfertas">
-                <label class="form-check-label" for="notifOfertas">Ofertas y Promociones</label>
-            </div>
+            <form method="post" asp-page-handler="SaveNotifications" id="formNotificaciones">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="notifEmail" name="EmailNotification" @(Model.EmailNotification == "Active" ? "checked" : "")>
+                    <label class="form-check-label" for="notifEmail">Notificaciones por Email</label>
+                </div>
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="notifPush" name="PushNotification" @(Model.PushNotification == "Active" ? "checked" : "")>
+                    <label class="form-check-label" for="notifPush">Notificaciones Push</label>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="notifSms" name="SMSNotification" @(Model.SMSNotification == "Active" ? "checked" : "")>
+                    <label class="form-check-label" for="notifSms">Notificaciones SMS</label>
+                </div>
+                <button type="submit" class="btn btn-outline-primary w-100 mt-3">Guardar Notificaciones</button>
+            </form>
         </div>
     </div>
 
     <!-- Roles Administrativos -->
-    @if (Model.Role == "User")
-    {
-        <div class="card mb-4">
-            <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
-            <div class="card-body">
-                <ul class="list-group">
-                    @if (Model.AdminMerchants != null && Model.AdminMerchants.Count > 0)
+    <div class="card mb-4">
+        <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
+        <div class="card-body">
+            <ul class="list-group">
+                @if (Model.AdminMerchants != null && Model.AdminMerchants.Count > 0)
+                {
+                    @foreach (var merchant in Model.AdminMerchants)
                     {
-                        @foreach (var merchant in Model.AdminMerchants)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-shop me-2 text-secondary"></i>Comercio: <strong>@merchant.MerchantName</strong></span>
-                                <a href="/Admin/Merchant/@merchant.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
-                            </li>
-                        }
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-shop me-2 text-secondary"></i>Comercio: <strong>@merchant.MerchantName</strong></span>
+                            <a href="/Admin/Merchant/@merchant.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                        </li>
                     }
-                    @if (Model.AdminEntities != null && Model.AdminEntities.Count > 0)
+                }
+                @if (Model.AdminEntities != null && Model.AdminEntities.Count > 0)
+                {
+                    @foreach (var entity in Model.AdminEntities)
                     {
-                        @foreach (var entity in Model.AdminEntities)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-bank me-2 text-primary"></i>Entidad: <strong>@entity.EntityName</strong></span>
-                                <a href="/Admin/Entity/@entity.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
-                            </li>
-                        }
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-bank me-2 text-primary"></i>Entidad: <strong>@entity.EntityName</strong></span>
+                            <a href="/Admin/Entity/@entity.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                        </li>
                     }
-                    @if ((Model.AdminMerchants == null || Model.AdminMerchants.Count == 0) && (Model.AdminEntities == null || Model.AdminEntities.Count == 0))
-                    {
-                        <li class="list-group-item">No tienes comercios ni entidades asignadas.</li>
-                    }
-                </ul>
-            </div>
+                }
+                @if ((Model.AdminMerchants == null || Model.AdminMerchants.Count == 0) && (Model.AdminEntities == null || Model.AdminEntities.Count == 0))
+                {
+                    <li class="list-group-item">No tienes comercios ni entidades asignadas.</li>
+                }
+            </ul>
         </div>
-    }
+    </div>
 
     <!-- Cerrar Sesión -->
     <div class="d-grid">
         <button class="btn btn-danger" id="btnCerrarSesion">Cerrar Sesión</button>
     </div>
 </div>
+
+@section Scripts {
+    @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+    <script type="text/javascript">
+        // Copia la lógica de mapa de UserRegister aquí, ajustando los IDs si es necesario
+        let map, marker, geocoder, placeAutocomplete;
+        function initMap() {
+            const latInput = document.getElementById('txtLatitude');
+            const lngInput = document.getElementById('txtLongitude');
+            const mapDiv = document.getElementById('map');
+            const addressInput = document.getElementById('autocomplete');
+            const searchButton = document.getElementById('btnSearchAddress');
+            const initialLocation = { lat: parseFloat(latInput.value) || 9.934739, lng: parseFloat(lngInput.value) || -84.087502 };
+
+            geocoder = new google.maps.Geocoder();
+            map = new google.maps.Map(mapDiv, {
+                zoom: 14,
+                center: initialLocation,
+                mapId: 'YAVI_PROFILE_MAP'
+            });
+
+            marker = new google.maps.marker.AdvancedMarkerElement({
+                map,
+                position: initialLocation,
+                gmpDraggable: true
+            });
+
+            latInput.value = initialLocation.lat;
+            lngInput.value = initialLocation.lng;
+
+            placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+            placeAutocomplete.input = addressInput;
+            placeAutocomplete.addEventListener('gmp-placechange', (event) => {
+                const place = event.detail.place;
+                if (place && place.geometry && place.geometry.location) {
+                    const location = place.geometry.location;
+                    map.setCenter(location);
+                    marker.position = location;
+                    latInput.value = location.lat();
+                    lngInput.value = location.lng();
+                }
+            });
+
+            searchButton.addEventListener('click', function () {
+                if (addressInput.value) {
+                    geocoder.geocode({ address: addressInput.value }, function (results, status) {
+                        if (status === 'OK' && results[0]) {
+                            const loc = results[0].geometry.location;
+                            map.setCenter(loc);
+                            marker.position = loc;
+                            latInput.value = loc.lat();
+                            lngInput.value = loc.lng();
+                        } else {
+                            alert('La dirección no se encontró: ' + status);
+                        }
+                    });
+                }
+            });
+
+            addressInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchButton.click();
+                }
+            });
+
+            marker.addListener('dragend', (event) => {
+                const pos = event.latLng;
+                latInput.value = pos.lat();
+                lngInput.value = pos.lng();
+                geocoder.geocode({ location: pos }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        addressInput.value = results[0].formatted_address;
+                    }
+                });
+            });
+
+            map.addListener('click', (event) => {
+                marker.position = event.latLng;
+                latInput.value = event.latLng.lat();
+                lngInput.value = event.latLng.lng();
+                geocoder.geocode({ location: event.latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        addressInput.value = results[0].formatted_address;
+                    }
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.google && window.google.maps) {
+                initMap();
+            } else {
+                window.initMap = initMap;
+            }
+        });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=@(Configuration["GoogleMaps:ApiKey"])&libraries=places,marker,geocoding&callback=initMap" async defer loading="async"></script>
+}

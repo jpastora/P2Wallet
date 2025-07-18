@@ -14,7 +14,19 @@ namespace WebApp.Pages.User
         [BindProperty]
         public string FirstName { get; set; }
         [BindProperty]
+        public string LastName { get; set; }
+        [BindProperty]
         public string MobilePhone { get; set; }
+        [BindProperty]
+        public double Latitude { get; set; }
+        [BindProperty]
+        public double Longitude { get; set; }
+        [BindProperty]
+        public string EmailNotification { get; set; }
+        [BindProperty]
+        public string PushNotification { get; set; }
+        [BindProperty]
+        public string SMSNotification { get; set; }
         [BindProperty]
         public string Password { get; set; }
         [BindProperty]
@@ -35,11 +47,17 @@ namespace WebApp.Pages.User
                 var currentUser = userManager.RetrieveUserByEmail(new DTOs.User { Email = email });
                 if (currentUser != null)
                 {
-                    FirstName = currentUser.FirstName + (string.IsNullOrWhiteSpace(currentUser.LastName) ? "" : " " + currentUser.LastName);
+                    FirstName = currentUser.FirstName;
+                    LastName = currentUser.LastName;
                     MobilePhone = currentUser.MobilePhone;
                     Email = currentUser.Email;
                     ProfilePhotoUrl = currentUser.ProfilePhotoUrl;
                     Role = currentUser.Role;
+                    Latitude = currentUser.Latitude;
+                    Longitude = currentUser.Longitude;
+                    EmailNotification = currentUser.EmailNotification;
+                    PushNotification = currentUser.PushNotification;
+                    SMSNotification = currentUser.SMSNotification;
 
                     if (Role == "Admin")
                     {
@@ -59,13 +77,33 @@ namespace WebApp.Pages.User
                 var currentUser = userManager.RetrieveUserByEmail(new DTOs.User { Email = email });
                 if (currentUser != null)
                 {
-                    // Separar nombre y apellido si es posible
-                    var names = FirstName?.Split(' ');
-                    currentUser.FirstName = names != null && names.Length > 0 ? names[0] : FirstName;
-                    currentUser.LastName = names != null && names.Length > 1 ? string.Join(" ", names, 1, names.Length - 1) : "";
+                    currentUser.FirstName = FirstName;
+                    currentUser.LastName = LastName;
                     currentUser.MobilePhone = MobilePhone;
+                    currentUser.Latitude = Latitude;
+                    currentUser.Longitude = Longitude;
                     userManager.UpdateUser(currentUser);
                     Message = "Datos personales actualizados correctamente.";
+                }
+            }
+            OnGet();
+            return Page();
+        }
+
+        public IActionResult OnPostSaveNotifications()
+        {
+            var email = User.Identity?.Name;
+            if (!string.IsNullOrEmpty(email))
+            {
+                var userManager = new UserManager();
+                var currentUser = userManager.RetrieveUserByEmail(new DTOs.User { Email = email });
+                if (currentUser != null)
+                {
+                    currentUser.EmailNotification = Request.Form["EmailNotification"] == "on" ? "Active" : "Inactive";
+                    currentUser.PushNotification = Request.Form["PushNotification"] == "on" ? "Active" : "Inactive";
+                    currentUser.SMSNotification = Request.Form["SMSNotification"] == "on" ? "Active" : "Inactive";
+                    userManager.UpdateUser(currentUser);
+                    Message = "Preferencias de notificación actualizadas.";
                 }
             }
             OnGet();

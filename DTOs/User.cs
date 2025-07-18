@@ -1,4 +1,4 @@
-﻿    using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +28,5 @@ namespace DTOs
         public string EmailNotification { get; set; }
         public string PushNotification { get; set; }
         public string Role { get; set; }
-
     }
 }
