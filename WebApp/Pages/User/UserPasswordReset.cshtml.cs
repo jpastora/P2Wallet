@@ -53,16 +53,14 @@ namespace WebApp.Pages.User
                 return Page();
             }
             var userManager = new UserManager();
-            // Recuperar el usuario completo de la base de datos
             var user = userManager.RetrieveUserByEmail(new DTOs.User { Email = Email });
             if (user == null)
             {
                 ErrorMessage = "No se encontró el usuario.";
                 return Page();
             }
-            // Solo actualiza la contraseña, pero mantiene el resto de propiedades
-            user.Password = NewPassword;
-            userManager.UpdateUser(user);
+            // Cambia la contraseña usando el nuevo método
+            userManager.ChangeUserPassword(user.ID, NewPassword);
             _cache.Remove($"PWD_RESET_{Email}");
             SuccessMessage = "¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión.";
             return Page();

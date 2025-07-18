@@ -42,7 +42,7 @@ BEGIN
         MobileVerified = @P_MobileVerified,
         BiometricVerified = @P_BiometricVerified,
         ValidationStatus = @P_ValidationStatus,
-        SMSNotificaction = @P_SMSNotificaction,
+        SMSNotification = @P_SMSNotification,
         PushNotification = @P_PushNotification,
         EmailNotification = @P_EmailNotification,
         Role = @P_Role,
