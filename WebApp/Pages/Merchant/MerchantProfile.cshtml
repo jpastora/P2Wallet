@@ -38,7 +38,14 @@
                 </div>
                 <div class="mb-3">
                     <label for="logoImage" class="form-label">Logo (URL)</label>
-                    <input type="text" class="form-control" id="logoImage" name="LogoImage" value="@Model.LogoImage">
+                    <input type="text" class="form-control" id="logoImage" name="LogoImage" value="@Model.LogoImage" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="logoFile" class="form-label">Logo (Imagen)</label>
+                    <input type="file" class="form-control" id="logoFile" accept="image/*">
+                    <button type="button" class="btn btn-primary mt-2" id="btnUploadLogo">Subir Logo</button>
+                        <img id="logoPreview" src="@Model.LogoImage" alt="Vista previa del logo" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:8px;" />
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label for="contactPhone" class="form-label">Teléfono de Contacto</label>
@@ -201,6 +208,35 @@
                     confirmButtonText: 'OK'
                 });
             }
+
+            document.getElementById('btnUploadLogo').addEventListener('click', function () {
+                var fileInput = document.getElementById('logoFile');
+                var file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire('Error', 'Selecciona una imagen primero.', 'error');
+                    return;
+                }
+                var formData = new FormData();
+                formData.append('photo', file);
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('logoImage').value = url;
+                        document.getElementById('logoPreview').src = url;
+                        Swal.fire('¡Éxito!', 'Logo subido correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo obtener la URL del logo.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error al subir la imagen.', 'error');
+                });
+            });
         });
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=@(Configuration["GoogleMaps:ApiKey"])&libraries=places,marker,geocoding&callback=initMap" async defer loading="async"></script>
