@@ -4,6 +4,8 @@
     ViewData["Title"] = "Registro de Comercio";
 }
 
+<script src="~/js/merchant.js"></script>
+
 <div class="container py-5">
     <div class="row">
         <div class="col-md-8 col-lg-6 mx-auto">
@@ -29,7 +31,7 @@
                     <!-- Teléfono -->
                     <div class="mb-3">
                         <label for="telefono" class="form-label">Teléfono</label>
-                        <input type="tel" class="form-control" id="telefono" name="Telefono" required>
+                        <input type="tel" class="form-control" id="txtPhone" name="Telefono" required>
                         <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
                     </div>
 
@@ -118,7 +120,7 @@
                     <input type="hidden" id="longitud" name="Longitud" required>
 
                     <!-- Botón de Registro -->
-                    <button type="submit" class="btn btn-primary w-100 mt-3 py-2">
+                    <button id="btnCreate" type="button" class="btn btn-primary w-100 mt-3 py-2">
                         <i class="bi bi-shop"></i> Registrar Comercio
                     </button>
                 </form>

@@ -18,11 +18,23 @@ namespace WebAPI.Controllers
             {
                 var merchantManager = new MerchantManager();
                 merchantManager.CreateMerchant(merchant);
-                return Ok("Merchant created successfully.");
+                // Retorna un objeto JSON con mensaje de éxito
+                return Ok(new
+                {
+                    message = "Comercio agregado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500, new
+                {
+                    // Retorna un objeto JSON con mensaje de error
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
@@ -30,15 +42,26 @@ namespace WebAPI.Controllers
         [Route("Update")]
         public ActionResult UpdateMerchant(Merchant merchant)
         {
-         try 
-         {
-             var merchantManager = new MerchantManager();
-             merchantManager.UpdateMerchant(merchant);
-             return Ok("Merchant updated successfully.");
-         }
-         catch (Exception ex)
-         {
-             return StatusCode(500, ex.Message);
+             try 
+             {
+                 var merchantManager = new MerchantManager();
+                 merchantManager.UpdateMerchant(merchant);
+                    return Ok(new
+                    {
+                        message = "Comercio actualizado exitosamente.",
+                        icon = "success",
+                        title = "¡Éxito!"
+                    });
+                }
+             catch (Exception ex)
+             {
+                return StatusCode(500, new
+                {
+                    // Retorna un objeto JSON con mensaje de error
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
