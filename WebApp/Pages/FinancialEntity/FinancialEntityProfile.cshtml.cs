@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace WebApp.Pages.FinancialEntity
 {
@@ -182,6 +183,78 @@ namespace WebApp.Pages.FinancialEntity
                 Message = $"Error al guardar: {ex.Message}";
                 await ReloadData();
             }
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostAssignUser(string userEmail)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userEmail))
+                {
+                    Message = "El email del usuario es obligatorio.";
+                    await ReloadData();
+                    return Page();
+                }
+
+                // Validar que el FinancialEntityID sea válido
+                if (FinancialEntityID <= 0)
+                {
+                    Message = "Error: ID de entidad financiera inválido.";
+                    await ReloadData();
+                    return Page();
+                }
+
+                var userManager = new UserManager();
+                var userEntityManager = new UserEntityManager();
+                var financialEntityManager = new FinancialEntityManager();
+
+                // Verificar que la entidad financiera existe
+                var entity = financialEntityManager.RetrieveFinancialEntityById(FinancialEntityID);
+                if (entity == null)
+                {
+                    Message = "Error: La entidad financiera no existe.";
+                    await ReloadData();
+                    return Page();
+                }
+
+                // Buscar usuario por email
+                var user = userManager.RetrieveUserByEmail(new DTOs.User { Email = userEmail.Trim() });
+                if (user == null)
+                {
+                    Message = $"No existe un usuario con el email: {userEmail}";
+                    await ReloadData();
+                    return Page();
+                }
+
+                // Verificar si ya existe la asignación
+                var existingAssignments = userEntityManager.RetrieveAllUserEntities();
+                var existingAssignment = existingAssignments.FirstOrDefault(ue => ue.UserID == user.ID && ue.FinancialEntityID == FinancialEntityID);
+
+                if (existingAssignment != null)
+                {
+                    Message = $"El usuario {user.FirstName} {user.LastName} ya está asignado a esta entidad financiera.";
+                    await ReloadData();
+                    return Page();
+                }
+
+                // Crear nueva asignación
+                var userEntity = new UserEntity
+                {
+                    UserID = user.ID,
+                    FinancialEntityID = FinancialEntityID
+                };
+
+                userEntityManager.CreateUserEntity(userEntity);
+                Message = $"Usuario {user.FirstName} {user.LastName} asignado exitosamente a la entidad financiera.";
+            }
+            catch (Exception ex)
+            {
+                Message = $"Error al asignar usuario: {ex.Message}";
+                System.Diagnostics.Debug.WriteLine($"Error detallado: FinancialEntityID={FinancialEntityID}, UserEmail={userEmail}, Exception={ex}");
+            }
+
+            await ReloadData();
             return Page();
         }
 
