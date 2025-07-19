@@ -4,6 +4,8 @@
 @model WebApp.Pages.User.UserProfileModel
 @{
     var profilePhoto = Model.ProfilePhotoUrl ?? "https://picsum.photos/seed/perfil/120";
+    var hasCommercesOrEntities = (Model.AdminMerchants != null && Model.AdminMerchants.Count > 0) || 
+                                 (Model.AdminEntities != null && Model.AdminEntities.Count > 0);
 }
 <!-- CONTENIDO -->
 <div class="container py-4 mb-5">
@@ -131,38 +133,37 @@
         </div>
     </div>
 
-    <!-- Roles Administrativos -->
-    <div class="card mb-4">
-        <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
-        <div class="card-body">
-            <ul class="list-group">
-                @if (Model.AdminMerchants != null && Model.AdminMerchants.Count > 0)
-                {
-                    @foreach (var merchant in Model.AdminMerchants)
+    <!-- Roles Administrativos - Solo mostrar si el usuario tiene comercios o entidades -->
+    @if (hasCommercesOrEntities)
+    {
+        <div class="card mb-4">
+            <div class="card-header"><strong>Gestionar Comercios y Entidades</strong></div>
+            <div class="card-body">
+                <ul class="list-group">
+                    @if (Model.AdminMerchants != null && Model.AdminMerchants.Count > 0)
                     {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-shop me-2 text-secondary"></i>Comercio: <strong>@merchant.MerchantName</strong></span>
-                            <a href="/Merchant/MerchantProfile?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
-                        </li>
+                        @foreach (var merchant in Model.AdminMerchants)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-shop me-2 text-secondary"></i>Comercio: <strong>@merchant.MerchantName</strong></span>
+                                <a href="/Merchant/MerchantProfile?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                            </li>
+                        }
                     }
-                }
-                @if (Model.AdminEntities != null && Model.AdminEntities.Count > 0)
-                {
-                    @foreach (var entity in Model.AdminEntities)
+                    @if (Model.AdminEntities != null && Model.AdminEntities.Count > 0)
                     {
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="bi bi-bank me-2 text-primary"></i>Entidad: <strong>@entity.EntityName</strong></span>
-                            <a href="/FinancialEntity/FinancialEntityProfile?FinancialEntityId=@entity.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
-                        </li>
+                        @foreach (var entity in Model.AdminEntities)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-bank me-2 text-primary"></i>Entidad: <strong>@entity.EntityName</strong></span>
+                                <a href="/FinancialEntity/FinancialEntityProfile?FinancialEntityId=@entity.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                            </li>
+                        }
                     }
-                }
-                @if ((Model.AdminMerchants == null || Model.AdminMerchants.Count == 0) && (Model.AdminEntities == null || Model.AdminEntities.Count == 0))
-                {
-                    <li class="list-group-item">No tienes comercios ni entidades asignadas.</li>
-                }
-            </ul>
+                </ul>
+            </div>
         </div>
-    </div>
+    }
 
     <!-- Cerrar Sesión -->
     <div class="d-grid">
