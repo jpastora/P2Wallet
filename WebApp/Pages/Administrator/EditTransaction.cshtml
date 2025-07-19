@@ -1,0 +1,179 @@
+@page
+@model WebApp.Pages.Administrator.EditTransactionModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Editar Transacción";
+}
+
+<h1 class="mb-4">Editar Transacción</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @Model.Message
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información de la Transacción</h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" asp-for="TransactionToEdit.ID" />
+                    
+                    <!-- Campos de solo lectura para información de referencia -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Usuario</label>
+                            <input type="text" class="form-control" value="@Model.GetUserName(Model.TransactionToEdit.UserID)" readonly />
+                            <input type="hidden" asp-for="TransactionToEdit.UserID" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Comercio</label>
+                            <input type="text" class="form-control" value="@Model.GetMerchantName(Model.TransactionToEdit.MerchantID)" readonly />
+                            <input type="hidden" asp-for="TransactionToEdit.MerchantID" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cuenta Bancaria</label>
+                            <input type="text" class="form-control" value="@Model.GetBankAccountInfo(Model.TransactionToEdit.BankAccountID)" readonly />
+                            <input type="hidden" asp-for="TransactionToEdit.BankAccountID" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.TransactionStatus" class="form-label">Estado de la Transacción</label>
+                            <select asp-for="TransactionToEdit.TransactionStatus" class="form-select">
+                                <option value="Pending">Pendiente</option>
+                                <option value="Completed">Completada</option>
+                                <option value="Failed">Fallida</option>
+                                <option value="Cancelled">Cancelada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Campos editables de montos -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.GrossAmount" class="form-label">Monto Bruto</label>
+                            <input asp-for="TransactionToEdit.GrossAmount" type="number" step="0.01" min="0" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.NetAmount" class="form-label">Monto Neto</label>
+                            <input asp-for="TransactionToEdit.NetAmount" type="number" step="0.01" min="0" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.CommissionApplied" class="form-label">Comisión Aplicada</label>
+                            <input asp-for="TransactionToEdit.CommissionApplied" type="number" step="0.01" min="0" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.SalesTaxAmount" class="form-label">Monto de Impuesto</label>
+                            <input asp-for="TransactionToEdit.SalesTaxAmount" type="number" step="0.01" min="0" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.TaxRateApplied" class="form-label">Tasa de Impuesto Aplicada (%)</label>
+                            <input asp-for="TransactionToEdit.TaxRateApplied" type="number" step="0.01" min="0" max="100" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.Timestamp" class="form-label">Fecha y Hora</label>
+                            <input asp-for="TransactionToEdit.Timestamp" type="datetime-local" class="form-control" />
+                        </div>
+                    </div>
+
+                    <!-- Promociones (opcional) -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.MerchantPromotionID" class="form-label">Promoción de Comercio (ID)</label>
+                            <input asp-for="TransactionToEdit.MerchantPromotionID" type="number" min="1" class="form-control" />
+                            <small class="form-text text-muted">Dejar vacío si no aplica</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TransactionToEdit.FinancialPromotionID" class="form-label">Promoción Financiera (ID)</label>
+                            <input asp-for="TransactionToEdit.FinancialPromotionID" type="number" min="1" class="form-control" />
+                            <small class="form-text text-muted">Dejar vacío si no aplica</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/Administrator/AdministratorPanelTransactions" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información Adicional</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>ID de Transacción:</strong> #@Model.TransactionToEdit.ID</p>
+                <p><strong>Usuario ID:</strong> @Model.TransactionToEdit.UserID</p>
+                <p><strong>Comercio ID:</strong> @Model.TransactionToEdit.MerchantID</p>
+                <p><strong>Cuenta Bancaria ID:</strong> @Model.TransactionToEdit.BankAccountID</p>
+                
+                <hr>
+                
+                <h6>Estado Actual</h6>
+                @{
+                    var statusClass = Model.TransactionToEdit.TransactionStatus switch
+                    {
+                        "Completed" => "bg-success",
+                        "Pending" => "bg-warning text-dark",
+                        "Failed" => "bg-danger",
+                        "Cancelled" => "bg-secondary",
+                        _ => "bg-secondary"
+                    };
+                }
+                <span class="badge @statusClass">
+                    @EditTransactionModel.EstadoEspanol(Model.TransactionToEdit.TransactionStatus)
+                </span>
+                
+                <hr>
+                
+                <h6>Cálculos</h6>
+                @if (Model.TransactionToEdit.GrossAmount > 0)
+                {
+                    var taxPercentage = Model.TransactionToEdit.GrossAmount > 0 ? 
+                        (Model.TransactionToEdit.SalesTaxAmount / Model.TransactionToEdit.GrossAmount) * 100 : 0;
+                    var commissionPercentage = Model.TransactionToEdit.NetAmount > 0 ? 
+                        (Model.TransactionToEdit.CommissionApplied / Model.TransactionToEdit.NetAmount) * 100 : 0;
+                    
+                    <p><strong>% Impuesto:</strong> @taxPercentage.ToString("0.0")%</p>
+                    <p><strong>% Comisión:</strong> @commissionPercentage.ToString("0.0")%</p>
+                    <p><strong>Diferencia Bruto-Neto:</strong> ?@((Model.TransactionToEdit.GrossAmount - Model.TransactionToEdit.NetAmount).ToString("N0"))</p>
+                }
+                
+                @if (Model.TransactionToEdit.MerchantPromotionID.HasValue || Model.TransactionToEdit.FinancialPromotionID.HasValue)
+                {
+                    <hr>
+                    <h6>Promociones Aplicadas</h6>
+                    @if (Model.TransactionToEdit.MerchantPromotionID.HasValue)
+                    {
+                        <p><strong>Promoción Comercio:</strong> #@Model.TransactionToEdit.MerchantPromotionID</p>
+                    }
+                    @if (Model.TransactionToEdit.FinancialPromotionID.HasValue)
+                    {
+                        <p><strong>Promoción Financiera:</strong> #@Model.TransactionToEdit.FinancialPromotionID</p>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

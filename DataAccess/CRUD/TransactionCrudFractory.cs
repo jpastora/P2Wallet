@@ -82,8 +82,10 @@ namespace DataAccess.CRUD
         public override void Update(BaseDTO baseDTO)
         {
             var transaction = baseDTO as Transaction;
-            var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_TRANSACTION_pr" };
+            var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_TRANSACTION_PR" };
 
+            // Include all parameters as expected by the stored procedure
+            // The stored procedure will handle which fields can actually be updated
             sqlOperation.AddIntParam("@P_TransactionID", transaction.ID);
             sqlOperation.AddIntParam("@P_UserID", transaction.UserID);
             sqlOperation.AddIntParam("@P_MerchantID", transaction.MerchantID);
