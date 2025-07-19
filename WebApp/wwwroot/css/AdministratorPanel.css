@@ -1,0 +1,467 @@
+﻿/* Panel Administrativo CSS */
+
+/* Layout base */
+.admin-layout {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.sidebar {
+    min-height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.content {
+    margin-left: 250px;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    transition: margin-left 0.3s ease;
+}
+
+/* Sidebar styling */
+.sidebar h4 {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem !important;
+}
+
+.sidebar .nav-link {
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.25rem;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff !important;
+    transform: translateX(2px);
+}
+
+.sidebar .nav-link.active {
+    background-color: #3498db;
+    color: #fff !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+/* Navbar administrativo */
+.admin-navbar {
+    background-color: #fff !important;
+    border-bottom: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.admin-navbar .navbar-brand {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Main content */
+.admin-main {
+    padding: 1.5rem;
+    min-height: calc(100vh - 70px);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 0.75rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card h6 {
+    color: #6c757d;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card h4 {
+    color: #2c3e50;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+}
+
+/* Tables */
+.table {
+    background-color: #fff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+    vertical-align: middle;
+    border-color: #f1f3f4;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(85, 61, 242, 0.03);
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        margin-left: -250px;
+        transition: margin-left 0.3s ease;
+    }
+    
+    .sidebar.show {
+        margin-left: 0;
+    }
+    
+    .content {
+        margin-left: 0;
+    }
+    
+    .admin-main {
+        padding: 1rem;
+    }
+    
+    /* Overlay para móvil */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+        opacity: 1;
+    }
+    
+    .sidebar-open {
+        overflow: hidden;
+    }
+    
+    /* Cards en móvil */
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    /* Tablas responsive */
+    .table-responsive {
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+}
+
+@media (max-width: 576px) {
+    .admin-main {
+        padding: 0.75rem;
+    }
+    
+    .card h4 {
+        font-size: 1.1rem;
+    }
+    
+    .card h6 {
+        font-size: 0.8rem;
+    }
+}
+
+/* Chart containers */
+canvas {
+    max-height: 300px !important;
+}
+
+/* Status badges - ESTADOS EN ESPAÑOL */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Estados específicos en español */
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+    text-transform: none;
+}
+
+/* Estados de transacciones en español */
+.badge.status-completada,
+.badge.status-activo,
+.badge.status-verificado {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge.status-pendiente,
+.badge.status-procesando {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge.status-fallida,
+.badge.status-cancelada,
+.badge.status-rechazado,
+.badge.status-bloqueado {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge.status-inactivo,
+.badge.status-suspendido,
+.badge.status-no-verificado {
+    background-color: #e2e3e5;
+    color: #6c757d;
+}
+
+/* Estados tradicionales de Bootstrap con mejoras */
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Tooltip para badges con estado original */
+.badge[title] {
+    cursor: help;
+    position: relative;
+}
+
+.badge[title]:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+    transition: all 0.2s ease;
+}
+
+/* ESTILOS ESPECÍFICOS PARA DATOS MONETARIOS EN TABLAS */
+
+/* Alineación automática para datos monetarios */
+.table td[data-currency],
+.table th[data-currency] {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-weight: 600;
+}
+
+/* Detectar automáticamente contenido monetario y aplicar alineación */
+.table td:has-text('₡'):not(.text-start):not(.text-center),
+.table td:has-text('$'):not(.text-start):not(.text-center),
+.table td:has-text('€'):not(.text-start):not(.text-center),
+.table th:has-text('₡'):not(.text-start):not(.text-center),
+.table th:has-text('$'):not(.text-start):not(.text-center),
+.table th:has-text('€'):not(.text-start):not(.text-center) {
+    text-align: right !important;
+}
+
+/* Estilo específico para columnas monetarias */
+.table .monetary-column {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    padding-right: 1.2rem !important;
+}
+
+/* Mejorar el espaciado para números monetarios */
+.table td.text-end:contains('₡'),
+.table td.text-end:contains('$'),
+.table td.text-end:contains('€'),
+.table td.text-end:contains('%') {
+    padding-right: 1.2rem !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Headers específicos para columnas monetarias */
+.table th.text-end {
+    padding-right: 1.2rem !important;
+    font-weight: 700;
+}
+
+/* Estilo para porcentajes */
+.table td:contains('%'):not(.badge):not(.text-start):not(.text-center),
+.table th:contains('%'):not(.badge):not(.text-start):not(.text-center) {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Números grandes con separadores de miles */
+.table td:matches(^\d{1,3}(,\d{3})*(\.\d{2})?$):not(.text-start):not(.text-center) {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Clase específica para aplicar manualmente */
+.monetary-cell {
+    text-align: right !important;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    padding-right: 1.2rem !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Responsive para datos monetarios en móviles */
+@media (max-width: 576px) {
+    .table .monetary-column,
+    .table td.text-end,
+    .table th.text-end {
+        padding-right: 0.8rem !important;
+        font-size: 0.875rem;
+    }
+}
+
+/* Mejoras adicionales para tablas */
+.table-hover tbody tr:hover .monetary-cell,
+.table-hover tbody tr:hover td.text-end:contains('₡'),
+.table-hover tbody tr:hover td.text-end:contains('$'),
+.table-hover tbody tr:hover td.text-end:contains('€') {
+    background-color: rgba(85, 61, 242, 0.05) !important;
+}
+
+/* Zebra striping mejorado para columnas monetarias */
+.table-striped tbody tr:nth-of-type(odd) .monetary-cell,
+.table-striped tbody tr:nth-of-type(odd) td.text-end:contains('₡'),
+.table-striped tbody tr:nth-of-type(odd) td.text-end:contains('$'),
+.table-striped tbody tr:nth-of-type(odd) td.text-end:contains('€') {
+    background-color: rgba(248, 249, 250, 0.8);
+}
+
+/* Animaciones y transiciones */
+.card, .btn, .nav-link {
+    transition: all 0.3s ease;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Utilidades adicionales */
+.text-purple { 
+    color: #6f42c1 !important; 
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+}
+
+/* Progress bars con animación */
+.progress-bar { 
+    transition: width 1s ease-in-out; 
+}
+
+/* Badges mejorados */
+.badge {
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+/* Alerts mejorados */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Estilos adicionales para estados en español */
+.table .badge {
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Hover effects para badges */
+.table .badge:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Estados con iconos */
+.badge.has-icon {
+    padding-left: 0.5rem;
+    padding-right: 0.75rem;
+}
+
+.badge.has-icon i {
+    margin-right: 0.25rem;
+}
