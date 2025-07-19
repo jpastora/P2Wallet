@@ -11,11 +11,10 @@
     }
 
     // Metodo crear usuario
-    this.Create = function ()
-    {
+    this.Create = function () {
         var userDTO = {};
 
-        //Atributos por defecto
+        // Atributos por defecto
         userDTO.ID = 0;
         userDTO.IDNumber = "";
         userDTO.Created = "2000-01-01";
@@ -33,16 +32,14 @@
         userDTO.BirthDate = new Date("2000-01-01T00:00:00Z").toISOString();
         userDTO.Role = "User";
 
-        //Atributos del formulario 
+        // Atributos del formulario
         userDTO.FirstName = document.getElementById("txtFirstName").value;
         userDTO.LastName = document.getElementById("txtLastName").value;
         userDTO.Email = document.getElementById("txtEmail").value;
         var phoneValue = document.getElementById("txtPhone").value.trim();
-        // Agregar código de país automáticamente si no está presente
         if (!phoneValue.startsWith("+")) {
             phoneValue = "+506" + phoneValue;
         }
-        // Validar que el teléfono incluya el código de país y tenga el formato correcto
         if (!/^\+\d{1,3}\d{8,}$/.test(phoneValue)) {
             alert("El número telefónico debe incluir el código de país, por ejemplo: +506XXXXXXXX");
             return;
@@ -52,15 +49,26 @@
         userDTO.Longitude = parseFloat(document.getElementById("txtLongitude").value);
         userDTO.Password = document.getElementById("txtPassword").value;
 
-        //Enviar la data al API
+        const email = userDTO.Email;
+        const password = userDTO.Password;
+
         var ca = new ControlActions();
         var urlService = this.ApiEndpoint + "/Create";
 
-        ca.PostToAPI(urlService, userDTO, function ()
-        {
-            console.log("User created successfully");
+        ca.PostToAPI(urlService, userDTO, function () {
+            console.log("Usuario creado exitosamente");
+
+            // Guardar datos en sessionStorage
+            sessionStorage.setItem('autoLoginEmail', email);
+            sessionStorage.setItem('autoLoginPassword', password);
+
+            // Esperar 5 segundos antes de redirigir (puede ser menos)
+            setTimeout(() => {
+                window.location.href = '/Login';
+            }, 3000);
         });
-    }
+    };
+
 
     this.UpdateBiometricInfo = function (user)
     {

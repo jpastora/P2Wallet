@@ -78,7 +78,13 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                // Retorna un objeto JSON con mensaje de error
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 

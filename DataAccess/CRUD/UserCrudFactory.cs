@@ -155,7 +155,6 @@ namespace DataAccess.CRUD
 
             var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_USER_BIOMETRIC_PR" };
             sqlOperation.AddIntParam("@P_UserID", user.ID);
-            sqlOperation.AddStringParameter("@P_BiometricVerified", user.BiometricVerified);
             sqlOperation.AddStringParameter("@P_IDNumber", user.IDNumber);
             sqlOperation.AddDateTimeParam("@P_BirthDate", user.BirthDate);
 

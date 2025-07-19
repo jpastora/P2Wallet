@@ -31,6 +31,21 @@
                     <button type="submit" class="btn btn-primary w-100">Ingresar</button>
                     <hr class="divider" data-content="o" />
                 </form>
+                <script>
+                    // Auto login desde sessionStorage
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const email = sessionStorage.getItem('autoLoginEmail');
+                        const password = sessionStorage.getItem('autoLoginPassword');
+
+                        if (email && password) {
+                            document.querySelector('input[name="Email"]').value = email;
+                            document.querySelector('input[name="Password"]').value = password;
+                            sessionStorage.removeItem('autoLoginEmail');
+                            sessionStorage.removeItem('autoLoginPassword');
+                            document.querySelector('form').submit();
+                        }
+                    });
+                </script>
                 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
                 {
                     <div class="alert alert-danger mt-2">@Model.ErrorMessage</div>
@@ -43,3 +58,50 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const email = sessionStorage.getItem('autoLoginEmail');
+            const password = sessionStorage.getItem('autoLoginPassword');
+
+            if (email && password) {
+                // Ocultar el formulario mientras inicia sesión
+                document.querySelector('form').style.display = 'none'
+
+                // Promesa de delay
+                const delay = new Promise(resolve => setTimeout(resolve, 50000));
+
+                // Promesa del fetch login
+                const loginPromise = fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/User/Login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                try {
+                    // Esperar ambas promesas (mín 5s y login)
+                    const [response] = await Promise.all([loginPromise, delay]);
+
+                    if (!response.ok) {
+                        console.logo('Entramos aqui..')
+                        // Mostrar formulario si el login automático falla
+                        document.querySelector('form').style.display = 'block';
+                        loadingContainer.remove();
+                    }
+                } catch (err) {
+                    console.error('Error en login automático', err);
+                    document.querySelector('form').style.display = 'block';
+                    loadingContainer.remove();
+                } finally {
+                    // Limpiar para evitar repetir el login automático
+                    sessionStorage.removeItem('autoLoginEmail');
+                    sessionStorage.removeItem('autoLoginPassword');
+                }
+            }
+        });
+    </script>
+}
+
+
+

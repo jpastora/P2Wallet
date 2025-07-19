@@ -410,6 +410,10 @@
                     return;
                 }
 
+                // Valores para luego de crear, poder auntenticar y hacer la parte biometrica
+                const email = emailInput.value;
+                const password = pwdInput.value;
+
                 // Si todo es válido, puedes proceder a enviar los datos.
                 userController.Create();
                 form.reset();
