@@ -60,11 +60,9 @@ namespace WebApp.Pages.User
                     SMSNotification = currentUser.SMSNotification;
                     ProfilePhotoUrl = currentUser.ProfilePhotoUrl;
 
-                    if (Role == "Admin")
-                    {
-                        AdminMerchants = userManager.GetMerchantsForUser(currentUser.ID);
-                        AdminEntities = userManager.GetEntitiesForUser(currentUser.ID);
-                    }
+                    // Cargar comercios y entidades para cualquier usuario (no solo Admin)
+                    AdminMerchants = userManager.GetMerchantsForUser(currentUser.ID);
+                    AdminEntities = userManager.GetEntitiesForUser(currentUser.ID);
                 }
             }
         }
