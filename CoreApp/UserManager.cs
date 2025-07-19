@@ -63,16 +63,38 @@ namespace CoreApp
             try
             {
                 var userCrud = new UserCrudFactory();
-                // Si el campo Password no es nulo ni vacío, hashearlo antes de actualizar
+                
+                // CRÍTICO: Solo hashear el password si NO está ya hasheado
+                // Un password hasheado típicamente tiene más de 40 caracteres y contiene caracteres base64
                 if (!string.IsNullOrWhiteSpace(user.Password))
                 {
-                    user.Password = PasswordHelper.HashPassword(user.Password);
+                    // Verificar si el password ya está hasheado (evitar doble hashing)
+                    if (user.Password.Length < 40 || !IsBase64String(user.Password))
+                    {
+                        user.Password = PasswordHelper.HashPassword(user.Password);
+                    }
+                    // Si ya está hasheado (>40 chars y base64), lo dejamos como está
                 }
+                
                 userCrud.Update(user); // Actualiza el usuario en la base de datos
             }
             catch (Exception ex)
             {
                 ManageException(ex); // Maneja la excepción usando el método base
+            }
+        }
+
+        // Método helper para verificar si una cadena es Base64
+        private bool IsBase64String(string s)
+        {
+            try
+            {
+                Convert.FromBase64String(s);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
