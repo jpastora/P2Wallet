@@ -5,13 +5,12 @@
 <button class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">Cuenta</button>
 <ul class="dropdown-menu dropdown-menu-end">
     <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item @(currentPath == "/user/UserProfile" ? "active" : "")" href="/User/UserProfile">Perfil</a></li>
-    <li><a class="dropdown-item" href="#">Registro Comercio</a></li>
-    <li><a class="dropdown-item" href="#">Registro Banco</a></li>
+    <li><a class="dropdown-item @(currentPath == "/user/userprofile" ? "active" : "")" href="/User/UserProfile">Perfil</a></li>
+    <li><a class="dropdown-item" href="/Register/MerchantRegister">Registro Comercio</a></li>
+    <li><a class="dropdown-item" href="/Register/EntityRegister">Registro Banco</a></li>
     <li>
         <form method="post" asp-page="/Logout" style="display:inline;">
             <button type="submit" class="dropdown-item text-danger">Salir</button>
         </form>
     </li>
 </ul>
-

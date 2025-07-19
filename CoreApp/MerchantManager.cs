@@ -69,5 +69,11 @@ namespace CoreApp
                 ManageException(ex); // Maneja la excepción usando el método base
             }
         }
+
+        public Merchant RetrieveByTaxID(string taxId)
+        {
+            var merchantCrud = new MerchantCrudFactory();
+            return merchantCrud.RetrieveByTaxID<Merchant>(taxId);
+        }
     }
 }

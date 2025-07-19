@@ -4,6 +4,7 @@
     ViewData["Title"] = "Registro de Comercio";
 }
 
+
 <script src="~/js/merchant.js"></script>
 
 <div class="container py-5">
@@ -123,6 +124,8 @@
                     <button id="btnCreate" type="button" class="btn btn-primary w-100 mt-3 py-2">
                         <i class="bi bi-shop"></i> Registrar Comercio
                     </button>
+
+                    <input type="hidden" id="userId" value="@Model.UserId" />
                 </form>
             </div>
         </div>

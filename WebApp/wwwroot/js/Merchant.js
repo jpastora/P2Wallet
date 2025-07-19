@@ -72,15 +72,39 @@
             merchantDTO.LogoImage = null;
         }
 
-        // Enviar la data al API
+        // Enviar la data al API para crear el merchant
         const ca = new ControlActions();
         const urlService = this.ApiEndpoint + "/Create";
 
         ca.PostToAPI(urlService, merchantDTO, function () {
-            console.log("Merchant created successfully");
-            alert("Comercio registrado correctamente.");
-            // Opcional: limpiar formulario o redirigir
+            // Obtener el taxId para buscar el merchant recién creado
+            const taxId = merchantDTO.TaxID;
+
+            // Consultar merchant por TaxID para obtener el ID real
+            ca.GetToApi(`Merchant/GetByTaxID?taxId=${encodeURIComponent(taxId)}`, function (merchant) {
+                if (!merchant || !merchant.MerchantID) {
+                    alert("No se pudo obtener el comercio recién creado.");
+                    return;
+                }
+
+                var userMerchantDTO = {
+                    Created: "2000-01-01",
+                    MerchantID: merchant.MerchantID,
+                    UserID: parseInt(document.getElementById("userId").value)
+                };
+
+                console.log(userMerchantDTO.UserID);
+                console.log(userMerchantDTO.MerchantID);
+
+                const urlService2 = "UserMerchant/Create";
+
+                ca.PostToAPI(urlService2, userMerchantDTO, function () {
+                    console.log("Merchant user added successfully");
+                    // Opcional: limpiar formulario o redirigir
+                });
+            });
         });
+
     };
 }
 

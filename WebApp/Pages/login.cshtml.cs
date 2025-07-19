@@ -47,11 +47,12 @@
                     var root = doc.RootElement;
 
                     var biometricStatus = root.GetProperty("biometricVerified").GetString();
+                    var userId = root.GetProperty("id").GetInt32();
 
-                    if (biometricStatus == "Inactive")
+                if (biometricStatus == "Inactive")
                     {
                         // Si no tiene la parte biometrica verificada hace redirect a la pagina y le enviar el user ID para oder verificar la biometrica
-                        var userId = root.GetProperty("id").GetInt32();
+                        
                         return RedirectToPage("/Security/UserBiometricVerifications", new { id = userId });
                     }
                     else
@@ -59,7 +60,8 @@
                         // Login exitoso y biometrica validado, crear cookie de autenticación
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.Name, Email)
+                            new Claim(ClaimTypes.Name, Email),
+                            new Claim("UserId", userId.ToString())
                         };
                         var claimsIdentity = new ClaimsIdentity(claims, "MyCookieAuth");
                         var authProperties = new AuthenticationProperties
