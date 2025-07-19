@@ -98,6 +98,33 @@
         </div>
     </div>
 
+    <!-- Asignar Usuario al Comercio - Solo visible para administradores -->
+    @if (isAdmin)
+    {
+        <div class="card mb-4">
+            <div class="card-header"><strong>Asignar Usuario al Comercio</strong></div>
+            <div class="card-body">
+                <form method="post" asp-page-handler="AssignUser">
+                    <input type="hidden" name="MerchantID" value="@Model.MerchantID" />
+                    <div class="mb-3">
+                        <label for="userEmail" class="form-label">Email del Usuario</label>
+                        <input type="email" class="form-control" id="userEmail" name="userEmail" placeholder="ejemplo@correo.com" required>
+                        <div class="form-text">Ingresa el email del usuario que deseas asignar a este comercio.</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <small>
+                            <i class="bi bi-info-circle me-1"></i>
+                            Al asignar un usuario a este comercio, el usuario podrá acceder al panel de administración del comercio desde su perfil.
+                        </small>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-person-plus me-2"></i>Asignar Usuario
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+
     <!-- Cerrar Sesión -->
     <div class="d-grid">
         <button class="btn btn-danger" id="btnCerrarSesion">Cerrar Sesión</button>
@@ -203,8 +230,8 @@
             const msg = '@Model.Message';
             if (msg && msg.length > 0) {
                 Swal.fire({
-                    icon: msg.includes('correctamente') ? 'success' : 'error',
-                    title: msg.includes('correctamente') ? '¡Guardado!' : 'Error',
+                    icon: msg.includes('correctamente') || msg.includes('exitosamente') ? 'success' : 'error',
+                    title: msg.includes('correctamente') || msg.includes('exitosamente') ? '¡Éxito!' : 'Error',
                     text: msg,
                     confirmButtonText: 'OK'
                 });
