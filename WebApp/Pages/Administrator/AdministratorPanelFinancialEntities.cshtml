@@ -81,15 +81,20 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
-                                        <input type="hidden" name="entityId" value="@entity.ID" />
-                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
-                                            @(isActive ? "Desactivar" : "Activar")
+                                    <div class="btn-group" role="group">
+                                        <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                            <input type="hidden" name="entityId" value="@entity.ID" />
+                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                                @(isActive ? "Desactivar" : "Activar")
+                                            </button>
+                                        </form>
+                                        <a href="/Administrator/EditFinancialEntity?entityId=@entity.ID" class="btn btn-sm btn-outline-primary ms-1">
+                                            Editar
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-info ms-1" data-bs-toggle="modal" data-bs-target="#assignEntityModal@(entity.ID)">
+                                            Asignar Usuario
                                         </button>
-                                    </form>
-                                    <a href="/Administrator/EditFinancialEntity?entityId=@entity.ID" class="btn btn-sm btn-outline-primary ms-1">
-                                        Editar
-                                    </a>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -105,6 +110,48 @@
         }
     </div>
 </div>
+
+<!-- Modales para asignar usuarios -->
+@foreach (var entity in Model.AllFinancialEntities)
+{
+    <div class="modal fade" id="assignEntityModal@(entity.ID)" tabindex="-1" aria-labelledby="assignEntityModalLabel@(entity.ID)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignEntityModalLabel@(entity.ID)">
+                        Asignar Usuario a la Entidad: @entity.EntityName
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" asp-page-handler="AssignEntity">
+                    <div class="modal-body">
+                        <input type="hidden" name="entityId" value="@entity.ID" />
+                        <div class="mb-3">
+                            <label for="userId@(entity.ID)" class="form-label">Seleccionar Usuario</label>
+                            <select class="form-select" name="userId" id="userId@(entity.ID)" required>
+                                <option value="">-- Seleccione un usuario --</option>
+                                @foreach (var user in Model.AllUsers)
+                                {
+                                    <option value="@user.ID">@user.FirstName @user.LastName (@user.Email)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                Al asignar esta entidad financiera al usuario, el usuario podrá acceder al panel de administración de la entidad.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Asignar Entidad</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
 <!-- Paginación simple -->
 @if (Model.TotalPages > 1)

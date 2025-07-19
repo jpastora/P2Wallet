@@ -81,15 +81,20 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
-                                        <input type="hidden" name="merchantId" value="@merchant.ID" />
-                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
-                                            @(isActive ? "Desactivar" : "Activar")
+                                    <div class="btn-group" role="group">
+                                        <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                            <input type="hidden" name="merchantId" value="@merchant.ID" />
+                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                                @(isActive ? "Desactivar" : "Activar")
+                                            </button>
+                                        </form>
+                                        <a href="/Administrator/EditMerchant?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary ms-1">
+                                            Editar
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-info ms-1" data-bs-toggle="modal" data-bs-target="#assignMerchantModal@(merchant.ID)">
+                                            Asignar Usuario
                                         </button>
-                                    </form>
-                                    <a href="/Administrator/EditMerchant?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary ms-1">
-                                        Editar
-                                    </a>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -105,6 +110,48 @@
         }
     </div>
 </div>
+
+<!-- Modales para asignar usuarios -->
+@foreach (var merchant in Model.AllMerchants)
+{
+    <div class="modal fade" id="assignMerchantModal@(merchant.ID)" tabindex="-1" aria-labelledby="assignMerchantModalLabel@(merchant.ID)" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignMerchantModalLabel@(merchant.ID)">
+                        Asignar Usuario al Comercio: @merchant.MerchantName
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" asp-page-handler="AssignMerchant">
+                    <div class="modal-body">
+                        <input type="hidden" name="merchantId" value="@merchant.ID" />
+                        <div class="mb-3">
+                            <label for="userId@(merchant.ID)" class="form-label">Seleccionar Usuario</label>
+                            <select class="form-select" name="userId" id="userId@(merchant.ID)" required>
+                                <option value="">-- Seleccione un usuario --</option>
+                                @foreach (var user in Model.AllUsers)
+                                {
+                                    <option value="@user.ID">@user.FirstName @user.LastName (@user.Email)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                Al asignar este comercio al usuario, el usuario podrá acceder al panel de administración del comercio.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Asignar Comercio</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
 
 <!-- Paginación simple -->
 @if (Model.TotalPages > 1)
