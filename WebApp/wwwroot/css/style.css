@@ -9,27 +9,42 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     color: var(--dark);
+    line-height: 1.6;
 }
 
 .navbar,
 .btn-primary {
     background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
 }
 
-    .btn-primary:hover {
-        background-color: var(--accent-yellow);
-        color: var(--dark);
-    }
+.btn-primary:hover {
+    background-color: var(--accent-yellow);
+    color: var(--dark);
+    border-color: var(--accent-yellow);
+}
+
+.btn-outline-light:hover {
+    background-color: white;
+    color: var(--bs-primary);
+}
 
 .section-title {
     color: var(--bs-primary);
     margin-bottom: 1.5rem;
+    font-weight: 700;
 }
 
 .card {
     border: none;
     border-radius: .75rem;
     box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .bg-light-alt {
@@ -39,6 +54,12 @@ body {
 .carousel-caption {
     background: rgba(0,0,0,0.4);
     border-radius: .5rem;
+    padding: 1.5rem;
+}
+
+.carousel-item img {
+    height: 600px;
+    object-fit: cover;
 }
 
 footer {
@@ -47,14 +68,16 @@ footer {
     padding: 3rem 0;
 }
 
-    footer a {
-        color: var(--bs-secondary);
-        text-decoration: none;
-    }
+footer a {
+    color: var(--bs-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
 
-        footer a:hover {
-            text-decoration: underline;
-        }
+footer a:hover {
+    color: var(--accent-yellow);
+    text-decoration: underline;
+}
 
 /* Banner section */
 .banner {
@@ -84,40 +107,122 @@ footer {
     padding: 0 1rem;
 }
 
+.banner-content h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.banner-content p {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.banner-content .btn-primary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: var(--accent-pink);
+    border: none;
+}
+
+.banner-content .btn-primary:hover {
+    background-color: var(--accent-yellow);
+}
+
+/* Mejoras específicas para la página de inicio */
+.navbar-brand {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-size: 20px 20px;
+}
+
+/* Estilos para iconos */
+.fs-1 {
+    font-size: 3rem !important;
+}
+
+/* Animaciones suaves */
+.btn, .card, .nav-link {
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--accent-yellow) !important;
+}
+
+/* Espaciado mejorado */
+section {
+    padding: 4rem 0;
+}
+
+@media (max-width: 768px) {
+    section {
+        padding: 2rem 0;
+    }
+    
+    .carousel-item img {
+        height: 300px;
+    }
+    
     .banner-content h1 {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
+        font-size: 2rem;
     }
-
-    .banner-content p {
-        font-size: 1.25rem;
-        margin-bottom: 1.5rem;
+    
+    .navbar-brand {
+        font-size: 1.5rem;
     }
+}
 
-    .banner-content .btn-primary {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        background-color: var(--accent-pink);
-        border: none;
-    }
+/* Estilos para acordeón */
+.accordion-button:not(.collapsed) {
+    background-color: var(--bs-primary);
+    color: white;
+}
 
-    .banner-content .btn-primary:hover {
-            background-color: var(--accent-yellow);
-     }
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(85, 61, 242, 0.25);
+}
+
+/* Estilos para badges */
+.badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+}
 
 /* Contenedor principal para el mapa y el buscador */
 #map-container {
-    position: relative; /* Establece el contexto para el posicionamiento absoluto */
+    position: relative;
 }
 
 /* Contenedor del buscador */
 #search-container {
     position: absolute;
-    top: 10px; /* 10px desde la parte superior */
-    left: 50%; /* Centrado horizontalmente */
+    top: 10px;
+    left: 50%;
     transform: translateX(-50%);
-    width: 80%; /* Ocupa el 80% del ancho del mapa */
-    max-width: 500px; /* Pero no más de 500px */
-    z-index: 10; /* Se asegura de que esté por encima del mapa */
+    width: 80%;
+    max-width: 500px;
+    z-index: 10;
 }
+
+/* Botones de llamada a la acción */
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* Estilo para sección de CTA */
+.bg-primary {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, var(--accent-pink) 100%) !important;
+}
+
+/* Mejoras de accesibilidad */
+.btn:focus,
+.form-control:focus,
+.accordion-button:focus {
+    outline: 2px solid var(--accent-yellow);
+    outline-offset: 2px;
 }
