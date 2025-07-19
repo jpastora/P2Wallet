@@ -13,7 +13,7 @@ namespace WebApp.Pages.User
     {
         public DTOs.User CurrentUser { get; set; }
         public List<BankAccount> UserAccounts { get; set; } = new();
-        public List<FinancialEntity> FinancialEntities { get; set; } = new();
+        public List<DTOs.FinancialEntity> FinancialEntities { get; set; } = new();
 
         [BindProperty]
         public BankAccount NewAccount { get; set; }
@@ -35,7 +35,7 @@ namespace WebApp.Pages.User
                     UserAccounts = allAccounts.FindAll(a => a.UserID == CurrentUser.ID && a.ValidationStatus == "Active");
 
                     var entityManager = new FinancialEntityCrudFactory();
-                    FinancialEntities = entityManager.RetrieveAll<FinancialEntity>();
+                    FinancialEntities = entityManager.RetrieveAll<DTOs.FinancialEntity>();
                 }
             }
         }

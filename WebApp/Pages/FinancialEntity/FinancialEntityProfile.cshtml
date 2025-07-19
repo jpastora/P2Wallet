@@ -1,0 +1,246 @@
+﻿@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@model WebApp.Pages.FinancialEntity.FinancialEntityProfileModel
+@{
+    var profilePhoto = Model.LogoImage ?? "https://picsum.photos/seed/FinancialEntity/120";
+    string statusEsp = Model.ValidationStatus == "Active" ? "Activo" : "Inactivo";
+    bool isAdmin = Model.IsAdmin;
+}
+<!-- CONTENIDO -->
+<div class="container py-4 mb-5">
+    <!-- Resumen de Perfil -->
+    <div class="text-center mb-4">
+        <img src="@profilePhoto" alt="Logo del comercio" class="rounded-circle profile-img mb-2" style="width:100px;height:100px;object-fit:cover;">
+        <h4>@Model.FinancialEntityName</h4>
+        <p class="text-muted">@Model.Email</p>
+        <div class="d-flex justify-content-center gap-2 mt-2">
+            <span class="badge bg-secondary">@statusEsp</span>
+        </div>
+    </div>
+
+    <!-- SweetAlert feedback -->
+    <div id="alert-placeholder"></div>
+
+    <!-- Datos del Comercio -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Datos del Comercio</strong></div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="SaveProfile" id="formPerfil">
+                <input type="hidden" name="FinancialEntityID" value="@Model.FinancialEntityID" />
+                <input type="hidden" name="LogoImage" id="hiddenLogoImage" value="@Model.LogoImage" />
+                <div class="mb-3">
+                    <label for="FinancialEntityName" class="form-label">Nombre de la Entidad Financiera</label>
+                    <input type="text" class="form-control" id="FinancialEntityName" name="FinancialEntityName" value="@Model.FinancialEntityName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="taxId" class="form-label">Cédula Jurídica</label>
+                    <input type="text" class="form-control" id="taxId" name="TaxID" value="@Model.TaxID">
+                </div>
+                <div class="mb-3">
+                    <label for="logoImage" class="form-label">Logo (URL)</label>
+                    <input type="text" class="form-control" id="logoImage" name="LogoImage" value="@Model.LogoImage" readonly>
+                </div>
+                <div class="mb-3">
+                    <label for="logoFile" class="form-label">Logo (Imagen)</label>
+                    <input type="file" class="form-control" id="logoFile" accept="image/*">
+                    <button type="button" class="btn btn-primary mt-2" id="btnUploadLogo">Subir Logo</button>
+                    <div class="mt-2 text-center">
+                        <img id="logoPreview" src="@Model.LogoImage" alt="Vista previa del logo" style="max-width:120px;max-height:120px;object-fit:cover;border-radius:8px;" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="contactPhone" class="form-label">Teléfono de Contacto</label>
+                    <input type="text" class="form-control" id="contactPhone" name="ContactPhone" value="@Model.ContactPhone">
+                </div>
+                <div class="mb-3">
+                    <label for="correo" class="form-label">Correo Electrónico</label>
+                    <input type="email" class="form-control" id="correo" name="Email" value="@Model.Email">
+                </div>
+                <div class="mb-3">
+                    <label for="commission" class="form-label">Comisión (%)</label>
+                    <input type="number" step="0.01" class="form-control" id="commission" name="CommissionPercentage" value="@Model.CommissionPercentage" @(isAdmin ? "" : "readonly")>
+                </div>
+                <div class="mb-3">
+                    <label for="validationStatus" class="form-label">Estado</label>
+                    @if (isAdmin)
+                    {
+                        <select class="form-select" id="validationStatus" name="ValidationStatus">
+                            <option value="Active" selected="@(Model.ValidationStatus == "Active" ? "selected" : null)">Activo</option>
+                            <option value="Inactive" selected="@(Model.ValidationStatus == "Inactive" ? "selected" : null)">Inactivo</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select class="form-select" id="validationStatus" disabled>
+                            <option value="Active" selected="@(Model.ValidationStatus == "Active" ? "selected" : null)">Activo</option>
+                            <option value="Inactive" selected="@(Model.ValidationStatus == "Inactive" ? "selected" : null)">Inactivo</option>
+                        </select>
+                        <input type="hidden" name="ValidationStatus" value="@Model.ValidationStatus" />
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input id="autocomplete" type="text" class="form-control" name="Address" value="@Model.Address" placeholder="Escribe tu dirección o lugar..." autocomplete="off" />
+                </div>
+                <div class="mb-3 d-flex align-items-end">
+                    <button class="btn btn-light w-100" type="button" id="btnSearchAddress">Seleccionar dirección</button>
+                </div>
+                <input type="hidden" id="txtLatitude" name="Latitude" value="@Model.Latitude">
+                <input type="hidden" id="txtLongitude" name="Longitude" value="@Model.Longitude">
+                <div class="mb-3">
+                    <div id="map-container" class="position-relative">
+                        <div id="map" style="height: 300px; width: 100%; border-radius: 8px;"></div>
+                    </div>
+                    <small class="form-text text-muted">Busca, haz clic en el mapa o arrastra el pin para ajustar tu ubicación.</small>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cerrar Sesión -->
+    <div class="d-grid">
+        <button class="btn btn-danger" id="btnCerrarSesion">Cerrar Sesión</button>
+    </div>
+</div>
+
+@section Scripts {
+    @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+        // Copia la lógica de mapa de UserRegister aquí, ajustando los IDs si es necesario
+        let map, marker, geocoder, placeAutocomplete;
+        function initMap() {
+            const latInput = document.getElementById('txtLatitude');
+            const lngInput = document.getElementById('txtLongitude');
+            const mapDiv = document.getElementById('map');
+            const addressInput = document.getElementById('autocomplete');
+            const searchButton = document.getElementById('btnSearchAddress');
+            const initialLocation = { lat: parseFloat(latInput.value) || 9.934739, lng: parseFloat(lngInput.value) || -84.087502 };
+
+            geocoder = new google.maps.Geocoder();
+            map = new google.maps.Map(mapDiv, {
+                zoom: 14,
+                center: initialLocation,
+                mapId: 'YAVI_FinancialEntity_MAP'
+            });
+
+            marker = new google.maps.marker.AdvancedMarkerElement({
+                map,
+                position: initialLocation,
+                gmpDraggable: true
+            });
+
+            latInput.value = initialLocation.lat;
+            lngInput.value = initialLocation.lng;
+
+            placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+            placeAutocomplete.input = addressInput;
+            placeAutocomplete.addEventListener('gmp-placechange', (event) => {
+                const place = event.detail.place;
+                if (place && place.geometry && place.geometry.location) {
+                    const location = place.geometry.location;
+                    map.setCenter(location);
+                    marker.position = location;
+                    latInput.value = location.lat();
+                    lngInput.value = location.lng();
+                }
+            });
+
+            searchButton.addEventListener('click', function () {
+                if (addressInput.value) {
+                    geocoder.geocode({ address: addressInput.value }, function (results, status) {
+                        if (status === 'OK' && results[0]) {
+                            const loc = results[0].geometry.location;
+                            map.setCenter(loc);
+                            marker.position = loc;
+                            latInput.value = loc.lat();
+                            lngInput.value = loc.lng();
+                        } else {
+                            alert('La dirección no se encontró: ' + status);
+                        }
+                    });
+                }
+            });
+
+            addressInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchButton.click();
+                }
+            });
+
+            marker.addListener('dragend', (event) => {
+                const pos = event.latLng;
+                latInput.value = pos.lat();
+                lngInput.value = pos.lng();
+                geocoder.geocode({ location: pos }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        addressInput.value = results[0].formatted_address;
+                    }
+                });
+            });
+
+            map.addListener('click', (event) => {
+                marker.position = event.latLng;
+                latInput.value = event.latLng.lat();
+                lngInput.value = event.latLng.lng();
+                geocoder.geocode({ location: event.latLng }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        addressInput.value = results[0].formatted_address;
+                    }
+                });
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.google && window.google.maps) {
+                initMap();
+            } else {
+                window.initMap = initMap;
+            }
+
+            // SweetAlert feedback
+            const msg = '@Model.Message';
+            if (msg && msg.length > 0) {
+                Swal.fire({
+                    icon: msg.includes('correctamente') ? 'success' : 'error',
+                    title: msg.includes('correctamente') ? '¡Guardado!' : 'Error',
+                    text: msg,
+                    confirmButtonText: 'OK'
+                });
+            }
+
+            document.getElementById('btnUploadLogo').addEventListener('click', function () {
+                var fileInput = document.getElementById('logoFile');
+                var file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire('Error', 'Selecciona una imagen primero.', 'error');
+                    return;
+                }
+                var formData = new FormData();
+                formData.append('photo', file);
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('logoImage').value = url;
+                        document.getElementById('logoPreview').src = url;
+                        document.getElementById('hiddenLogoImage').value = url; // Update hidden field
+                        Swal.fire('¡Éxito!', 'Logo subido correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo obtener la URL del logo.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error al subir la imagen.', 'error');
+                });
+            });
+        });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=@(Configuration["GoogleMaps:ApiKey"])&libraries=places,marker,geocoding&callback=initMap" async defer loading="async"></script>
+}
