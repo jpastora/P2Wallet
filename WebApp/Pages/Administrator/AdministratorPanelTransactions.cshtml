@@ -1,11 +1,11 @@
-@page
+锘緻page
 @model WebApp.Pages.Administrator.AdministratorPanelTransactionsModel
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Administraci髇 de Transacciones";
+    ViewData["Title"] = "Administraci贸n de Transacciones";
 }
 
-<h1 class="mb-4">Administraci髇 de Transacciones</h1>
+<h1 class="mb-4">Administraci贸n de Transacciones</h1>
 
 @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
 {
@@ -23,7 +23,7 @@
     </div>
 }
 
-<!-- Filtros y b鷖queda -->
+<!-- Filtros y b煤squeda -->
 <div class="card p-3 mb-4">
     <form method="get" class="row g-3">
         <div class="col-md-3">
@@ -50,7 +50,7 @@
     </form>
 </div>
 
-<!-- Estad韘ticas r醦idas -->
+<!-- Estad铆sticas r谩pidas -->
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card p-3 shadow-sm text-center">
@@ -61,19 +61,19 @@
     <div class="col-md-3">
         <div class="card p-3 shadow-sm text-center">
             <h6 class="text-muted">Volumen Total</h6>
-            <h4 class="text-success">?@Model.TotalVolume.ToString("N0")</h4>
+            <h4 class="text-success">鈧Model.TotalVolume.ToString("N0")</h4>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card p-3 shadow-sm text-center">
             <h6 class="text-muted">Comisiones</h6>
-            <h4 class="text-warning">?@Model.TotalCommissions.ToString("N0")</h4>
+            <h4 class="text-warning">鈧Model.TotalCommissions.ToString("N0")</h4>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card p-3 shadow-sm text-center">
             <h6 class="text-muted">Promedio</h6>
-            <h4 class="text-info">?@Model.AverageTransaction.ToString("N0")</h4>
+            <h4 class="text-info">鈧Model.AverageTransaction.ToString("N0")</h4>
         </div>
     </div>
 </div>
@@ -98,7 +98,7 @@
                             <th>Comercio</th>
                             <th>Monto Bruto</th>
                             <th>Monto Neto</th>
-                            <th>Comisi髇</th>
+                            <th>Comisi贸n</th>
                             <th>Fecha</th>
                             <th>Estado</th>
                             <th>Acciones</th>
@@ -122,9 +122,9 @@
                                 <td><strong>#@transaction.ID</strong></td>
                                 <td>@Model.GetUserName(transaction.UserID)</td>
                                 <td>@Model.GetMerchantName(transaction.MerchantID)</td>
-                                <td>?@transaction.GrossAmount.ToString("N0")</td>
-                                <td>?@transaction.NetAmount.ToString("N0")</td>
-                                <td>?@transaction.CommissionApplied.ToString("N0")</td>
+                                <td>鈧transaction.GrossAmount.ToString("N0")</td>
+                                <td>鈧transaction.NetAmount.ToString("N0")</td>
+                                <td>鈧transaction.CommissionApplied.ToString("N0")</td>
                                 <td>@transaction.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
                                     <span class="badge @statusClass">
@@ -170,7 +170,7 @@
     </div>
 </div>
 
-<!-- Paginaci髇 simple -->
+<!-- Paginaci贸n simple -->
 @if (Model.TotalPages > 1)
 {
     <nav class="mt-4">
@@ -183,7 +183,7 @@
             
             <li class="page-item active">
                 <span class="page-link">
-                    P醙ina @Model.CurrentPage de @Model.TotalPages
+                    P谩gina @Model.CurrentPage de @Model.TotalPages
                 </span>
             </li>
             
