@@ -21,19 +21,20 @@ namespace DataAccess.CRUD
             var promo = baseDTO as FinancialPromotion;
             var operation = new SqlOperation { ProcedureName = "CREATE_FINANCIAL_PROMOTION_PR" };
 
+            // Solo enviar los parámetros que el SP espera (sin ValidationStatus y CreatedAt)
             operation.AddIntParam("@P_FinancialEntityID", promo.FinancialEntityID);
-            operation.AddStringParameter("@P_FinancialPromotionName", promo.FinancialPromotionName);
-            operation.AddStringParameter("@P_FinancialPromotionDescription", promo.FinancialPromotionDescription);
-            operation.AddStringParameter("@P_FinancialPromotionTerms", promo.FinancialPromotionTerms);
-            operation.AddStringParameter("@P_FinancialPromotionImage", promo.FinancialPromotionImage);
             operation.AddStringParameter("@P_PromotionType", promo.PromotionType);
             operation.AddDoubleParam("@P_DiscountPercentage", promo.DiscountPercentage);
             operation.AddDoubleParam("@P_MaxRefund", promo.MaxRefund);
             operation.AddDateTimeParam("@P_StartDate", promo.StartDate);
             operation.AddDateTimeParam("@P_EndDate", promo.EndDate);
             operation.AddIntParam("@P_AvailableQuantity", promo.AvailableQuantity);
-            operation.AddStringParameter("@P_ValidationStatus", promo.ValidationStatus);
-            operation.AddDateTimeParam("@P_CreatedAt", promo.CreatedAt);
+            operation.AddStringParameter("@P_FinancialPromotionName", promo.FinancialPromotionName);
+            operation.AddStringParameter("@P_FinancialPromotionDescription", promo.FinancialPromotionDescription);
+            operation.AddStringParameter("@P_FinancialPromotionTerms", promo.FinancialPromotionTerms);
+            operation.AddStringParameter("@P_FinancialPromotionImage", promo.FinancialPromotionImage);
+            
+            // ValidationStatus y CreatedAt NO se envían - los maneja la BD automáticamente
 
             _sqlDao.ExecuteProcedure(operation);
         }

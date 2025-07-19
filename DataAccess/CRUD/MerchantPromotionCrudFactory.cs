@@ -21,19 +21,20 @@ namespace DataAccess.CRUD
             var promo = baseDTO as MerchantPromotion;
             var operation = new SqlOperation { ProcedureName = "CREATE_MERCHANT_PROMOTION_PR" };
 
+            // Solo enviar los parámetros que el SP espera (en el orden correcto)
             operation.AddIntParam("@P_MerchantID", promo.MerchantID);
-            operation.AddStringParameter("@P_MerchantPromotionName", promo.MerchantPromotionName);
-            operation.AddStringParameter("@P_MerchantPromotionDescription", promo.MerchantPromotionDescription);
-            operation.AddStringParameter("@P_MerchantPromotionTerms", promo.MerchantPromotionTerms);
-            operation.AddStringParameter("@P_MerchantPromotionImage", promo.MerchantPromotionImage);
             operation.AddStringParameter("@P_PromotionType", promo.PromotionType);
             operation.AddDoubleParam("@P_DiscountPercentage", promo.DiscountPercentage);
             operation.AddDoubleParam("@P_MaxRefund", promo.MaxRefund);
             operation.AddDateTimeParam("@P_StartDate", promo.StartDate);
             operation.AddDateTimeParam("@P_EndDate", promo.EndDate);
             operation.AddIntParam("@P_AvailableQuantity", promo.AvailableQuantity);
-            operation.AddStringParameter("@P_ValidationStatus", promo.ValidationStatus);
-            operation.AddDateTimeParam("@P_CreatedAt", promo.CreatedAt);
+            operation.AddStringParameter("@P_MerchantPromotionName", promo.MerchantPromotionName);
+            operation.AddStringParameter("@P_MerchantPromotionDescription", promo.MerchantPromotionDescription);
+            operation.AddStringParameter("@P_MerchantPromotionTerms", promo.MerchantPromotionTerms);
+            operation.AddStringParameter("@P_MerchantPromotionImage", promo.MerchantPromotionImage);
+            
+            // ValidationStatus y CreatedAt NO se envían - los maneja la BD automáticamente
 
             _sqlDao.ExecuteProcedure(operation);
         }
