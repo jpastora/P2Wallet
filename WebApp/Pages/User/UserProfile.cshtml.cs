@@ -39,8 +39,13 @@ namespace WebApp.Pages.User
         public List<DTOs.Merchant> AdminMerchants { get; set; } = new();
         public List<DTOs.FinancialEntity> AdminEntities { get; set; } = new();
 
-        public void OnGet()
+        public void OnGet(string message = null)
         {
+            if (!string.IsNullOrEmpty(message))
+            {
+                Message = message;
+            }
+
             var email = User.Identity?.Name;
             if (!string.IsNullOrEmpty(email))
             {
