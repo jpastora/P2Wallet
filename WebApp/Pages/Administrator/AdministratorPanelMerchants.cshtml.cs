@@ -12,6 +12,7 @@ namespace WebApp.Pages.Administrator
     public class AdministratorPanelMerchantsModel : PageModel
     {
         public List<DTOs.Merchant> AllMerchants { get; set; } = new();
+        public List<DTOs.User> AllUsers { get; set; } = new();
         
         [BindProperty(SupportsGet = true)]
         public string SearchTerm { get; set; } = string.Empty;
@@ -56,6 +57,7 @@ namespace WebApp.Pages.Administrator
 
             IsAdmin = true;
             LoadMerchants();
+            LoadUsers();
             return Page();
         }
 
@@ -92,6 +94,24 @@ namespace WebApp.Pages.Administrator
             }
         }
 
+        private void LoadUsers()
+        {
+            try
+            {
+                var userManager = new UserManager();
+                AllUsers = userManager.RetrieveAllUsers()
+                    .Where(u => u.ValidationStatus == "Active")
+                    .OrderBy(u => u.FirstName)
+                    .ThenBy(u => u.LastName)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error al cargar usuarios: {ex.Message}";
+                AllUsers = new List<DTOs.User>();
+            }
+        }
+
         public IActionResult OnPostToggleStatus(int merchantId)
         {
             try
@@ -115,6 +135,57 @@ namespace WebApp.Pages.Administrator
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error al cambiar estado del comercio: {ex.Message}";
+            }
+
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostAssignMerchant(int merchantId, int userId)
+        {
+            try
+            {
+                var userMerchantManager = new UserMerchantManager();
+                var merchantManager = new MerchantManager();
+                var userManager = new UserManager();
+
+                var merchant = merchantManager.RetrieveMerchantById(merchantId);
+                var user = userManager.RetrieveUserById(userId);
+
+                if (merchant == null)
+                {
+                    TempData["ErrorMessage"] = "Comercio no encontrado.";
+                    return RedirectToPage();
+                }
+
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "Usuario no encontrado.";
+                    return RedirectToPage();
+                }
+
+                // Verificar si ya existe la asignación
+                var existingAssignments = userMerchantManager.RetrieveAllUserMerchants();
+                var existingAssignment = existingAssignments.FirstOrDefault(um => um.UserID == userId && um.MerchantID == merchantId);
+
+                if (existingAssignment != null)
+                {
+                    TempData["ErrorMessage"] = $"El usuario {user.FirstName} {user.LastName} ya está asignado al comercio {merchant.MerchantName}.";
+                    return RedirectToPage();
+                }
+
+                // Crear nueva asignación
+                var userMerchant = new UserMerchant
+                {
+                    UserID = userId,
+                    MerchantID = merchantId
+                };
+
+                userMerchantManager.CreateUserMerchant(userMerchant);
+                TempData["SuccessMessage"] = $"Comercio {merchant.MerchantName} asignado exitosamente a {user.FirstName} {user.LastName}.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error al asignar comercio: {ex.Message}";
             }
 
             return RedirectToPage();

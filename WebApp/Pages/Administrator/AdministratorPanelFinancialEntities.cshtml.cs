@@ -12,6 +12,7 @@ namespace WebApp.Pages.Administrator
     public class AdministratorPanelFinancialEntitiesModel : PageModel
     {
         public List<DTOs.FinancialEntity> AllFinancialEntities { get; set; } = new();
+        public List<DTOs.User> AllUsers { get; set; } = new();
         
         [BindProperty(SupportsGet = true)]
         public string SearchTerm { get; set; } = string.Empty;
@@ -56,6 +57,7 @@ namespace WebApp.Pages.Administrator
 
             IsAdmin = true;
             LoadFinancialEntities();
+            LoadUsers();
             return Page();
         }
 
@@ -92,6 +94,24 @@ namespace WebApp.Pages.Administrator
             }
         }
 
+        private void LoadUsers()
+        {
+            try
+            {
+                var userManager = new UserManager();
+                AllUsers = userManager.RetrieveAllUsers()
+                    .Where(u => u.ValidationStatus == "Active")
+                    .OrderBy(u => u.FirstName)
+                    .ThenBy(u => u.LastName)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error al cargar usuarios: {ex.Message}";
+                AllUsers = new List<DTOs.User>();
+            }
+        }
+
         public IActionResult OnPostToggleStatus(int entityId)
         {
             try
@@ -115,6 +135,57 @@ namespace WebApp.Pages.Administrator
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Error al cambiar estado de la entidad financiera: {ex.Message}";
+            }
+
+            return RedirectToPage();
+        }
+
+        public IActionResult OnPostAssignEntity(int entityId, int userId)
+        {
+            try
+            {
+                var userEntityManager = new UserEntityManager();
+                var financialEntityManager = new FinancialEntityManager();
+                var userManager = new UserManager();
+
+                var entity = financialEntityManager.RetrieveFinancialEntityById(entityId);
+                var user = userManager.RetrieveUserById(userId);
+
+                if (entity == null)
+                {
+                    TempData["ErrorMessage"] = "Entidad financiera no encontrada.";
+                    return RedirectToPage();
+                }
+
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "Usuario no encontrado.";
+                    return RedirectToPage();
+                }
+
+                // Verificar si ya existe la asignación
+                var existingAssignments = userEntityManager.RetrieveAllUserEntities();
+                var existingAssignment = existingAssignments.FirstOrDefault(ue => ue.UserID == userId && ue.FinancialEntityID == entityId);
+
+                if (existingAssignment != null)
+                {
+                    TempData["ErrorMessage"] = $"El usuario {user.FirstName} {user.LastName} ya está asignado a la entidad {entity.EntityName}.";
+                    return RedirectToPage();
+                }
+
+                // Crear nueva asignación
+                var userEntity = new UserEntity
+                {
+                    UserID = userId,
+                    FinancialEntityID = entityId
+                };
+
+                userEntityManager.CreateUserEntity(userEntity);
+                TempData["SuccessMessage"] = $"Entidad financiera {entity.EntityName} asignada exitosamente a {user.FirstName} {user.LastName}.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Error al asignar entidad financiera: {ex.Message}";
             }
 
             return RedirectToPage();
