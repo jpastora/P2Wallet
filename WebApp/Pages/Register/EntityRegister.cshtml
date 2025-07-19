@@ -1,0 +1,270 @@
+﻿@page
+@model WebApp.Pages.Register.EntityRegisterModel
+@{
+    ViewData["Title"] = "Registro de Entidad Financiera";
+}
+
+<script src="~/js/entity.js"></script>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 col-lg-6 mx-auto">
+            <div class="card p-4 shadow-sm">
+                <h2 class="text-center mb-4">Registro de Entidad Financiera</h2>
+
+                <form id="registroEntidadForm" class="needs-validation" novalidate>
+                    <!-- Nombre de la entidad -->
+                    <div class="mb-3">
+                        <label for="nombreEntidad" class="form-label">Nombre del Banco</label>
+                        <input type="text" class="form-control" id="nombreEntidad" name="EntityName" required>
+                        <div class="invalid-feedback">Por favor ingrese el nombre del banco.</div>
+                    </div>
+
+                    <!-- Correo Electrónico -->
+                    <div class="mb-3">
+                        <label for="correo" class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="correo" name="Email" required>
+                        <div class="invalid-feedback">Por favor ingrese un correo válido.</div>
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="telefono" name="ContactPhone" required>
+                        <div class="invalid-feedback">Por favor ingrese un teléfono válido.</div>
+                    </div>
+
+                    <!-- Cédula Jurídica -->
+                    <div class="mb-3">
+                        <label for="taxid" class="form-label">Cédula Jurídica</label>
+                        <input type="text" class="form-control" id="taxid" name="TaxID" required>
+                        <div class="invalid-feedback">Por favor ingrese la cédula jurídica.</div>
+                    </div>
+
+                    <!-- IBAN -->
+                    <div class="mb-3">
+                        <label for="iban" class="form-label">IBAN (Cuenta Bancaria)</label>
+                        <input type="text" class="form-control" id="iban" name="IBAN" required
+                               pattern="[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}" placeholder="Ej: ES9121000418450200051332">
+                        <div class="invalid-feedback">
+                            Por favor ingrese un IBAN válido (formato internacional).
+                        </div>
+                        <small class="text-muted">
+                            Formato: Código país (2 letras) + dígitos de control (2 números) +
+                            código de cuenta (hasta 30 caracteres)
+                        </small>
+                    </div>
+
+                    <!-- Logo -->
+                    <div class="mb-3">
+                        <label for="logoEntidad" class="form-label">Logo del Banco</label>
+                        <input type="file" class="form-control" id="logoEntidad" name="LogoImage" accept="image/*">
+                        <div class="invalid-feedback">Por favor seleccione una imagen válida.</div>
+                        <small class="text-muted">Tamaño máximo: 2MB. Formatos aceptados: JPG, PNG, GIF.</small>
+
+                        <!-- Preview -->
+                        <div id="logoPreviewContainer" class="mt-2" style="display: none;">
+                            <img id="logoPreview" src="#" alt="Vista previa del logo" class="img-thumbnail"
+                                 style="max-width: 150px; max-height: 150px;">
+                            <button type="button" id="btnRemoveLogo" class="btn btn-sm btn-outline-danger ms-2">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Ubicación -->
+                    <div class="mb-3">
+                        <label class="form-label">Ubicación del Banco</label>
+                        <div id="mapContainer" class="position-relative border rounded">
+                            <div id="loadingLocation" class="position-absolute top-50 start-50 translate-middle text-center">
+                                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                    <span class="visually-hidden">Cargando ubicación...</span>
+                                </div>
+                                <p class="mt-2 mb-0 text-dark">Detectando tu ubicación...</p>
+                            </div>
+                            <div id="locationError" class="position-absolute top-50 start-50 translate-middle alert alert-danger text-center" style="display: none;"></div>
+                            <div id="map" style="height: 450px; width: 100%; border-radius: 8px;"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <small class="text-muted">Mueve el marcador para ajustar la ubicación exacta</small>
+                            <button type="button" id="btnRefrescarUbicacion" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-geo-alt-fill"></i> Actualizar ubicación
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección Completa</label>
+                        <textarea class="form-control" id="direccion" name="Direccion" rows="2" required></textarea>
+                        <div class="invalid-feedback">Por favor ingrese la dirección.</div>
+                    </div>
+
+                    <!-- Coordenadas ocultas -->
+                    <input type="hidden" id="latitud" name="Latitude" required>
+                    <input type="hidden" id="longitud" name="Longitude" required>
+
+                    <button id="btnRegisterEntity" type="button" class="btn btn-primary w-100 mt-3 py-2">
+                        <i class="bi bi-bank"></i> Registrar Entidad Financiera
+                    </button>
+
+                    <input type="hidden" id="userId" value="@Model.UserId" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+    <script>
+        // =================== VISTA PREVIA Y ELIMINAR LOGO ===================
+        document.addEventListener("DOMContentLoaded", function () {
+            const logoInput = document.getElementById("logoEntidad");
+            const logoPreview = document.getElementById("logoPreview");
+            const previewContainer = document.getElementById("logoPreviewContainer");
+            const removeBtn = document.getElementById("btnRemoveLogo");
+
+            logoInput.addEventListener("change", function () {
+                const file = logoInput.files[0];
+                if (file && file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        logoPreview.src = e.target.result;
+                        previewContainer.style.display = "block";
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.style.display = "none";
+                    logoInput.value = "";
+                }
+            });
+
+            removeBtn.addEventListener("click", function () {
+                logoInput.value = "";
+                previewContainer.style.display = "none";
+            });
+        });
+
+        // =================== VALIDACIÓN DE FORMULARIO ===================
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("registroEntidadForm");
+
+            form.addEventListener("submit", function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add("was-validated");
+            }, false);
+        });
+
+        // =================== GOOGLE MAPS ===================
+        let map, marker, geocoder;
+
+        function initMap() {
+            const latInput = document.getElementById("latitud");
+            const lngInput = document.getElementById("longitud");
+            const direccionInput = document.getElementById("direccion");
+            const loading = document.getElementById("loadingLocation");
+            const errorMsg = document.getElementById("locationError");
+
+            geocoder = new google.maps.Geocoder();
+            const defaultLocation = { lat: 9.9333, lng: -84.0833 }; // San José CR
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: defaultLocation,
+                zoom: 15,
+                mapId: 'YAVI_ENTITY_MAP'
+            });
+
+            marker = new google.maps.marker.AdvancedMarkerElement({
+                map,
+                position: defaultLocation,
+                gmpDraggable: true
+            });
+
+            latInput.value = defaultLocation.lat;
+            lngInput.value = defaultLocation.lng;
+            actualizarDireccion(defaultLocation);
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(pos);
+                        marker.position = pos;
+                        latInput.value = pos.lat;
+                        lngInput.value = pos.lng;
+                        actualizarDireccion(pos);
+                        loading.style.display = "none";
+                    },
+                    function (error) {
+                        loading.style.display = "none";
+                        errorMsg.style.display = "block";
+                        errorMsg.textContent = "No se pudo obtener tu ubicación: " + error.message;
+                    }
+                );
+            } else {
+                loading.style.display = "none";
+                errorMsg.style.display = "block";
+                errorMsg.textContent = "Tu navegador no soporta geolocalización.";
+            }
+
+            marker.addListener("dragend", function (event) {
+                const pos = event.latLng;
+                latInput.value = pos.lat();
+                lngInput.value = pos.lng();
+                actualizarDireccion(pos);
+            });
+
+            map.addListener("click", function (event) {
+                marker.position = event.latLng;
+                latInput.value = event.latLng.lat();
+                lngInput.value = event.latLng.lng();
+                actualizarDireccion(event.latLng);
+            });
+
+            document.getElementById("btnRefrescarUbicacion").addEventListener("click", function () {
+                if (navigator.geolocation) {
+                    loading.style.display = "block";
+                    errorMsg.style.display = "none";
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        map.setCenter(pos);
+                        marker.position = pos;
+                        latInput.value = pos.lat;
+                        lngInput.value = pos.lng;
+                        actualizarDireccion(pos);
+                        loading.style.display = "none";
+                    }, function (error) {
+                        loading.style.display = "none";
+                        errorMsg.style.display = "block";
+                        errorMsg.textContent = "No se pudo obtener tu ubicación: " + error.message;
+                    });
+                }
+            });
+        }
+
+        function actualizarDireccion(pos) {
+            geocoder.geocode({ location: pos }, function (results, status) {
+                if (status === "OK" && results[0]) {
+                    document.getElementById("direccion").value = results[0].formatted_address;
+                }
+            });
+        }
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=@(Configuration["GoogleMaps:ApiKey"])&libraries=marker,geocoding&callback=initMap"
+            async defer loading="async"></script>
+}
+

@@ -63,5 +63,11 @@ namespace CoreApp
                 ManageException(ex); // Maneja la excepción usando el método base
             }
         }
+
+        public FinancialEntity RetrieveByTaxID(string taxId)
+        {
+            var financialEntityCrud = new FinancialEntityCrudFactory();
+            return financialEntityCrud.RetrieveByTaxID<FinancialEntity>(taxId);
+        }
     }
 }

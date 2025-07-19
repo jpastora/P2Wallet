@@ -93,14 +93,30 @@
                     UserID: parseInt(document.getElementById("userId").value)
                 };
 
-                console.log(userMerchantDTO.UserID);
-                console.log(userMerchantDTO.MerchantID);
+                //console.log(userMerchantDTO.UserID);
+                //console.log(userMerchantDTO.MerchantID);
 
                 const urlService2 = "UserMerchant/Create";
 
                 ca.PostToAPI(urlService2, userMerchantDTO, function () {
-                    console.log("Merchant user added successfully");
-                    // Opcional: limpiar formulario o redirigir
+                    document.getElementById("nombreComercio").value = "";
+                    document.getElementById("cedulaJuridica").value = "";
+                    document.getElementById("correoElectronico").value = "";
+                    document.getElementById("txtPhone").value = "";
+                    document.getElementById("latitud").value = "";
+                    document.getElementById("longitud").value = "";
+                    document.getElementById("logoComercio").value = "";
+                    document.getElementById("iban").value = "";
+
+                    // Limpiar el input de archivo
+                    const logoInput = document.getElementById("logoComercio");
+                    logoInput.value = "";
+
+                    // Eliminar vista previa si existe (imagen adjunta)
+                    const previewContainer = document.getElementById("logoPreviewContainer");
+                    if (previewContainer) {
+                        previewContainer.innerHTML = ""; // Elimina el contenido (como una <img>)
+                    }
                 });
             });
         });

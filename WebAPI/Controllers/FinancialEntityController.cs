@@ -95,5 +95,27 @@ namespace WebAPI.Controllers
 
 
         }
+
+        [HttpGet]
+        [Route("GetByTaxID")]
+
+        public ActionResult RetrieveEntityByTaxID(String taxId)
+        {
+            try
+            {
+                var financialEntityManager = new FinancialEntityManager();
+                var entityResult = financialEntityManager.RetrieveByTaxID(taxId);
+                if (entityResult == null)
+                {
+                    return NotFound("No se encontró el banco.");
+                }
+                return Ok(entityResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
+        }
     }
 }

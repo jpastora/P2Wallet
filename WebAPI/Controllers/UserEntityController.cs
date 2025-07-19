@@ -14,7 +14,7 @@ namespace WebAPI.Controllers
         public IActionResult Create([FromBody] UserEntity userEntity)
         {
             _manager.CreateUserEntity(userEntity);
-            return Ok();
+            return Ok(new { message = "Usuario asignado al banco exitosamente" });
         }
 
         [HttpDelete("Delete")]

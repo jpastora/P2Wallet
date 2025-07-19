@@ -103,6 +103,20 @@ namespace DataAccess.CRUD
                 LogoImage = row.ContainsKey("LogoImage") ? row["LogoImage"].ToString() : string.Empty
             };
         }
+
+        public T RetrieveByTaxID<T>(string taxId)
+        {
+            var sqlOperation = new SqlOperation { ProcedureName = "RET_ENTITY_BY_TAXID" };
+            sqlOperation.AddStringParameter("TaxID", taxId);
+
+            var lstResult = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+            if (lstResult.Count > 0)
+            {
+                var obj = BuildFinancialEntity(lstResult[0]);
+                return (T)Convert.ChangeType(obj, typeof(T));
+            }
+            return default(T);
+        }
     }
 
 }
