@@ -82,14 +82,14 @@
 
             // Consultar merchant por TaxID para obtener el ID real
             ca.GetToApi(`Merchant/GetByTaxID?taxId=${encodeURIComponent(taxId)}`, function (merchant) {
-                if (!merchant || !merchant.MerchantID) {
+                if (!merchant || !merchant.id) {
                     alert("No se pudo obtener el comercio recién creado.");
                     return;
                 }
 
                 var userMerchantDTO = {
                     Created: "2000-01-01",
-                    MerchantID: merchant.MerchantID,
+                    MerchantID: merchant.id,
                     UserID: parseInt(document.getElementById("userId").value)
                 };
 
