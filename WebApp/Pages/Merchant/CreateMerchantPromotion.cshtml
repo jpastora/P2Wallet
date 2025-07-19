@@ -1,0 +1,208 @@
+@page
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@model WebApp.Pages.Merchant.CreateMerchantPromotionModel
+@{
+    ViewData["Title"] = "Crear Promoción - " + Model.MerchantName;
+}
+
+<div class="container py-4 mb-5">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col">
+            <h2><i class="bi bi-tag me-2 text-primary"></i>Crear Nueva Promoción</h2>
+            <p class="text-muted">Comercio: <strong>@Model.MerchantName</strong></p>
+        </div>
+        <div class="col-auto">
+            <a href="/User/UserProfile" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Perfil
+            </a>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Información de la Promoción</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                <input type="hidden" name="MerchantID" value="@Model.MerchantID" />
+                
+                <!-- Información Básica -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary border-bottom pb-2">Información Básica</h6>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <label for="promotionName" class="form-label">Nombre de la Promoción *</label>
+                        <input type="text" class="form-control" id="promotionName" name="MerchantPromotionName" 
+                               value="@Model.MerchantPromotionName" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="promotionType" class="form-label">Tipo de Promoción *</label>
+                        <select class="form-select" id="promotionType" name="PromotionType" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="Porcentaje" selected="@(Model.PromotionType == "Porcentaje" ? "selected" : null)">Descuento por Porcentaje</option>
+                            <option value="MontoFijo" selected="@(Model.PromotionType == "MontoFijo" ? "selected" : null)">Descuento Monto Fijo</option>
+                            <option value="CashBack" selected="@(Model.PromotionType == "CashBack" ? "selected" : null)">Cash Back</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="promotionDescription" class="form-label">Descripción *</label>
+                    <textarea class="form-control" id="promotionDescription" name="MerchantPromotionDescription" 
+                              rows="3" required>@Model.MerchantPromotionDescription</textarea>
+                    <div class="form-text">Describe los beneficios y características principales de la promoción.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="promotionTerms" class="form-label">Términos y Condiciones</label>
+                    <textarea class="form-control" id="promotionTerms" name="MerchantPromotionTerms" 
+                              rows="3">@Model.MerchantPromotionTerms</textarea>
+                    <div class="form-text">Especifica las condiciones, restricciones y requisitos para aplicar la promoción.</div>
+                </div>
+
+                <!-- Imagen de la Promoción -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary border-bottom pb-2">Imagen de la Promoción</h6>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="promotionImage" class="form-label">URL de Imagen</label>
+                    <input type="text" class="form-control" id="promotionImage" name="MerchantPromotionImage" 
+                           value="@Model.MerchantPromotionImage" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label for="promotionImageFile" class="form-label">Subir Imagen</label>
+                    <input type="file" class="form-control" id="promotionImageFile" accept="image/*">
+                    <button type="button" class="btn btn-primary mt-2" id="btnUploadImage">
+                        <i class="bi bi-cloud-upload me-1"></i>Subir Imagen
+                    </button>
+                    <div class="mt-2 text-center">
+                        <img id="imagePreview" src="@Model.MerchantPromotionImage" alt="Vista previa" 
+                             style="max-width:200px;max-height:200px;object-fit:cover;border-radius:8px;" />
+                    </div>
+                </div>
+
+                <!-- Configuración de Descuento -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary border-bottom pb-2">Configuración de Descuento</h6>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="discountPercentage" class="form-label">Porcentaje de Descuento (%) *</label>
+                        <input type="number" class="form-control" id="discountPercentage" name="DiscountPercentage" 
+                               value="@Model.DiscountPercentage" min="0.01" max="100" step="0.01" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="maxRefund" class="form-label">Reembolso Máximo (?)</label>
+                        <input type="number" class="form-control" id="maxRefund" name="MaxRefund" 
+                               value="@Model.MaxRefund" min="0" step="0.01">
+                        <div class="form-text">Deja en 0 para sin límite</div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="availableQuantity" class="form-label">Cantidad Disponible *</label>
+                        <input type="number" class="form-control" id="availableQuantity" name="AvailableQuantity" 
+                               value="@Model.AvailableQuantity" min="1" required>
+                    </div>
+                </div>
+
+                <!-- Vigencia -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="text-primary border-bottom pb-2">Vigencia de la Promoción</h6>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="startDate" class="form-label">Fecha de Inicio *</label>
+                        <input type="datetime-local" class="form-control" id="startDate" name="StartDate" 
+                               value="@Model.StartDate.ToString("yyyy-MM-ddTHH:mm")" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="endDate" class="form-label">Fecha de Fin *</label>
+                        <input type="datetime-local" class="form-control" id="endDate" name="EndDate" 
+                               value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success me-2">
+                            <i class="bi bi-check-circle me-1"></i>Crear Promoción
+                        </button>
+                        <a href="/User/UserProfile" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Upload de imagen
+            document.getElementById('btnUploadImage').addEventListener('click', function () {
+                var fileInput = document.getElementById('promotionImageFile');
+                var file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire('Error', 'Selecciona una imagen primero.', 'error');
+                    return;
+                }
+                
+                var formData = new FormData();
+                formData.append('photo', file);
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('promotionImage').value = url;
+                        document.getElementById('imagePreview').src = url;
+                        Swal.fire('¡Éxito!', 'Imagen subida correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo obtener la URL de la imagen.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error al subir la imagen.', 'error');
+                });
+            });
+
+            // Validación de fechas
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            
+            startDateInput.addEventListener('change', function() {
+                endDateInput.min = this.value;
+            });
+        });
+    </script>
+}

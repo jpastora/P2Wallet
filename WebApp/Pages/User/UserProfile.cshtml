@@ -146,7 +146,14 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="bi bi-shop me-2 text-secondary"></i>Comercio: <strong>@merchant.MerchantName</strong></span>
-                                <a href="/Merchant/MerchantProfile?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                                <div class="btn-group" role="group">
+                                    <a href="/Merchant/MerchantProfile?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-building me-1"></i>Ir al Panel
+                                    </a>
+                                    <a href="/Merchant/CreateMerchantPromotion?merchantId=@merchant.ID" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-tag me-1"></i>Crear Promoción
+                                    </a>
+                                </div>
                             </li>
                         }
                     }
@@ -156,7 +163,14 @@
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="bi bi-bank me-2 text-primary"></i>Entidad: <strong>@entity.EntityName</strong></span>
-                                <a href="/FinancialEntity/FinancialEntityProfile?FinancialEntityId=@entity.ID" class="btn btn-sm btn-outline-primary">Ir al Panel</a>
+                                <div class="btn-group" role="group">
+                                    <a href="/FinancialEntity/FinancialEntityProfile?FinancialEntityId=@entity.ID" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-building me-1"></i>Ir al Panel
+                                    </a>
+                                    <a href="/FinancialEntity/CreateFinancialPromotion?financialEntityId=@entity.ID" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-percent me-1"></i>Crear Promoción
+                                    </a>
+                                </div>
                             </li>
                         }
                     }
