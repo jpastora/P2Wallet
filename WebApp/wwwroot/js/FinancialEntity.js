@@ -76,6 +76,7 @@
 
             // Buscar la entidad creada por TaxID para obtener el ID
             ca.GetToApi(`FinancialEntity/GetByTaxID?taxId=${encodeURIComponent(taxId)}`, function (entity) {
+                console.log(entity.id)
                 if (!entity || !entity.id) {
                     alert("No se pudo obtener la entidad financiera recién creada.");
                     return;
@@ -87,7 +88,10 @@
                     UserID: parseInt(document.getElementById("userId").value)
                 };
 
-                const urlService2 = "UserFinancialEntity/Create";
+                console.log(userEntityDTO.UserID);
+                console.log(userEntityDTO.MerchantID);
+
+                const urlService2 = "UserEntity/Create";
 
                 ca.PostToAPI(urlService2, userEntityDTO, function () {
                     document.getElementById("nombreEntidad").value = "";
