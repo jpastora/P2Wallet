@@ -3,6 +3,40 @@
 @{
     Layout = "_LayoutAdmin";
     ViewData["Title"] = "Panel de Administración";
+    
+    // Funciones helper para traducir estados al español
+    string EstadoTransaccionEspanol(string status) => status switch
+    {
+        "Completed" => "Completada",
+        "Pending" => "Pendiente",
+        "Failed" => "Fallida",
+        "Cancelled" => "Cancelada",
+        "Processing" => "Procesando",
+        "Rejected" => "Rechazada",
+        _ => status
+    };
+    
+    string EstadoValidacionEspanol(string status) => status switch
+    {
+        "Active" => "Activo",
+        "Inactive" => "Inactivo",
+        "Pending" => "Pendiente",
+        "Rejected" => "Rechazado",
+        "Suspended" => "Suspendido",
+        "Blocked" => "Bloqueado",
+        "Verified" => "Verificado",
+        "UnVerified" => "No Verificado",
+        _ => status
+    };
+    
+    string ClaseBadgeEstado(string status) => status switch
+    {
+        "Completed" or "Active" or "Verified" => "bg-success",
+        "Pending" or "Processing" => "bg-warning text-dark",
+        "Failed" or "Cancelled" or "Rejected" or "Blocked" => "bg-danger",
+        "Inactive" or "Suspended" or "UnVerified" => "bg-secondary",
+        _ => "bg-secondary"
+    };
 }
 
 <h1 class="mb-4">Dashboard Principal</h1>
@@ -143,8 +177,8 @@
                                 <th>Promoción</th>
                                 <th>Tipo</th>
                                 <th>Origen</th>
-                                <th>Descuento</th>
-                                <th>Disponibles</th>
+                                <th class="text-end">Descuento</th>
+                                <th class="text-center">Disponibles</th>
                                 <th>Vence</th>
                             </tr>
                         </thead>
@@ -164,8 +198,8 @@
                                         </span>
                                     </td>
                                     <td><small>@promo.SourceName</small></td>
-                                    <td><strong class="text-success">@promo.DiscountPercentage%</strong></td>
-                                    <td>
+                                    <td class="text-end"><strong class="text-success">@promo.DiscountPercentage%</strong></td>
+                                    <td class="text-center">
                                         <span class="badge @(promo.AvailableQuantity > 10 ? "bg-success" : promo.AvailableQuantity > 5 ? "bg-warning" : "bg-danger")">
                                             @promo.AvailableQuantity
                                         </span>
@@ -245,10 +279,10 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Comercio</th>
-                                <th>Monto Neto</th>
-                                <th>Ganancia Plataforma</th>
-                                <th>Margen</th>
-                                <th>Estado</th>
+                                <th class="text-end">Monto Neto</th>
+                                <th class="text-end">Ganancia Plataforma</th>
+                                <th class="text-end">Margen</th>
+                                <th class="text-center">Estado</th>
                                 <th>Fecha</th>
                             </tr>
                         </thead>
@@ -257,15 +291,17 @@
                             {
                                 var merchantName = Model.MerchantNames.ContainsKey(txn.MerchantID) ? Model.MerchantNames[txn.MerchantID] : $"ID: {txn.MerchantID}";
                                 var margin = txn.NetAmount > 0 ? Math.Round((txn.CommissionApplied / txn.NetAmount) * 100, 2) : 0;
+                                var estadoEspanol = EstadoTransaccionEspanol(txn.TransactionStatus);
+                                var claseBadge = ClaseBadgeEstado(txn.TransactionStatus);
                                 <tr>
                                     <td><small class="text-muted">#@txn.ID</small></td>
                                     <td>@merchantName</td>
-                                    <td><strong>₡@txn.NetAmount.ToString("N2")</strong></td>
-                                    <td><span class="text-success fw-bold">₡@txn.CommissionApplied.ToString("N2")</span></td>
-                                    <td><small class="text-warning">@margin%</small></td>
-                                    <td>
-                                        <span class="badge @(txn.TransactionStatus == "Completed" ? "bg-success" : txn.TransactionStatus == "Pending" ? "bg-warning" : "bg-danger")">
-                                            @txn.TransactionStatus
+                                    <td class="text-end"><strong>₡@txn.NetAmount.ToString("N2")</strong></td>
+                                    <td class="text-end"><span class="text-success fw-bold">₡@txn.CommissionApplied.ToString("N2")</span></td>
+                                    <td class="text-end"><small class="text-warning">@margin%</small></td>
+                                    <td class="text-center">
+                                        <span class="badge @claseBadge" title="Estado original: @txn.TransactionStatus">
+                                            @estadoEspanol
                                         </span>
                                     </td>
                                     <td><small>@txn.Timestamp.ToString("dd/MM HH:mm")</small></td>
@@ -306,14 +342,16 @@
                         <th>Nombre</th>
                         <th>Email</th>
                         <th>Teléfono</th>
-                        <th>Estado</th>
+                        <th class="text-center">Estado</th>
                         <th>Fecha de Solicitud</th>
-                        <th>Acciones</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var approval in Model.PendingApprovals)
                     {
+                        var estadoEspanol = EstadoValidacionEspanol(approval.Status);
+                        var claseBadge = ClaseBadgeEstado(approval.Status);
                         <tr>
                             <td>
                                 <i class="bi @(approval.Type == "Comercio" ? "bi-shop" : "bi-bank") me-2"></i>
@@ -322,13 +360,13 @@
                             <td><strong>@approval.Name</strong></td>
                             <td>@approval.Email</td>
                             <td>@approval.ContactPhone</td>
-                            <td>
-                                <span class="badge @(approval.Status == "Inactive" ? "bg-warning" : approval.Status == "Rejected" ? "bg-danger" : "bg-secondary")">
-                                    @approval.Status
+                            <td class="text-center">
+                                <span class="badge @claseBadge" title="Estado original: @approval.Status">
+                                    @estadoEspanol
                                 </span>
                             </td>
                             <td>@approval.RequestDate.ToString("dd/MM/yyyy")</td>
-                            <td>
+                            <td class="text-center">
                                 <form method="post" class="d-inline">
                                     <input type="hidden" name="id" value="@approval.ID" />
                                     <input type="hidden" name="type" value="@approval.Type" />
@@ -366,6 +404,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Función para aplicar alineación automática a datos monetarios
+            function applyMonetaryAlignment() {
+                // Buscar todas las celdas de tabla que contengan símbolos de moneda
+                const cells = document.querySelectorAll('td, th');
+                cells.forEach(cell => {
+                    const text = cell.textContent.trim();
+                    // Detectar si contiene símbolo de moneda (₡, $, €, etc.) o porcentajes
+                    if (text.includes('₡') || text.includes('$') || text.includes('€') || 
+                        (text.includes('%') && /\d/.test(text)) || 
+                        /^\d{1,3}(,\d{3})*(\.\d{2})?$/.test(text.replace(/[₡$€]/g, ''))) {
+                        
+                        // Solo aplicar si no tiene clase de alineación específica
+                        if (!cell.classList.contains('text-start') && 
+                            !cell.classList.contains('text-center') &&
+                            !cell.classList.contains('text-end')) {
+                            cell.classList.add('text-end');
+                        }
+                    }
+                });
+            }
+
+            // Aplicar alineación monetaria después de cargar
+            applyMonetaryAlignment();
+
             // Datos de distribución de ingresos desde el servidor
             const incomeData = @Html.Raw(Json.Serialize(Model.IncomeDistribution.Select(i => new { 
                 label = i.Name, 
@@ -491,5 +553,36 @@
     <style>
         .text-purple { color: #6f42c1 !important; }
         .progress-bar { transition: width 1s ease-in-out; }
+        
+        /* Estilos específicos para datos monetarios en tablas */
+        .table td:has-text('₡'), 
+        .table td:has-text('$'), 
+        .table td:has-text('€'),
+        .table th:has-text('₡'), 
+        .table th:has-text('$'), 
+        .table th:has-text('€') {
+            text-align: right !important;
+        }
+        
+        /* Alineación específica para columnas monetarias */
+        .table th.monetary,
+        .table td.monetary {
+            text-align: right !important;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        
+        /* Mejorar el espaciado para números monetarios */
+        .table td[class*="text-end"]:contains('₡'),
+        .table td[class*="text-end"]:contains('$'),
+        .table td[class*="text-end"]:contains('%') {
+            padding-right: 1rem !important;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Tooltip para mostrar estado original */
+        .badge[title] {
+            cursor: help;
+        }
     </style>
 }

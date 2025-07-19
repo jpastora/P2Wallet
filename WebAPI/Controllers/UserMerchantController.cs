@@ -38,5 +38,8 @@ namespace WebAPI.Controllers
             var result = _manager.GetMerchantsForUser(userId);
             return Ok(result);
         }
+
+
+
     }
 }

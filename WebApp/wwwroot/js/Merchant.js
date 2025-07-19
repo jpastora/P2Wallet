@@ -72,7 +72,7 @@
             merchantDTO.LogoImage = null;
         }
 
-        // Enviar la data al API
+        // Enviar la data al API para crear el merchant
         const ca = new ControlActions();
         const urlService = this.ApiEndpoint + "/Create";
 

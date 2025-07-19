@@ -3,8 +3,12 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace WebApp.Pages.Register
 {
+
+
     public class MerchantRegisterModel : PageModel
     {
+        public int UserId { get; set; }
+
         public void OnGet()
         {
             var userIdString = User.FindFirst("UserId")?.Value;
