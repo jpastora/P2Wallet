@@ -46,24 +46,19 @@
         <h2 class="section-title">Nuestros Servicios</h2>
         <p class="mb-5">Soluciones integradas para usuarios, comercios y bancos.</p>
         <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card p-4 h-100">
-                    <h5>Pagos y Cobros</h5>
-                    <p>Transacciones seguras al instante.</p>
+            @foreach (var servicio in Model.Servicios)
+            {
+                <div class="col-md-4">
+                    <div class="card p-4 h-100">
+                        @if (!string.IsNullOrEmpty(servicio.Icono))
+                        {
+                            <i class="@servicio.Icono fs-1 text-primary mb-3"></i>
+                        }
+                        <h5>@servicio.Titulo</h5>
+                        <p>@servicio.Descripcion</p>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-4 h-100">
-                    <h5>Promociones</h5>
-                    <p>Ofertas exclusivas para usuarios Yavi.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-4 h-100">
-                    <h5>Integración Bancaria</h5>
-                    <p>Conecta tus cuentas en un clic.</p>
-                </div>
-            </div>
+            }
         </div>
     </div>
 </section>
@@ -75,6 +70,12 @@
             <div class="col-md-6">
                 <h2 class="section-title">Pagos rápidos y control inteligente</h2>
                 <p>En Yavi conectamos usuarios, comercios y bancos con una experiencia digital simple y segura.</p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Transacciones instantáneas</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Máxima seguridad</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Facilidad de uso</li>
+                    <li><i class="bi bi-check-circle text-success me-2"></i>Soporte 24/7</li>
+                </ul>
             </div>
             <div class="col-md-6 text-center">
                 <img src="https://picsum.photos/seed/about/500/350" class="img-fluid rounded" alt="Sobre Yavi">
@@ -87,7 +88,37 @@
 <section id="por-que" class="py-5">
     <div class="container text-center">
         <h2 class="section-title">¿Por qué elegir Yavi?</h2>
-        <p>Experiencia intuitiva, seguridad y convenios exclusivos.</p>
+        <p class="mb-5">Experiencia intuitiva, seguridad y convenios exclusivos.</p>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <i class="bi bi-shield-check fs-1 text-primary mb-3"></i>
+                    <h5>Seguridad</h5>
+                    <p>Tecnología de punta para proteger tus transacciones</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <i class="bi bi-lightning fs-1 text-primary mb-3"></i>
+                    <h5>Rapidez</h5>
+                    <p>Pagos instantáneos sin complicaciones</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <i class="bi bi-people fs-1 text-primary mb-3"></i>
+                    <h5>Comunidad</h5>
+                    <p>Red amplia de comercios y entidades aliadas</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <i class="bi bi-headset fs-1 text-primary mb-3"></i>
+                    <h5>Soporte</h5>
+                    <p>Atención al cliente disponible siempre</p>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -95,35 +126,55 @@
 <section id="promos" class="py-5 bg-light-alt">
     <div class="container">
         <h2 class="section-title text-center">Promociones Destacadas</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <img src="https://picsum.photos/seed/promo1/400/200" class="card-img-top" alt="Promo 1">
-                    <div class="card-body">
-                        <h5 class="card-title">10% en Supermercados</h5>
-                        <p class="card-text">Pagando con Yavi tenés un 10% de descuento en compras mayores a ₡10.000.</p>
+        @if (Model.Promociones.Any())
+        {
+            <div class="row g-4">
+                @foreach (var promocion in Model.Promociones)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <img src="@promocion.ImagenUrl" class="card-img-top" alt="@promocion.Titulo">
+                            <div class="card-body">
+                                <h5 class="card-title">@promocion.Titulo</h5>
+                                <p class="card-text">@promocion.Descripcion</p>
+                                
+                                @if (!string.IsNullOrEmpty(promocion.ComercioNombre) && promocion.ComercioNombre != "Yavi")
+                                {
+                                    <p class="small text-muted mb-2">
+                                        <i class="bi bi-shop"></i> @promocion.ComercioNombre
+                                    </p>
+                                }
+                                
+                                @if (promocion.PorcentajeDescuento > 0)
+                                {
+                                    <div class="mb-2">
+                                        <span class="badge bg-success">
+                                            @promocion.PorcentajeDescuento% de descuento
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(promocion.TipoDescuento))
+                                        {
+                                            <span class="badge bg-info">@promocion.TipoDescuento</span>
+                                        }
+                                    </div>
+                                }
+                                
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar"></i> Válida hasta: @promocion.FechaVencimiento.ToString("dd/MM/yyyy")
+                                </small>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <img src="https://picsum.photos/seed/promo2/400/200" class="card-img-top" alt="Promo 2">
-                    <div class="card-body">
-                        <h5 class="card-title">2x1 en Cafeterías</h5>
-                        <p class="card-text">Disfrutá de cafés dobles en locales aliados los fines de semana.</p>
-                    </div>
-                </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-gift fs-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Promociones próximamente</h4>
+                <p class="text-muted">Estamos preparando ofertas exclusivas para ti.</p>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <img src="https://picsum.photos/seed/promo3/400/200" class="card-img-top" alt="Promo 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Envíos Gratis</h5>
-                        <p class="card-text">Comprá online y pagá con Yavi para obtener envíos gratis en comercios afiliados.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
 
@@ -131,35 +182,46 @@
 <section id="comercios" class="py-5">
     <div class="container">
         <h2 class="section-title text-center">Comercios Afiliados</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-3">
-                    <img src="https://picsum.photos/seed/comercio1/400/200" class="card-img-top" alt="Comercio 1">
-                    <div class="card-body">
-                        <h5 class="card-title">Super Tienda</h5>
-                        <p class="card-text">Productos esenciales con beneficios al pagar con Yavi.</p>
+        @if (Model.ComerciosAfiliados.Any())
+        {
+            <div class="row g-4">
+                @foreach (var comercio in Model.ComerciosAfiliados)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-3">
+                            <img src="@comercio.ImagenUrl" class="card-img-top" alt="@comercio.Nombre">
+                            <div class="card-body">
+                                <h5 class="card-title">@comercio.Nombre</h5>
+                                <span class="badge bg-secondary mb-2">@comercio.Categoria</span>
+                                <p class="card-text">@comercio.Descripcion</p>
+                                
+                                @if (!string.IsNullOrEmpty(comercio.Telefono) || !string.IsNullOrEmpty(comercio.Email))
+                                {
+                                    <div class="mt-3 small text-muted">
+                                        @if (!string.IsNullOrEmpty(comercio.Telefono))
+                                        {
+                                            <div><i class="bi bi-telephone"></i> @comercio.Telefono</div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(comercio.Email))
+                                        {
+                                            <div><i class="bi bi-envelope"></i> @comercio.Email</div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-3">
-                    <img src="https://picsum.photos/seed/comercio2/400/200" class="card-img-top" alt="Comercio 2">
-                    <div class="card-body">
-                        <h5 class="card-title">Café Central</h5>
-                        <p class="card-text">Disfrutá de un café especial con Yavi.</p>
-                    </div>
-                </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-shop fs-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Comercios próximamente</h4>
+                <p class="text-muted">Estamos incorporando más comercios aliados para brindarte mejores beneficios.</p>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-3">
-                    <img src="https://picsum.photos/seed/comercio3/400/200" class="card-img-top" alt="Comercio 3">
-                    <div class="card-body">
-                        <h5 class="card-title">Moda Urbana</h5>
-                        <p class="card-text">Accedé a descuentos exclusivos en moda urbana.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
 
@@ -167,35 +229,45 @@
 <section id="bancos" class="py-5 bg-light-alt">
     <div class="container">
         <h2 class="section-title text-center">Entidades Financieras</h2>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-3">
-                    <img src="https://picsum.photos/seed/banco1/400/200" class="card-img-top" alt="Banco Nacional">
-                    <div class="card-body">
-                        <h5 class="card-title">Banco Nacional</h5>
-                        <p class="card-text">Operaciones seguras y rápidas con tu banco aliado.</p>
+        @if (Model.EntidadesFinancieras.Any())
+        {
+            <div class="row g-4">
+                @foreach (var entidad in Model.EntidadesFinancieras)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 text-center p-3">
+                            <img src="@entidad.ImagenUrl" class="card-img-top" alt="@entidad.Nombre">
+                            <div class="card-body">
+                                <h5 class="card-title">@entidad.Nombre</h5>
+                                <p class="card-text">@entidad.Descripcion</p>
+                                
+                                @if (!string.IsNullOrEmpty(entidad.Telefono) || !string.IsNullOrEmpty(entidad.Email))
+                                {
+                                    <div class="mt-3 small text-muted">
+                                        @if (!string.IsNullOrEmpty(entidad.Telefono))
+                                        {
+                                            <div><i class="bi bi-telephone"></i> @entidad.Telefono</div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(entidad.Email))
+                                        {
+                                            <div><i class="bi bi-envelope"></i> @entidad.Email</div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
                     </div>
-                </div>
+                }
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-3">
-                    <img src="https://picsum.photos/seed/banco2/400/200" class="card-img-top" alt="Banco Ágil">
-                    <div class="card-body">
-                        <h5 class="card-title">Banco Ágil</h5>
-                        <p class="card-text">Transferencias instantáneas y sin comisiones.</p>
-                    </div>
-                </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-bank fs-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Entidades financieras próximamente</h4>
+                <p class="text-muted">Estamos estableciendo alianzas con más entidades financieras para mejorar tu experiencia.</p>
             </div>
-            <div class="col-md-4">
-                <div class="card h-100 text-center p-3">
-                    <img src="https://picsum.photos/seed/banco3/400/200" class="card-img-top" alt="Financieras Unidas">
-                    <div class="card-body">
-                        <h5 class="card-title">Financieras Unidas</h5>
-                        <p class="card-text">Más convenios y beneficios para tu billetera.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
 
@@ -204,46 +276,125 @@
     <div class="container">
         <h2 class="section-title text-center">Preguntas Frecuentes</h2>
         <div class="accordion" id="faqAccordion">
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="faq1">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1" aria-expanded="true" aria-controls="collapse1">
-                        ¿Qué necesito para registrarme en Yavi?
-                    </button>
-                </h2>
-                <div id="collapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        Solo necesitás un correo electrónico válido, una selfie y tus datos personales básicos para comenzar.
+            @for (int i = 0; i < Model.PreguntasFrecuentes.Count; i++)
+            {
+                var pregunta = Model.PreguntasFrecuentes[i];
+                var collapseId = $"collapse{i + 1}";
+                var headerId = $"faq{i + 1}";
+                var isFirst = i == 0;
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="@headerId">
+                        <button class="accordion-button @(isFirst ? "" : "collapsed")" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#@collapseId" 
+                                aria-expanded="@(isFirst ? "true" : "false")" aria-controls="@collapseId">
+                            @pregunta.Pregunta
+                        </button>
+                    </h2>
+                    <div id="@collapseId" class="accordion-collapse collapse @(isFirst ? "show" : "")" 
+                         aria-labelledby="@headerId" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            @pregunta.Respuesta
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="faq2">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2" aria-expanded="false" aria-controls="collapse2">
-                        ¿Yavi cobra alguna comisión?
-                    </button>
-                </h2>
-                <div id="collapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        El uso de Yavi es gratuito para los usuarios. Solo algunos comercios o entidades pueden aplicar comisiones según sus políticas.
-                    </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ESTADÍSTICAS -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="bi bi-people fs-1"></i>
+                    <h3 class="mt-2">@Model.ComerciosAfiliados.Count(c => c.Categoria != "Información")+</h3>
+                    <p>Comercios Afiliados</p>
                 </div>
             </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header" id="faq3">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3" aria-expanded="false" aria-controls="collapse3">
-                        ¿Dónde puedo usar Yavi?
-                    </button>
-                </h2>
-                <div id="collapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        En los comercios afiliados y plataformas que acepten pagos digitales a través de Yavi.
-                    </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="bi bi-bank fs-1"></i>
+                    <h3 class="mt-2">@Model.EntidadesFinancieras.Count(e => e.Nombre.Contains("Banco") || e.Nombre.Contains("Financiera"))+</h3>
+                    <p>Entidades Financieras</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="bi bi-gift fs-1"></i>
+                    <h3 class="mt-2">@Model.Promociones.Count(p => p.PorcentajeDescuento > 0)+</h3>
+                    <p>Promociones Activas</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="bi bi-shield-check fs-1"></i>
+                    <h3 class="mt-2">100%</h3>
+                    <p>Seguridad Garantizada</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+<!-- LLAMADA A LA ACCIÓN -->
+<section class="py-5">
+    <div class="container text-center">
+        <h2>¿Listo para comenzar con Yavi?</h2>
+        <p class="lead">Únete a miles de usuarios que ya disfrutan de la comodidad de Yavi</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="/Register/UserRegister" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-plus me-2"></i>Registrarse como Usuario
+            </a>
+           <!-- <a href="/Register/MerchantRegister" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-shop me-2"></i>Registrar Comercio
+             </a>-->
+        </div>
+    </div>
+</section>
+
 @section Scripts {
     <script src="~/js/ControlActions.js"></script>
+    <script>
+        // Inicializar controlador
+        const controlActions = new ControlActions();
+        
+        // Smooth scrolling para enlaces de navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Auto-inicializar carousel
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = new bootstrap.Carousel(document.querySelector('#heroCarousel'), {
+                interval: 5000,
+                ride: 'carousel'
+            });
+        });
+
+        // Función para contactar comercio
+        function contactarComercio(nombreComercio) {
+            if (window.yaviController) {
+                window.yaviController.ContactMerchant(nombreComercio);
+            }
+        }
+
+        // Función para mostrar detalles de promoción
+        function mostrarDetallesPromocion(tituloPromocion) {
+            if (window.yaviController) {
+                window.yaviController.ShowPromoDetails(tituloPromocion);
+            }
+        }
+    </script>
 }
