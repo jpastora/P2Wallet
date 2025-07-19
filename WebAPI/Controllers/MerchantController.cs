@@ -117,5 +117,29 @@ namespace WebAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpGet]
+        [Route("GetByTaxID")]
+
+        public ActionResult RetrieveMerchantByTextID(String taxId)
+        {
+            try
+            {
+                var merchantManager = new MerchantManager();
+                var merchantResult = merchantManager.RetrieveByTaxID(taxId);
+                if (merchantResult == null)
+                {
+                    return NotFound("No se encontró el comercio.");
+                }
+                return Ok(merchantResult);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
+        }
+
     }
+
 }

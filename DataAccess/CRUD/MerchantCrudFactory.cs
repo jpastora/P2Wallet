@@ -104,5 +104,20 @@ namespace DataAccess.CRUD
                 ValidationStatus = (string)row["ValidationStatus"]
             };
         }
+
+        public T RetrieveByTaxID<T>(string taxId)
+        {
+            var sqlOperation = new SqlOperation { ProcedureName = "RET_MERCHANT_BY_TAXID" };
+            sqlOperation.AddStringParameter("TaxID", taxId);
+
+            var lstResult = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+            if (lstResult.Count > 0)
+            {
+                var obj = BuildMerchant(lstResult[0]);
+                return (T)Convert.ChangeType(obj, typeof(T));
+            }
+            return default(T);
+        }
+
     }
 }
