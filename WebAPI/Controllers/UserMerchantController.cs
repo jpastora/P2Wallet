@@ -14,7 +14,7 @@ namespace WebAPI.Controllers
         public IActionResult Create([FromBody] UserMerchant userMerchant)
         {
             _manager.CreateUserMerchant(userMerchant);
-            return Ok();
+            return Ok(new { message = "Usuario asignado al comercio exitosamente" });
         }
 
         [HttpDelete("Delete")]
