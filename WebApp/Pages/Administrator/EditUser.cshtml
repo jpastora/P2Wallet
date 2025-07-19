@@ -1,0 +1,133 @@
+@page
+@model WebApp.Pages.Administrator.EditUserModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Editar Usuario";
+}
+
+<h1 class="mb-4">Editar Usuario</h1>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @Model.Message
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información del Usuario</h6>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <input type="hidden" asp-for="UserToEdit.ID" />
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.FirstName" class="form-label">Nombre</label>
+                            <input asp-for="UserToEdit.FirstName" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.LastName" class="form-label">Apellido</label>
+                            <input asp-for="UserToEdit.LastName" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.Email" class="form-label">Email</label>
+                            <input asp-for="UserToEdit.Email" type="email" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.MobilePhone" class="form-label">Teléfono</label>
+                            <input asp-for="UserToEdit.MobilePhone" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.IDNumber" class="form-label">Número de Identificación</label>
+                            <input asp-for="UserToEdit.IDNumber" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.BirthDate" class="form-label">Fecha de Nacimiento</label>
+                            <input asp-for="UserToEdit.BirthDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.ValidationStatus" class="form-label">Estado</label>
+                            <select asp-for="UserToEdit.ValidationStatus" class="form-select">
+                                <option value="Active">Activo</option>
+                                <option value="Inactive">Inactivo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.Role" class="form-label">Rol</label>
+                            <select asp-for="UserToEdit.Role" class="form-select">
+                                <option value="User">Usuario</option>
+                                <option value="Admin">Administrador</option>
+                                <option value="Merchant">Comerciante</option>
+                                <option value="Entity">Entidad</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h6>Cambiar Contraseña (Opcional)</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="UserToEdit.Password" class="form-label">Nueva Contraseña</label>
+                            <input asp-for="UserToEdit.Password" type="password" class="form-control" />
+                            <small class="form-text text-muted">Dejar vacío para mantener la contraseña actual</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/Administrator/AdministratorPanelUsers" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Información Adicional</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> @Model.UserToEdit.ID</p>
+                <p><strong>Creado:</strong> @(Model.UserToEdit.Created != DateTime.MinValue ? Model.UserToEdit.Created.ToString("dd/MM/yyyy") : "N/A")</p>
+                <p><strong>Actualizado:</strong> @(Model.UserToEdit.Updated != DateTime.MinValue ? Model.UserToEdit.Updated.ToString("dd/MM/yyyy") : "N/A")</p>
+                
+                @if (!string.IsNullOrEmpty(Model.UserToEdit.ProfilePhotoUrl))
+                {
+                    <div class="text-center">
+                        <img src="@Model.UserToEdit.ProfilePhotoUrl" class="img-fluid rounded" alt="Foto de perfil" style="max-height: 200px;">
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted">
+                        <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
+                        <p>Sin foto de perfil</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
