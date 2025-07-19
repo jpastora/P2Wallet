@@ -4,8 +4,8 @@ using CoreApp;
 
 namespace WebAPI.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class UserMerchantController : ControllerBase
     {
         private readonly UserMerchantManager _manager = new UserMerchantManager();

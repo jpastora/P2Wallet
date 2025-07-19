@@ -7,6 +7,8 @@ namespace WebApp.Pages.Register
     {
         public void OnGet()
         {
+            var userIdString = User.FindFirst("UserId")?.Value;
+            UserId = int.Parse(userIdString);
         }
     }
 }

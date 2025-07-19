@@ -4,8 +4,8 @@ using CoreApp;
 
 namespace WebAPI.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
     public class UserEntityController : ControllerBase
     {
         private readonly UserEntityManager _manager = new UserEntityManager();
