@@ -1,0 +1,495 @@
+﻿@page
+@model WebApp.Pages.Administrator.AdministratorPannelModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<h1 class="mb-4">Dashboard Principal</h1>
+
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- KPIs Principales -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Total de Transacciones</h6>
+            <h4 class="text-primary">@Model.TotalTransactions.ToString("N0")</h4>
+            <small class="text-muted">En toda la plataforma</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Volumen Transaccionado</h6>
+            <h4 class="text-success">₡@Model.TotalVolume.ToString("N2")</h4>
+            <small class="text-muted">Total procesado</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Ganancias de la Plataforma</h6>
+            <h4 class="text-warning">₡@Model.TotalPlatformEarnings.ToString("N2")</h4>
+            <small class="text-muted">Comisiones totales</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Usuarios Registrados</h6>
+            <h4 class="text-info">@Model.TotalUsers</h4>
+            <small class="text-muted">Total de usuarios</small>
+        </div>
+    </div>
+</div>
+
+<!-- KPIs Secundarios -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Comercios</h6>
+            <h4 class="text-secondary">@Model.TotalMerchants</h4>
+            <small class="text-muted">Registrados</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Entidades</h6>
+            <h4 class="text-secondary">@Model.TotalFinancialEntities</h4>
+            <small class="text-muted">Financieras</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Promociones</h6>
+            <h4 class="text-purple">@Model.TotalActivePromotions</h4>
+            <small class="text-muted">Activas</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Solicitudes Pendientes</h6>
+            <h4 class="text-danger">@Model.PendingApprovals.Count</h4>
+            <small class="text-muted">Requieren aprobación</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 shadow-sm text-center">
+            <h6 class="text-muted">Margen de Ganancia</h6>
+            <h4 class="text-success">@(Model.TotalVolume > 0 ? Math.Round((Model.TotalPlatformEarnings / Model.TotalVolume) * 100, 2) : 0)%</h4>
+            <small class="text-muted">Sobre el volumen</small>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos y Promociones -->
+<div class="row mb-4">
+    <div class="col-md-5">
+        <div class="card p-3 shadow-sm">
+            <h6 class="d-flex align-items-center">
+                <i class="bi bi-pie-chart me-2"></i>
+                Distribución de Ganancias
+                <span class="badge bg-primary ms-auto">₡@Model.TotalPlatformEarnings.ToString("N0")</span>
+            </h6>
+            <div class="row">
+                <div class="col-8">
+                    <canvas id="ingresosChart" height="200"></canvas>
+                </div>
+                <div class="col-4">
+                    <div class="mt-3">
+                        @foreach (var category in Model.IncomeDistribution)
+                        {
+                            <div class="mb-2">
+                                <div class="d-flex align-items-center mb-1">
+                                    <div class="me-2" style="width: 12px; height: 12px; background-color: @category.Color; border-radius: 2px;"></div>
+                                    <small class="text-muted">@category.Name</small>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <strong style="font-size: 0.9rem;">₡@category.Amount.ToString("N0")</strong>
+                                    <small class="text-muted">@category.Percentage%</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card p-3 shadow-sm">
+            <h6 class="d-flex align-items-center">
+                <i class="bi bi-megaphone me-2"></i>
+                Promociones Activas
+                <span class="badge bg-success ms-auto">@Model.TotalActivePromotions activas</span>
+            </h6>
+            @if (Model.ActivePromotions.Count > 0)
+            {
+                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Promoción</th>
+                                <th>Tipo</th>
+                                <th>Origen</th>
+                                <th>Descuento</th>
+                                <th>Disponibles</th>
+                                <th>Vence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var promo in Model.ActivePromotions)
+                            {
+                                var daysLeft = (promo.EndDate - DateTime.Now).Days;
+                                <tr>
+                                    <td>
+                                        <strong>@promo.Name</strong>
+                                        <br><small class="text-muted">@promo.PromotionType</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge @(promo.Type == "Comercio" ? "bg-primary" : "bg-success")">
+                                            <i class="bi @(promo.Type == "Comercio" ? "bi-shop" : "bi-bank") me-1"></i>
+                                            @promo.Type
+                                        </span>
+                                    </td>
+                                    <td><small>@promo.SourceName</small></td>
+                                    <td><strong class="text-success">@promo.DiscountPercentage%</strong></td>
+                                    <td>
+                                        <span class="badge @(promo.AvailableQuantity > 10 ? "bg-success" : promo.AvailableQuantity > 5 ? "bg-warning" : "bg-danger")">
+                                            @promo.AvailableQuantity
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="@(daysLeft <= 3 ? "text-danger" : daysLeft <= 7 ? "text-warning" : "text-muted")">
+                                            @(daysLeft > 0 ? $"{daysLeft} días" : "Vencida")
+                                        </small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-megaphone text-muted" style="font-size: 2rem;"></i>
+                    <p class="text-muted mt-2">No hay promociones activas</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Tendencia y Métricas Detalladas -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card p-3 shadow-sm">
+            <h6 class="d-flex align-items-center">
+                <i class="bi bi-graph-up me-2"></i>
+                Tendencia de Ganancias (12 meses)
+            </h6>
+            <canvas id="trendChart" height="200"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3 shadow-sm mb-3">
+            <h6 class="text-muted">Ganancias por Comercios</h6>
+            <h4 class="text-primary">₡@Model.MerchantCommissions.ToString("N2")</h4>
+            <small class="text-muted">@(Model.TotalPlatformEarnings > 0 ? Math.Round((Model.MerchantCommissions / Model.TotalPlatformEarnings) * 100, 1) : 0)% del total</small>
+            <div class="progress mt-2" style="height: 8px;">
+                <div class="progress-bar bg-primary" style="width: @(Model.TotalPlatformEarnings > 0 ? (Model.MerchantCommissions / Model.TotalPlatformEarnings) * 100 : 0)%"></div>
+            </div>
+        </div>
+        <div class="card p-3 shadow-sm mb-3">
+            <h6 class="text-muted">Ganancias por Entidades</h6>
+            <h4 class="text-success">₡@Model.FinancialEntityCommissions.ToString("N2")</h4>
+            <small class="text-muted">@(Model.TotalPlatformEarnings > 0 ? Math.Round((Model.FinancialEntityCommissions / Model.TotalPlatformEarnings) * 100, 1) : 0)% del total</small>
+            <div class="progress mt-2" style="height: 8px;">
+                <div class="progress-bar bg-success" style="width: @(Model.TotalPlatformEarnings > 0 ? (Model.FinancialEntityCommissions / Model.TotalPlatformEarnings) * 100 : 0)%"></div>
+            </div>
+        </div>
+        <div class="card p-3 shadow-sm">
+            <h6 class="text-muted">Promedio por Transacción</h6>
+            <h4 class="text-warning">₡@(Model.TotalTransactions > 0 ? Math.Round(Model.TotalPlatformEarnings / Model.TotalTransactions, 2) : 0)</h4>
+            <small class="text-muted">Ganancia promedio</small>
+        </div>
+    </div>
+</div>
+
+<!-- Transacciones Recientes -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card p-3 shadow-sm">
+            <h6 class="d-flex align-items-center">
+                <i class="bi bi-clock-history me-2"></i>
+                Transacciones Recientes
+                <span class="badge bg-info ms-auto">Últimas 10</span>
+            </h6>
+            @if (Model.RecentTransactions.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Comercio</th>
+                                <th>Monto Neto</th>
+                                <th>Ganancia Plataforma</th>
+                                <th>Margen</th>
+                                <th>Estado</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var txn in Model.RecentTransactions)
+                            {
+                                var merchantName = Model.MerchantNames.ContainsKey(txn.MerchantID) ? Model.MerchantNames[txn.MerchantID] : $"ID: {txn.MerchantID}";
+                                var margin = txn.NetAmount > 0 ? Math.Round((txn.CommissionApplied / txn.NetAmount) * 100, 2) : 0;
+                                <tr>
+                                    <td><small class="text-muted">#@txn.ID</small></td>
+                                    <td>@merchantName</td>
+                                    <td><strong>₡@txn.NetAmount.ToString("N2")</strong></td>
+                                    <td><span class="text-success fw-bold">₡@txn.CommissionApplied.ToString("N2")</span></td>
+                                    <td><small class="text-warning">@margin%</small></td>
+                                    <td>
+                                        <span class="badge @(txn.TransactionStatus == "Completed" ? "bg-success" : txn.TransactionStatus == "Pending" ? "bg-warning" : "bg-danger")">
+                                            @txn.TransactionStatus
+                                        </span>
+                                    </td>
+                                    <td><small>@txn.Timestamp.ToString("dd/MM HH:mm")</small></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+                    <p class="text-muted mt-2">No hay transacciones registradas</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de solicitudes -->
+<div class="card p-3 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">
+            <i class="bi bi-clipboard-check me-2"></i>
+            Solicitudes Pendientes de Aprobación
+        </h6>
+        <span class="badge bg-primary">@Model.PendingApprovals.Count total</span>
+    </div>
+    
+    @if (Model.PendingApprovals.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th>Fecha de Solicitud</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var approval in Model.PendingApprovals)
+                    {
+                        <tr>
+                            <td>
+                                <i class="bi @(approval.Type == "Comercio" ? "bi-shop" : "bi-bank") me-2"></i>
+                                @approval.Type
+                            </td>
+                            <td><strong>@approval.Name</strong></td>
+                            <td>@approval.Email</td>
+                            <td>@approval.ContactPhone</td>
+                            <td>
+                                <span class="badge @(approval.Status == "Inactive" ? "bg-warning" : approval.Status == "Rejected" ? "bg-danger" : "bg-secondary")">
+                                    @approval.Status
+                                </span>
+                            </td>
+                            <td>@approval.RequestDate.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@approval.ID" />
+                                    <input type="hidden" name="type" value="@approval.Type" />
+                                    <button type="submit" asp-page-handler="Approve" class="btn btn-success btn-sm me-1" 
+                                            onclick="return confirm('¿Estás seguro de aprobar esta solicitud?')">
+                                        <i class="bi bi-check-circle"></i> Aprobar
+                                    </button>
+                                </form>
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@approval.ID" />
+                                    <input type="hidden" name="type" value="@approval.Type" />
+                                    <button type="submit" asp-page-handler="Reject" class="btn btn-danger btn-sm" 
+                                            onclick="return confirm('¿Estás seguro de rechazar esta solicitud?')">
+                                        <i class="bi bi-x-circle"></i> Rechazar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            <h5 class="mt-2">¡Todo al día!</h5>
+            <p class="text-muted">No hay solicitudes pendientes de aprobación.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Datos de distribución de ingresos desde el servidor
+            const incomeData = @Html.Raw(Json.Serialize(Model.IncomeDistribution.Select(i => new { 
+                label = i.Name, 
+                data = i.Amount, 
+                backgroundColor = i.Color,
+                percentage = i.Percentage
+            })));
+
+            const monthlyData = @Html.Raw(Json.Serialize(Model.MonthlyRevenueData));
+
+            // Gráfico de distribución de ganancias (doughnut)
+            const ingresosChart = new Chart(document.getElementById('ingresosChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: incomeData.map(item => item.label),
+                    datasets: [{
+                        data: incomeData.map(item => item.data),
+                        backgroundColor: incomeData.map(item => item.backgroundColor),
+                        borderWidth: 2,
+                        borderColor: '#fff',
+                        hoverBorderWidth: 3,
+                        hoverBorderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Usamos la leyenda personalizada
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.parsed;
+                                    const percentage = incomeData[context.dataIndex].percentage;
+                                    return context.label + ': ₡' + value.toLocaleString('es-CR', {minimumFractionDigits: 2}) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        duration: 1000
+                    }
+                }
+            });
+
+            // Gráfico de tendencia mensual (line)
+            const trendChart = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: {
+                    labels: monthlyData.map(item => item.month),
+                    datasets: [{
+                        label: 'Ganancias Mensuales',
+                        data: monthlyData.map(item => item.revenue),
+                        borderColor: '#553DF2',
+                        backgroundColor: 'rgba(85, 61, 242, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#553DF2',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '₡' + value.toLocaleString('es-CR');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Ganancias: ₡' + context.parsed.y.toLocaleString('es-CR', {minimumFractionDigits: 2});
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            // Auto-refresh cada 5 minutos
+            setInterval(() => {
+                location.reload();
+            }, 300000); // 5 minutos
+
+            // Animación de números al cargar
+            animateNumbers();
+        });
+
+        function animateNumbers() {
+            const numberElements = document.querySelectorAll('.card h4');
+            numberElements.forEach(el => {
+                const finalValue = el.textContent;
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    el.style.transition = 'opacity 0.5s ease-in-out';
+                    el.style.opacity = '1';
+                }, Math.random() * 500);
+            });
+        }
+    </script>
+    
+    <style>
+        .text-purple { color: #6f42c1 !important; }
+        .progress-bar { transition: width 1s ease-in-out; }
+    </style>
+}
