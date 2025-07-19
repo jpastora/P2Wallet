@@ -1,0 +1,142 @@
+@page
+@model WebApp.Pages.Administrator.AdministratorPanelUsersModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Administración de Usuarios";
+}
+
+<h1 class="mb-4">Administración de Usuarios</h1>
+
+@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Búsqueda simple -->
+<div class="card p-3 mb-4">
+    <form method="get" class="row g-3">
+        <div class="col-md-8">
+            <input type="text" class="form-control" name="searchTerm" 
+                   value="@Model.SearchTerm" placeholder="Buscar por nombre o email...">
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Lista de usuarios -->
+<div class="card">
+    <div class="card-header">
+        <h6 class="mb-0">
+            <i class="bi bi-people me-2"></i>
+            Lista de Usuarios (@Model.TotalUsers total)
+        </h6>
+    </div>
+    <div class="card-body p-0">
+        @if (Model.AllUsers.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model.AllUsers)
+                        {
+                            var currentUserEmail = User.Identity?.Name;
+                            var isCurrentUser = user.Email == currentUserEmail;
+                            var isActive = user.ValidationStatus == "Active";
+
+                            <tr class="@(isCurrentUser ? "table-warning" : "")">
+                                <td>
+                                    <strong>@user.FirstName @user.LastName</strong>
+                                    @if (isCurrentUser)
+                                    {
+                                        <br><small class="text-warning">Eres tú</small>
+                                    }
+                                </td>
+                                <td>@user.Email</td>
+                                <td>@user.MobilePhone</td>
+                                <td>
+                                    <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                        @AdministratorPanelUsersModel.EstadoEspanol(user.ValidationStatus)
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (!isCurrentUser)
+                                    {
+                                        <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                            <input type="hidden" name="userId" value="@user.ID" />
+                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                                @(isActive ? "Desactivar" : "Activar")
+                                            </button>
+                                        </form>
+                                        <a href="/Administrator/EditUser?userId=@user.ID" class="btn btn-sm btn-outline-primary ms-1">
+                                            Editar
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No disponible</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <h5 class="text-muted">No se encontraron usuarios</h5>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Paginación simple -->
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link" href="?searchTerm=@Model.SearchTerm&currentPage=@Model.PreviousPage">
+                    Anterior
+                </a>
+            </li>
+            
+            <li class="page-item active">
+                <span class="page-link">
+                    Página @Model.CurrentPage de @Model.TotalPages
+                </span>
+            </li>
+            
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <a class="page-link" href="?searchTerm=@Model.SearchTerm&currentPage=@Model.NextPage">
+                    Siguiente
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

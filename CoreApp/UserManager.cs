@@ -64,6 +64,9 @@ namespace CoreApp
             {
                 var userCrud = new UserCrudFactory();
                 
+                // Validar y completar campos requeridos
+                ValidateAndCompleteUserFields(user);
+                
                 // CRÍTICO: Solo hashear el password si NO está ya hasheado
                 // Un password hasheado típicamente tiene más de 40 caracteres y contiene caracteres base64
                 if (!string.IsNullOrWhiteSpace(user.Password))
@@ -82,6 +85,44 @@ namespace CoreApp
             {
                 ManageException(ex); // Maneja la excepción usando el método base
             }
+        }
+
+        // Método helper para validar y completar campos requeridos por el procedimiento almacenado
+        private void ValidateAndCompleteUserFields(User user)
+        {
+            // Asegurar que todos los campos requeridos por el SP tengan valores por defecto
+            if (string.IsNullOrEmpty(user.ProfilePhotoUrl))
+                user.ProfilePhotoUrl = "";
+            if (string.IsNullOrEmpty(user.IDPhotoFrontUrl))
+                user.IDPhotoFrontUrl = "";
+            if (string.IsNullOrEmpty(user.IDPhotoBackUrl))
+                user.IDPhotoBackUrl = "";
+            if (string.IsNullOrEmpty(user.EmailVerified))
+                user.EmailVerified = "Active";
+            if (string.IsNullOrEmpty(user.MobileVerified))
+                user.MobileVerified = "Active";
+            if (string.IsNullOrEmpty(user.BiometricVerified))
+                user.BiometricVerified = "Inactive";
+            if (string.IsNullOrEmpty(user.SMSNotification))
+                user.SMSNotification = "Active";
+            if (string.IsNullOrEmpty(user.EmailNotification))
+                user.EmailNotification = "Active";
+            if (string.IsNullOrEmpty(user.PushNotification))
+                user.PushNotification = "Active";
+            if (string.IsNullOrEmpty(user.ValidationStatus))
+                user.ValidationStatus = "Inactive";
+            if (string.IsNullOrEmpty(user.Role))
+                user.Role = "User";
+            if (string.IsNullOrEmpty(user.FirstName))
+                user.FirstName = "";
+            if (string.IsNullOrEmpty(user.LastName))
+                user.LastName = "";
+            if (string.IsNullOrEmpty(user.Email))
+                throw new ArgumentException("Email es requerido");
+            if (string.IsNullOrEmpty(user.MobilePhone))
+                user.MobilePhone = "";
+            if (string.IsNullOrEmpty(user.IDNumber))
+                user.IDNumber = "";
         }
 
         // Método helper para verificar si una cadena es Base64
