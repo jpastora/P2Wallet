@@ -93,15 +93,20 @@
             try
             {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: type === 'selfie' ? 'user' : 'environment' },
+                    video: {
+                        facingMode: type === 'selfie' ? 'user' : 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
                     audio: false
                 });
                 videoElements[type].srcObject = stream;
-            } catch (err) 
+            } catch (err)
             {
                 alert('Error al acceder a la cámara: ' + err.message);
             }
         }
+
 
         function stopCamera(type)
         {
@@ -211,7 +216,7 @@
             resultDiv.textContent = 'Procesando...';
 
             try {
-                const response = await fetch('https://62c0e31d9d26.ngrok-free.app/verify', {
+                const response = await fetch('https://a85196a878e4.ngrok-free.app/verify', {
                     method: 'POST',
                     body: formData
                 });
