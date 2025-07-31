@@ -1,0 +1,10 @@
+﻿CREATE OR ALTER PROCEDURE DELETE_ACCOUNT_MOVEMENT_PR
+    @P_MovementID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DELETE FROM AccountMovements
+    WHERE MovementID = @P_MovementID
+END
+GO
