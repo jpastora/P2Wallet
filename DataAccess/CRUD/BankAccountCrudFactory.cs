@@ -78,6 +78,7 @@ namespace DataAccess.CRUD
             sqlOperation.AddStringParameter("@P_IBAN", account.IBAN);
             sqlOperation.AddIntParam("@P_FinancialEntityID", account.FinancialEntityID);
             sqlOperation.AddStringParameter("@P_ValidationStatus", account.ValidationStatus);
+            sqlOperation.AddDoubleParam("@P_Balance", account.Balance);
 
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
@@ -90,7 +91,8 @@ namespace DataAccess.CRUD
                 UserID = (int)row["UserID"],
                 IBAN = (string)row["IBAN"],
                 FinancialEntityID = (int)row["FinancialEntityID"],
-                ValidationStatus = (string)row["ValidationStatus"]
+                ValidationStatus = (string)row["ValidationStatus"],
+                Balance = (double)row["Balance"]
             };
         }
     }

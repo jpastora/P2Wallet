@@ -136,3 +136,16 @@ CREATE TABLE MerchantPromotions (
     CreatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (MerchantID) REFERENCES Merchants(MerchantID)
 );
+
+CREATE TABLE AccountMovements
+(
+    MovementID INT IDENTITY(1,1) PRIMARY KEY,
+    TransactionID INT NOT NULL,
+    SourceAccountDescription VARCHAR(100) NOT NULL,
+    DestinationAccountDescription VARCHAR(100) NOT NULL,
+    MovementType VARCHAR(50) NOT NULL,
+    Amount DECIMAL(12, 2) NOT NULL,
+    Timestamp DATETIME NOT NULL,
+	FOREIGN KEY (TransactionID) REFERENCES Transactions(TransactionID)
+);
+

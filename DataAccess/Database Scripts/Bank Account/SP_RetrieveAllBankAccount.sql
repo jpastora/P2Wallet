@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE RET_ALL_BANK_ACCOUNTS_PR
+﻿CREATE OR ALTER PROCEDURE RET_ALL_BANK_ACCOUNTS_PR
 AS
 BEGIN
     SELECT 
@@ -7,7 +7,8 @@ BEGIN
         IBAN,
         FinancialEntityID,
         ValidationStatus,
-        RegisteredAt
+        RegisteredAt,
+        Balance
     FROM 
         BankAccounts
 END

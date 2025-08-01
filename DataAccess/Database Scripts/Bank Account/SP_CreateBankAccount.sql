@@ -2,7 +2,8 @@
     @P_UserID INT,
     @P_IBAN CHAR(22),
     @P_FinancialEntityID INT,
-    @P_ValidationStatus VARCHAR(15) = 'Active' -- << PARÁMETRO AÑADIDO (OPCIONAL)
+    @P_ValidationStatus VARCHAR(15) = 'Active', -- Optional parameter
+    @P_Balance DECIMAL(18, 2) = 0.00            -- << New optional parameter
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -12,20 +13,16 @@ BEGIN
         IBAN,
         FinancialEntityID,
         RegisteredAt,
-        ValidationStatus -- << CAMPO AÑADIDO
+        ValidationStatus,
+        Balance -- << New column
     )
     VALUES (
         @P_UserID,
         @P_IBAN,
         @P_FinancialEntityID,
         GETDATE(),
-        @P_ValidationStatus -- << VALOR DEL PARÁMETRO
+        @P_ValidationStatus,
+        @P_Balance -- << New value
     );
 END;
 GO
-
-ALTER TABLE BankAccounts
-ADD CONSTRAINT UQ_BankAccounts_IBAN UNIQUE (IBAN);
-GO
-
-PRINT 'Restricción UNIQUE añadida exitosamente a la columna IBAN.';
