@@ -5,176 +5,209 @@
     ViewData["Title"] = "Administración de Entidades Financieras";
 }
 
-<h1 class="mb-4">Administración de Entidades Financieras</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4"><i class="bi bi-bank me-2"></i>Administración de Entidades Financieras</h1>
 
-@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-<!-- Búsqueda simple -->
-<div class="card p-3 mb-4">
-    <form method="get" class="row g-3">
-        <div class="col-md-8">
-            <input type="text" class="form-control" name="searchTerm" 
-                   value="@Model.SearchTerm" placeholder="Buscar por nombre o email...">
-        </div>
-        <div class="col-md-4">
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-search"></i> Buscar
-            </button>
-        </div>
-    </form>
-</div>
-
-<!-- Lista de entidades financieras -->
-<div class="card">
-    <div class="card-header">
-        <h6 class="mb-0">
-            <i class="bi bi-bank me-2"></i>
-            Lista de Entidades Financieras (@Model.TotalFinancialEntities total)
-        </h6>
-    </div>
-    <div class="card-body p-0">
-        @if (Model.AllFinancialEntities.Count > 0)
-        {
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Email</th>
-                            <th>Teléfono</th>
-                            <th>Tax ID</th>
-                            <th>Comisión %</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var entity in Model.AllFinancialEntities)
-                        {
-                            var isActive = entity.ValidationStatus == "Active";
-
-                            <tr>
-                                <td>
-                                    <strong>@entity.EntityName</strong>
-                                </td>
-                                <td>@entity.Email</td>
-                                <td>@entity.ContactPhone</td>
-                                <td>@entity.TaxID</td>
-                                <td>@entity.CommissionPercentage.ToString("0.0")%</td>
-                                <td>
-                                    <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
-                                        @AdministratorPanelFinancialEntitiesModel.EstadoEspanol(entity.ValidationStatus)
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
-                                            <input type="hidden" name="entityId" value="@entity.ID" />
-                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
-                                                @(isActive ? "Desactivar" : "Activar")
-                                            </button>
-                                        </form>
-                                        <a href="/Administrator/EditFinancialEntity?entityId=@entity.ID" class="btn btn-sm btn-outline-primary ms-1">
-                                            Editar
-                                        </a>
-                                        <button type="button" class="btn btn-sm btn-outline-info ms-1" data-bs-toggle="modal" data-bs-target="#assignEntityModal@(entity.ID)">
-                                            Asignar Usuario
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="text-center py-5">
-                <h5 class="text-muted">No se encontraron entidades financieras</h5>
-            </div>
-        }
-    </div>
-</div>
-
-<!-- Modales para asignar usuarios -->
-@foreach (var entity in Model.AllFinancialEntities)
-{
-    <div class="modal fade" id="assignEntityModal@(entity.ID)" tabindex="-1" aria-labelledby="assignEntityModalLabel@(entity.ID)" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assignEntityModalLabel@(entity.ID)">
-                        Asignar Usuario a la Entidad: @entity.EntityName
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-                <form method="post" asp-page-handler="AssignEntity">
-                    <div class="modal-body">
-                        <input type="hidden" name="entityId" value="@entity.ID" />
-                        <div class="mb-3">
-                            <label for="userId@(entity.ID)" class="form-label">Seleccionar Usuario</label>
-                            <select class="form-select" name="userId" id="userId@(entity.ID)" required>
-                                <option value="">-- Seleccione un usuario --</option>
-                                @foreach (var user in Model.AllUsers)
-                                {
-                                    <option value="@user.ID">@user.FirstName @user.LastName (@user.Email)</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="alert alert-info">
-                            <small>
-                                <i class="bi bi-info-circle me-1"></i>
-                                Al asignar esta entidad financiera al usuario, el usuario podrá acceder al panel de administración de la entidad.
-                            </small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Asignar Entidad</button>
-                    </div>
-                </form>
-            </div>
+            }
+
+            @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
         </div>
     </div>
-}
 
-<!-- Paginación simple -->
-@if (Model.TotalPages > 1)
-{
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                <a class="page-link" href="?searchTerm=@Model.SearchTerm&currentPage=@Model.PreviousPage">
-                    Anterior
-                </a>
-            </li>
-            
-            <li class="page-item active">
-                <span class="page-link">
-                    Página @Model.CurrentPage de @Model.TotalPages
-                </span>
-            </li>
-            
-            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                <a class="page-link" href="?searchTerm=@Model.SearchTerm&currentPage=@Model.NextPage">
-                    Siguiente
-                </a>
-            </li>
-        </ul>
-    </nav>
-}
+    <div class="row">
+        <div class="col-12">
+            <!-- Búsqueda simple -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h7 class="mb-0"><i class="bi bi-search me-2"></i>Buscar Entidades Financieras</h7>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-lg-8 col-md-7 col-12">
+                            <input type="text" class="form-control" name="searchTerm" 
+                                   value="@Model.SearchTerm" placeholder="Buscar por nombre o email...">
+                        </div>
+                        <div class="col-lg-4 col-md-5 col-12">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-1"></i>Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de entidades financieras -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h7 class="mb-0">
+                        <i class="bi bi-bank me-2"></i>
+                        Lista de Entidades Financieras (@Model.TotalFinancialEntities total)
+                    </h7>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.AllFinancialEntities.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th class="d-none d-lg-table-cell">Email</th>
+                                        <th class="d-none d-md-table-cell">Teléfono</th>
+                                        <th class="d-none d-xl-table-cell">Tax ID</th>
+                                        <th class="d-none d-lg-table-cell">Comisión %</th>
+                                        <th>Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var entity in Model.AllFinancialEntities)
+                                    {
+                                        var isActive = entity.ValidationStatus == "Active";
+
+                                        <tr>
+                                            <td>
+                                                <strong>@entity.EntityName</strong>
+                                                <div class="d-lg-none small text-muted">
+                                                    @(entity.Email.Length > 25 ? entity.Email.Substring(0, 25) + "..." : entity.Email)
+                                                </div>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell">@entity.Email</td>
+                                            <td class="d-none d-md-table-cell">@entity.ContactPhone</td>
+                                            <td class="d-none d-xl-table-cell">@entity.TaxID</td>
+                                            <td class="d-none d-lg-table-cell">@entity.CommissionPercentage.ToString("0.0")%</td>
+                                            <td>
+                                                <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                                    @AdministratorPanelFinancialEntitiesModel.EstadoEspanol(entity.ValidationStatus)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
+                                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                        <input type="hidden" name="entityId" value="@entity.ID" />
+                                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-lg-auto">
+                                                            <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
+                                                            <span class="d-none d-sm-inline">@(isActive ? "Desactivar" : "Activar")</span>
+                                                        </button>
+                                                    </form>
+                                                    <a href="/Administrator/EditFinancialEntity?entityId=@entity.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                        <i class="bi bi-pencil me-1"></i>
+                                                        <span class="d-none d-sm-inline">Editar</span>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-info w-100 w-lg-auto" data-bs-toggle="modal" data-bs-target="#assignEntityModal@(entity.ID)">
+                                                        <i class="bi bi-person-plus me-1"></i>
+                                                        <span class="d-none d-sm-inline">Asignar</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-bank text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No se encontraron entidades financieras</h5>
+                            <p class="text-muted">Intenta ajustar los criterios de búsqueda</p>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Modales para asignar usuarios -->
+            @foreach (var entity in Model.AllFinancialEntities)
+            {
+                <div class="modal fade" id="assignEntityModal@(entity.ID)" tabindex="-1" aria-labelledby="assignEntityModalLabel@(entity.ID)" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="assignEntityModalLabel@(entity.ID)">
+                                    <i class="bi bi-person-plus me-2"></i>Asignar Usuario a la Entidad
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="post" asp-page-handler="AssignEntity">
+                                <div class="modal-body">
+                                    <input type="hidden" name="entityId" value="@entity.ID" />
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Entidad Financiera:</label>
+                                        <p class="text-muted">@entity.EntityName</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="userId@(entity.ID)" class="form-label fw-bold">Seleccionar Usuario</label>
+                                        <select class="form-select" name="userId" id="userId@(entity.ID)" required>
+                                            <option value="">-- Seleccione un usuario --</option>
+                                            @foreach (var user in Model.AllUsers)
+                                            {
+                                                <option value="@user.ID">@user.FirstName @user.LastName (@user.Email)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <small>
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Al asignar esta entidad financiera al usuario, el usuario podrá acceder al panel de administración de la entidad.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="bi bi-x-lg me-1"></i>Cancelar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-1"></i>Asignar Entidad
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Paginación simple -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center flex-wrap">
+                        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                            <a class="page-link" href="?searchTerm=@Model.SearchTerm&currentPage=@Model.PreviousPage">
+                                <i class="bi bi-chevron-left"></i>
+                                <span class="d-none d-sm-inline ms-1">Anterior</span>
+                            </a>
+                        </li>
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                <span class="d-none d-sm-inline">Página </span>@Model.CurrentPage<span class="d-none d-sm-inline"> de @Model.TotalPages</span>
+                            </span>
+                        </li>
+                        
+                        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                            <a class="page-link" href="?searchTerm=@Model.SearchTerm&currentPage=@Model.NextPage">
+                                <span class="d-none d-sm-inline me-1">Siguiente</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>

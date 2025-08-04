@@ -98,6 +98,12 @@
     margin-bottom: 0.5rem;
 }
 
+    .card h {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
 .card h4 {
     color: #2c3e50;
     font-weight: 700;
