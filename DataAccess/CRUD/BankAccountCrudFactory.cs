@@ -34,7 +34,7 @@ namespace DataAccess.CRUD
             var sqlOperation = new SqlOperation() { ProcedureName = "DELETE_BANK_ACCOUNT_PR" };
             sqlOperation.AddIntParam("@P_BankAccountID", account.ID);
 
-            _sqlDao.ExecuteQueryProcedure(sqlOperation);
+            _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
         public override List<T> RetrieveAll<T>()
@@ -92,7 +92,7 @@ namespace DataAccess.CRUD
                 IBAN = (string)row["IBAN"],
                 FinancialEntityID = (int)row["FinancialEntityID"],
                 ValidationStatus = (string)row["ValidationStatus"],
-                Balance = Convert.ToDouble(row["Balance"])
+                Balance = row.ContainsKey("Balance") ? Convert.ToDouble(row["Balance"]) : 0.0
             };
         }
     }
