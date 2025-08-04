@@ -5,172 +5,203 @@
     ViewData["Title"] = "Administración de Promociones";
 }
 
-<h1 class="mb-4">Administración de Promociones</h1>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4"><i class="bi bi-megaphone me-2"></i>Administración de Promociones</h1>
 
-@if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+            @if (!string.IsNullOrEmpty(TempData["SuccessMessage"]?.ToString()))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
 
-@if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
-<!-- Filtros y búsqueda -->
-<div class="card p-3 mb-4">
-    <form method="get" class="row g-3">
-        <div class="col-md-6">
-            <input type="text" class="form-control" name="searchTerm" 
-                   value="@Model.SearchTerm" placeholder="Buscar por nombre de promoción...">
+            @if (!string.IsNullOrEmpty(TempData["ErrorMessage"]?.ToString()))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
         </div>
-        <div class="col-md-3">
-            <select name="promotionTypeFilter" class="form-select">
-                <option value="">Todos los tipos</option>
-                <option value="Merchant" selected="@(Model.PromotionTypeFilter == "Merchant")">Comercios</option>
-                <option value="Financial" selected="@(Model.PromotionTypeFilter == "Financial")">Entidades Financieras</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-search"></i> Buscar
-            </button>
-        </div>
-    </form>
-</div>
-
-<!-- Lista de promociones -->
-<div class="card">
-    <div class="card-header">
-        <h6 class="mb-0">
-            <i class="bi bi-megaphone me-2"></i>
-            Lista de Promociones (@Model.TotalPromotions total)
-        </h6>
     </div>
-    <div class="card-body p-0">
-        @if (Model.AllPromotions.Count > 0)
-        {
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nombre</th>
-                            <th>Tipo</th>
-                            <th>Origen</th>
-                            <th>Descuento %</th>
-                            <th>Vigencia</th>
-                            <th>Cantidad</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var promotion in Model.AllPromotions)
-                        {
-                            var isActive = promotion.ValidationStatus == "Active";
-                            var isExpired = promotion.EndDate < DateTime.Now;
-                            var isNotStarted = promotion.StartDate > DateTime.Now;
 
-                            <tr>
-                                <td>
-                                    <strong>@promotion.Name</strong>
-                                    @if (!string.IsNullOrEmpty(promotion.Description))
-                                    {
-                                        <br><small class="text-muted">@promotion.Description.Substring(0, Math.Min(50, promotion.Description.Length))@(promotion.Description.Length > 50 ? "..." : "")</small>
-                                    }
-                                </td>
-                                <td>
-                                    <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark")">
-                                        @promotion.Type
-                                    </span>
-                                </td>
-                                <td>@promotion.SourceName</td>
-                                <td>@promotion.DiscountPercentage.ToString("0.00")%</td>
-                                <td>
-                                    <small>@promotion.StartDate.ToString("dd/MM/yyyy") - @promotion.EndDate.ToString("dd/MM/yyyy")</small>
-                                    @if (isExpired)
-                                    {
-                                        <br><small class="text-danger">Expirada</small>
-                                    }
-                                    else if (isNotStarted)
-                                    {
-                                        <br><small class="text-warning">No iniciada</small>
-                                    }
-                                    else
-                                    {
-                                        <br><small class="text-success">Vigente</small>
-                                    }
-                                </td>
-                                <td>@promotion.AvailableQuantity</td>
-                                <td>
-                                    <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
-                                        @AdministratorPanelPromotionsModel.EstadoEspanol(promotion.ValidationStatus)
-                                    </span>
-                                </td>
-                                <td>
-                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
-                                        <input type="hidden" name="promotionId" value="@promotion.ID" />
-                                        <input type="hidden" name="promotionType" value="@promotion.Type" />
-                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
-                                            @(isActive ? "Desactivar" : "Activar")
-                                        </button>
-                                    </form>
-                                    @if (promotion.Type == "Comercio")
-                                    {
-                                        <a href="/Administrator/EditMerchantPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary ms-1">
-                                            Editar
-                                        </a>
-                                    }
-                                    else
-                                    {
-                                        <a href="/Administrator/EditFinancialPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary ms-1">
-                                            Editar
-                                        </a>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    <div class="row">
+        <div class="col-12">
+            <!-- Filtros y búsqueda -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h7 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros y Búsqueda</h7>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-lg-5 col-md-12">
+                            <label class="form-label small">Nombre de promoción</label>
+                            <input type="text" class="form-control" name="searchTerm" 
+                                   value="@Model.SearchTerm" placeholder="Buscar por nombre de promoción...">
+                        </div>
+                        <div class="col-lg-4 col-md-8">
+                            <label class="form-label small">Tipo de promoción</label>
+                            <select name="promotionTypeFilter" class="form-select">
+                                <option value="">Todos los tipos</option>
+                                <option value="Merchant" selected="@(Model.PromotionTypeFilter == "Merchant")">Comercios</option>
+                                <option value="Financial" selected="@(Model.PromotionTypeFilter == "Financial")">Entidades Financieras</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-3 col-md-4">
+                            <label class="form-label small d-none d-md-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search me-1"></i>Buscar
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        }
-        else
-        {
-            <div class="text-center py-5">
-                <h5 class="text-muted">No se encontraron promociones</h5>
+
+            <!-- Lista de promociones -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h7 class="mb-0">
+                        <i class="bi bi-megaphone me-2"></i>
+                        Lista de Promociones (@Model.TotalPromotions total)
+                    </h7>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.AllPromotions.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th class="d-none d-lg-table-cell">Origen</th>
+                                        <th class="d-none d-md-table-cell">Descuento %</th>
+                                        <th class="d-none d-xl-table-cell">Vigencia</th>
+                                        <th class="d-none d-lg-table-cell">Cantidad</th>
+                                        <th>Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var promotion in Model.AllPromotions)
+                                    {
+                                        var isActive = promotion.ValidationStatus == "Active";
+                                        var isExpired = promotion.EndDate < DateTime.Now;
+                                        var isNotStarted = promotion.StartDate > DateTime.Now;
+
+                                        <tr>
+                                            <td>
+                                                <strong>@promotion.Name</strong>
+                                                @if (!string.IsNullOrEmpty(promotion.Description))
+                                                {
+                                                    <div class="small text-muted">@promotion.Description.Substring(0, Math.Min(30, promotion.Description.Length))@(promotion.Description.Length > 30 ? "..." : "")</div>
+                                                }
+                                                <div class="d-lg-none small">
+                                                    <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark") me-1">@promotion.Type</span>
+                                                    <span class="text-muted">@promotion.SourceName</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark")">
+                                                    @promotion.Type
+                                                </span>
+                                            </td>
+                                            <td class="d-none d-lg-table-cell">@promotion.SourceName</td>
+                                            <td class="d-none d-md-table-cell">@promotion.DiscountPercentage.ToString("0.00")%</td>
+                                            <td class="d-none d-xl-table-cell">
+                                                <small>@promotion.StartDate.ToString("dd/MM/yyyy")<br>@promotion.EndDate.ToString("dd/MM/yyyy")</small>
+                                                @if (isExpired)
+                                                {
+                                                    <br><span class="badge bg-danger">Expirada</span>
+                                                }
+                                                else if (isNotStarted)
+                                                {
+                                                    <br><span class="badge bg-warning">No iniciada</span>
+                                                }
+                                                else
+                                                {
+                                                    <br><span class="badge bg-success">Vigente</span>
+                                                }
+                                            </td>
+                                            <td class="d-none d-lg-table-cell">@promotion.AvailableQuantity</td>
+                                            <td>
+                                                <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                                    @AdministratorPanelPromotionsModel.EstadoEspanol(promotion.ValidationStatus)
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
+                                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                        <input type="hidden" name="promotionId" value="@promotion.ID" />
+                                                        <input type="hidden" name="promotionType" value="@promotion.Type" />
+                                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-lg-auto">
+                                                            <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
+                                                            <span class="d-none d-sm-inline">@(isActive ? "Desactivar" : "Activar")</span>
+                                                        </button>
+                                                    </form>
+                                                    @if (promotion.Type == "Comercio")
+                                                    {
+                                                        <a href="/Administrator/EditMerchantPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                            <i class="bi bi-pencil me-1"></i>
+                                                            <span class="d-none d-sm-inline">Editar</span>
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a href="/Administrator/EditFinancialPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                            <i class="bi bi-pencil me-1"></i>
+                                                            <span class="d-none d-sm-inline">Editar</span>
+                                                        </a>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-megaphone text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No se encontraron promociones</h5>
+                            <p class="text-muted">Intenta ajustar los criterios de búsqueda o filtros</p>
+                        </div>
+                    }
+                </div>
             </div>
-        }
+
+            <!-- Paginación simple -->
+            @if (Model.TotalPages > 1)
+            {
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center flex-wrap">
+                        <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                            <a class="page-link" href="?searchTerm=@Model.SearchTerm&promotionTypeFilter=@Model.PromotionTypeFilter&currentPage=@Model.PreviousPage">
+                                <i class="bi bi-chevron-left"></i>
+                                <span class="d-none d-sm-inline ms-1">Anterior</span>
+                            </a>
+                        </li>
+                        
+                        <li class="page-item active">
+                            <span class="page-link">
+                                <span class="d-none d-sm-inline">Página </span>@Model.CurrentPage<span class="d-none d-sm-inline"> de @Model.TotalPages</span>
+                            </span>
+                        </li>
+                        
+                        <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                            <a class="page-link" href="?searchTerm=@Model.SearchTerm&promotionTypeFilter=@Model.PromotionTypeFilter&currentPage=@Model.NextPage">
+                                <span class="d-none d-sm-inline me-1">Siguiente</span>
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
     </div>
 </div>
-
-<!-- Paginación simple -->
-@if (Model.TotalPages > 1)
-{
-    <nav class="mt-4">
-        <ul class="pagination justify-content-center">
-            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
-                <a class="page-link" href="?searchTerm=@Model.SearchTerm&promotionTypeFilter=@Model.PromotionTypeFilter&currentPage=@Model.PreviousPage">
-                    Anterior
-                </a>
-            </li>
-            
-            <li class="page-item active">
-                <span class="page-link">
-                    Página @Model.CurrentPage de @Model.TotalPages
-                </span>
-            </li>
-            
-            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
-                <a class="page-link" href="?searchTerm=@Model.SearchTerm&promotionTypeFilter=@Model.PromotionTypeFilter&currentPage=@Model.NextPage">
-                    Siguiente
-                </a>
-            </li>
-        </ul>
-    </nav>
-}

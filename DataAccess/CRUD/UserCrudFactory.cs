@@ -187,6 +187,9 @@ namespace DataAccess.CRUD
                 EmailNotification = row.ContainsKey("EmailNotification") ? Convert.ToString(row["EmailNotification"]) : null,
                 PushNotification = row.ContainsKey("PushNotification") ? Convert.ToString(row["PushNotification"]) : null,
                 Role = row.ContainsKey("Role") ? Convert.ToString(row["Role"]) : null,
+                // Mapear las fechas de BaseDTO usando los nombres correctos de la base de datos
+                Created = row.ContainsKey("CreatedAt") ? (row["CreatedAt"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(row["CreatedAt"])) : DateTime.MinValue,
+                Updated = row.ContainsKey("UpdatedAt") ? (row["UpdatedAt"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(row["UpdatedAt"])) : DateTime.MinValue
             };
             return user;
         }
