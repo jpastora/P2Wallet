@@ -22,8 +22,30 @@
                 <h6 class="mb-0">Información del Usuario</h6>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" id="editUserForm">
                     <input type="hidden" asp-for="UserToEdit.ID" />
+                    <input type="hidden" asp-for="UserToEdit.ProfilePhotoUrl" id="hiddenProfilePhotoUrl" />
+                    
+                    <!-- Foto de Perfil Section -->
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Foto de Perfil</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-center">
+                                    <img id="profilePhotoPreview" src="@(Model.UserToEdit.ProfilePhotoUrl ?? "https://picsum.photos/seed/perfil/120")" 
+                                         alt="Foto de perfil" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <input type="file" class="form-control mb-2" id="profilePhotoFile" accept="image/*">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnUploadProfilePhoto">
+                                        <i class="bi bi-cloud-upload"></i> Subir Nueva Foto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -113,21 +135,55 @@
                 <p><strong>ID:</strong> @Model.UserToEdit.ID</p>
                 <p><strong>Creado:</strong> @(Model.UserToEdit.Created != DateTime.MinValue ? Model.UserToEdit.Created.ToString("dd/MM/yyyy") : "N/A")</p>
                 <p><strong>Actualizado:</strong> @(Model.UserToEdit.Updated != DateTime.MinValue ? Model.UserToEdit.Updated.ToString("dd/MM/yyyy") : "N/A")</p>
-                
-                @if (!string.IsNullOrEmpty(Model.UserToEdit.ProfilePhotoUrl))
-                {
-                    <div class="text-center">
-                        <img src="@Model.UserToEdit.ProfilePhotoUrl" class="img-fluid rounded" alt="Foto de perfil" style="max-height: 200px;">
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center text-muted">
-                        <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
-                        <p>Sin foto de perfil</p>
-                    </div>
-                }
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funcionalidad de subida de foto de perfil
+            document.getElementById('btnUploadProfilePhoto').addEventListener('click', function () {
+                var fileInput = document.getElementById('profilePhotoFile');
+                var file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire('Error', 'Selecciona una imagen primero.', 'error');
+                    return;
+                }
+                
+                var formData = new FormData();
+                formData.append('photo', file);
+                
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Subiendo imagen...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('hiddenProfilePhotoUrl').value = url;
+                        document.getElementById('profilePhotoPreview').src = url;
+                        Swal.fire('¡Éxito!', 'Foto de perfil subida correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo obtener la URL de la foto.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error al subir la imagen.', 'error');
+                });
+            });
+        });
+    </script>
+}

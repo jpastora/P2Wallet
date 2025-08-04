@@ -22,8 +22,30 @@
                 <h6 class="mb-0">Información de la Promoción</h6>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" id="editPromotionForm">
                     <input type="hidden" asp-for="PromotionToEdit.ID" />
+                    <input type="hidden" asp-for="PromotionToEdit.FinancialPromotionImage" id="hiddenPromotionImage" />
+                    
+                    <!-- Imagen de la Promoción Section -->
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Imagen de la Promoción</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-center">
+                                    <img id="promotionImagePreview" src="@(Model.PromotionToEdit.FinancialPromotionImage ?? "https://picsum.photos/seed/financial-promotion/120")" 
+                                         alt="Imagen de la promoción" class="rounded" style="width:80px;height:80px;object-fit:cover;">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <input type="file" class="form-control mb-2" id="promotionImageFile" accept="image/*">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="btnUploadPromotionImage">
+                                        <i class="bi bi-cloud-upload"></i> Subir Nueva Imagen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -83,13 +105,6 @@
                         <div class="col-12 mb-3">
                             <label asp-for="PromotionToEdit.FinancialPromotionTerms" class="form-label">Términos y Condiciones</label>
                             <textarea asp-for="PromotionToEdit.FinancialPromotionTerms" class="form-control" rows="4"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12 mb-3">
-                            <label asp-for="PromotionToEdit.FinancialPromotionImage" class="form-label">URL de la Imagen</label>
-                            <input asp-for="PromotionToEdit.FinancialPromotionImage" type="url" class="form-control" />
                         </div>
                     </div>
 
@@ -155,3 +170,51 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funcionalidad de subida de imagen de promoción
+            document.getElementById('btnUploadPromotionImage').addEventListener('click', function () {
+                var fileInput = document.getElementById('promotionImageFile');
+                var file = fileInput.files[0];
+                if (!file) {
+                    Swal.fire('Error', 'Selecciona una imagen primero.', 'error');
+                    return;
+                }
+                
+                var formData = new FormData();
+                formData.append('photo', file);
+                
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Subiendo imagen...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('hiddenPromotionImage').value = url;
+                        document.getElementById('promotionImagePreview').src = url;
+                        Swal.fire('¡Éxito!', 'Imagen subida correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo obtener la URL de la imagen.', 'error');
+                    }
+                })
+                .catch(() => {
+                    Swal.fire('Error', 'Error al subir la imagen.', 'error');
+                });
+            });
+        });
+    </script>
+}

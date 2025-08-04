@@ -72,6 +72,12 @@ namespace WebApp.Pages.Administrator
                 existingUser.ValidationStatus = UserToEdit.ValidationStatus;
                 existingUser.Role = UserToEdit.Role;
 
+                // Actualizar foto de perfil si se proporcionó una nueva
+                if (!string.IsNullOrWhiteSpace(UserToEdit.ProfilePhotoUrl))
+                {
+                    existingUser.ProfilePhotoUrl = UserToEdit.ProfilePhotoUrl;
+                }
+
                 // Si se proporcionó una nueva contraseña
                 if (!string.IsNullOrEmpty(UserToEdit.Password))
                 {

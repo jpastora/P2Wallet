@@ -52,12 +52,9 @@ namespace DataAccess.CRUD
             var promo = baseDTO as FinancialPromotion;
             var operation = new SqlOperation { ProcedureName = "UPDATE_FINANCIAL_PROMOTION_PR" };
 
+            // Enviar solo los parámetros que el procedimiento almacenado espera (en el orden correcto)
             operation.AddIntParam("@P_PromotionID", promo.ID);
             operation.AddIntParam("@P_FinancialEntityID", promo.FinancialEntityID);
-            operation.AddStringParameter("@P_FinancialPromotionName", promo.FinancialPromotionName);
-            operation.AddStringParameter("@P_FinancialPromotionDescription", promo.FinancialPromotionDescription);
-            operation.AddStringParameter("@P_FinancialPromotionTerms", promo.FinancialPromotionTerms);
-            operation.AddStringParameter("@P_FinancialPromotionImage", promo.FinancialPromotionImage);
             operation.AddStringParameter("@P_PromotionType", promo.PromotionType);
             operation.AddDoubleParam("@P_DiscountPercentage", promo.DiscountPercentage);
             operation.AddDoubleParam("@P_MaxRefund", promo.MaxRefund);
@@ -65,7 +62,12 @@ namespace DataAccess.CRUD
             operation.AddDateTimeParam("@P_EndDate", promo.EndDate);
             operation.AddIntParam("@P_AvailableQuantity", promo.AvailableQuantity);
             operation.AddStringParameter("@P_ValidationStatus", promo.ValidationStatus);
-            operation.AddDateTimeParam("@P_CreatedAt", promo.CreatedAt);
+            operation.AddStringParameter("@P_FinancialPromotionName", promo.FinancialPromotionName);
+            operation.AddStringParameter("@P_FinancialPromotionDescription", promo.FinancialPromotionDescription);
+            operation.AddStringParameter("@P_FinancialPromotionTerms", promo.FinancialPromotionTerms);
+            operation.AddStringParameter("@P_FinancialPromotionImage", promo.FinancialPromotionImage);
+
+            // Note: @P_CreatedAt is NOT included because the stored procedure does not expect it
 
             _sqlDao.ExecuteProcedure(operation);
         }
