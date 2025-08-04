@@ -84,8 +84,7 @@ namespace DataAccess.CRUD
             var transaction = baseDTO as Transaction;
             var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_TRANSACTION_PR" };
 
-            // Include all parameters as expected by the stored procedure
-            // The stored procedure will handle which fields can actually be updated
+
             sqlOperation.AddIntParam("@P_TransactionID", transaction.ID);
             sqlOperation.AddIntParam("@P_UserID", transaction.UserID);
             sqlOperation.AddIntParam("@P_MerchantID", transaction.MerchantID);
@@ -95,7 +94,6 @@ namespace DataAccess.CRUD
             sqlOperation.AddDoubleParam("@P_CommissionApplied", transaction.CommissionApplied);
             sqlOperation.AddDoubleParam("@P_SalesTaxAmount", transaction.SalesTaxAmount);
             sqlOperation.AddDoubleParam("@P_TaxRateApplied", transaction.TaxRateApplied);
-            sqlOperation.Parameters.Add(new SqlParameter("@P_Timestamp", transaction.Timestamp));
             sqlOperation.AddStringParameter("@P_TransactionStatus", transaction.TransactionStatus);
             sqlOperation.Parameters.Add(new SqlParameter("@P_FinancialPromotionID", (object?)transaction.FinancialPromotionID ?? DBNull.Value));
             sqlOperation.Parameters.Add(new SqlParameter("@P_MerchantPromotionID", (object?)transaction.MerchantPromotionID ?? DBNull.Value));

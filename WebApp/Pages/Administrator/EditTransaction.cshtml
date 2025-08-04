@@ -1,11 +1,11 @@
-@page
+锘緻page
 @model WebApp.Pages.Administrator.EditTransactionModel
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Editar Transacci髇";
+    ViewData["Title"] = "Editar Transacci贸n";
 }
 
-<h1 class="mb-4">Editar Transacci髇</h1>
+<h1 class="mb-4">Editar Transacci贸n</h1>
 
 @if (!string.IsNullOrEmpty(Model.Message))
 {
@@ -19,13 +19,13 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h6 class="mb-0">Informaci髇 de la Transacci髇</h6>
+                <h6 class="mb-0">Informaci贸n de la Transacci贸n</h6>
             </div>
             <div class="card-body">
                 <form method="post">
                     <input type="hidden" asp-for="TransactionToEdit.ID" />
                     
-                    <!-- Campos de solo lectura para informaci髇 de referencia -->
+                    <!-- Campos de solo lectura para informaci贸n de referencia -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Usuario</label>
@@ -46,7 +46,7 @@
                             <input type="hidden" asp-for="TransactionToEdit.BankAccountID" />
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="TransactionToEdit.TransactionStatus" class="form-label">Estado de la Transacci髇</label>
+                            <label asp-for="TransactionToEdit.TransactionStatus" class="form-label">Estado de la Transacci贸n</label>
                             <select asp-for="TransactionToEdit.TransactionStatus" class="form-select">
                                 <option value="Pending">Pendiente</option>
                                 <option value="Completed">Completada</option>
@@ -70,7 +70,7 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="TransactionToEdit.CommissionApplied" class="form-label">Comisi髇 Aplicada</label>
+                            <label asp-for="TransactionToEdit.CommissionApplied" class="form-label">Comisi贸n Aplicada</label>
                             <input asp-for="TransactionToEdit.CommissionApplied" type="number" step="0.01" min="0" class="form-control" />
                         </div>
                         <div class="col-md-6 mb-3">
@@ -93,14 +93,14 @@
                     <!-- Promociones (opcional) -->
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="TransactionToEdit.MerchantPromotionID" class="form-label">Promoci髇 de Comercio (ID)</label>
+                            <label asp-for="TransactionToEdit.MerchantPromotionID" class="form-label">Promoci贸n de Comercio (ID)</label>
                             <input asp-for="TransactionToEdit.MerchantPromotionID" type="number" min="1" class="form-control" />
-                            <small class="form-text text-muted">Dejar vac韔 si no aplica</small>
+                            <small class="form-text text-muted">Dejar vac铆o si no aplica</small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="TransactionToEdit.FinancialPromotionID" class="form-label">Promoci髇 Financiera (ID)</label>
+                            <label asp-for="TransactionToEdit.FinancialPromotionID" class="form-label">Promoci贸n Financiera (ID)</label>
                             <input asp-for="TransactionToEdit.FinancialPromotionID" type="number" min="1" class="form-control" />
-                            <small class="form-text text-muted">Dejar vac韔 si no aplica</small>
+                            <small class="form-text text-muted">Dejar vac铆o si no aplica</small>
                         </div>
                     </div>
 
@@ -120,10 +120,10 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-header">
-                <h6 class="mb-0">Informaci髇 Adicional</h6>
+                <h6 class="mb-0">Informaci贸n Adicional</h6>
             </div>
             <div class="card-body">
-                <p><strong>ID de Transacci髇:</strong> #@Model.TransactionToEdit.ID</p>
+                <p><strong>ID de Transacci贸n:</strong> #@Model.TransactionToEdit.ID</p>
                 <p><strong>Usuario ID:</strong> @Model.TransactionToEdit.UserID</p>
                 <p><strong>Comercio ID:</strong> @Model.TransactionToEdit.MerchantID</p>
                 <p><strong>Cuenta Bancaria ID:</strong> @Model.TransactionToEdit.BankAccountID</p>
@@ -147,7 +147,7 @@
                 
                 <hr>
                 
-                <h6>C醠culos</h6>
+                <h6>C谩lculos</h6>
                 @if (Model.TransactionToEdit.GrossAmount > 0)
                 {
                     var taxPercentage = Model.TransactionToEdit.GrossAmount > 0 ? 
@@ -156,8 +156,8 @@
                         (Model.TransactionToEdit.CommissionApplied / Model.TransactionToEdit.NetAmount) * 100 : 0;
                     
                     <p><strong>% Impuesto:</strong> @taxPercentage.ToString("0.0")%</p>
-                    <p><strong>% Comisi髇:</strong> @commissionPercentage.ToString("0.0")%</p>
-                    <p><strong>Diferencia Bruto-Neto:</strong> ?@((Model.TransactionToEdit.GrossAmount - Model.TransactionToEdit.NetAmount).ToString("N0"))</p>
+                    <p><strong>% Comisi贸n:</strong> @commissionPercentage.ToString("0.0")%</p>
+                    <p><strong>Diferencia Bruto-Neto:</strong> 鈧((Model.TransactionToEdit.GrossAmount - Model.TransactionToEdit.NetAmount).ToString("N0"))</p>
                 }
                 
                 @if (Model.TransactionToEdit.MerchantPromotionID.HasValue || Model.TransactionToEdit.FinancialPromotionID.HasValue)
@@ -166,11 +166,11 @@
                     <h6>Promociones Aplicadas</h6>
                     @if (Model.TransactionToEdit.MerchantPromotionID.HasValue)
                     {
-                        <p><strong>Promoci髇 Comercio:</strong> #@Model.TransactionToEdit.MerchantPromotionID</p>
+                        <p><strong>Promoci贸n Comercio:</strong> #@Model.TransactionToEdit.MerchantPromotionID</p>
                     }
                     @if (Model.TransactionToEdit.FinancialPromotionID.HasValue)
                     {
-                        <p><strong>Promoci髇 Financiera:</strong> #@Model.TransactionToEdit.FinancialPromotionID</p>
+                        <p><strong>Promoci贸n Financiera:</strong> #@Model.TransactionToEdit.FinancialPromotionID</p>
                     }
                 }
             </div>
