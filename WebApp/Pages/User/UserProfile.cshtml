@@ -30,10 +30,7 @@
     <div class="card mb-4">
         <div class="card-header"><strong>Foto de Perfil</strong></div>
         <div class="card-body">
-            <div class="mb-3">
-                <label for="profilePhotoUrl" class="form-label">URL de Foto de Perfil</label>
-                <input type="text" class="form-control" id="profilePhotoUrl" name="ProfilePhotoUrl" value="@Model.ProfilePhotoUrl" readonly>
-            </div>
+            <input type="hidden" class="form-control" id="profilePhotoUrl" name="ProfilePhotoUrl" value="@Model.ProfilePhotoUrl">
             <div class="mb-3">
                 <label for="profilePhotoFile" class="form-label">Foto de Perfil (Imagen)</label>
                 <input type="file" class="form-control" id="profilePhotoFile" accept="image/*">

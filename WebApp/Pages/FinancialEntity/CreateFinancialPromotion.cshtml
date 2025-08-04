@@ -4,6 +4,7 @@
 @model WebApp.Pages.FinancialEntity.CreateFinancialPromotionModel
 @{
     ViewData["Title"] = "Crear Promoción Financiera - " + Model.FinancialEntityName;
+    var promotionImage = @Model.FinancialPromotionImage ?? "https://res.cloudinary.com/dd4yjftn3/image/upload/v1754325640/promociones-comerciales-precio_zhzmoa.jpg";
 }
 
 <div class="container py-4 mb-5">
@@ -82,21 +83,16 @@
                         <h6 class="text-success border-bottom pb-2">Imagen de la Promoción</h6>
                     </div>
                 </div>
-
                 <div class="mb-3">
-                    <label for="promotionImage" class="form-label">URL de Imagen</label>
-                    <input type="text" class="form-control" id="promotionImage" name="FinancialPromotionImage" 
+                    <input type="hidden" class="form-control" id="promotionImage" name="FinancialPromotionImage"
                            value="@Model.FinancialPromotionImage" readonly>
-                </div>
-
-                <div class="mb-3">
                     <label for="promotionImageFile" class="form-label">Subir Imagen</label>
                     <input type="file" class="form-control" id="promotionImageFile" accept="image/*">
                     <button type="button" class="btn btn-success mt-2" id="btnUploadImage">
                         <i class="bi bi-cloud-upload me-1"></i>Subir Imagen
                     </button>
                     <div class="mt-2 text-center">
-                        <img id="imagePreview" src="@Model.FinancialPromotionImage" alt="Vista previa" 
+                        <img id="imagePreview" src="@promotionImage" alt="Vista previa" 
                              style="max-width:200px;max-height:200px;object-fit:cover;border-radius:8px;" />
                     </div>
                 </div>

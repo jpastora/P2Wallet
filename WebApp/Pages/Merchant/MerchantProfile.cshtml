@@ -37,10 +37,7 @@
                     <input type="text" class="form-control" id="taxId" name="TaxID" value="@Model.TaxID">
                 </div>
                 <div class="mb-3">
-                    <label for="logoImage" class="form-label">Logo (URL)</label>
-                    <input type="text" class="form-control" id="logoImage" name="LogoImage" value="@Model.LogoImage" readonly>
-                </div>
-                <div class="mb-3">
+                    <input type="hidden" class="form-control" id="logoImage" name="LogoImage" value="@Model.LogoImage" readonly>
                     <label for="logoFile" class="form-label">Logo (Imagen)</label>
                     <input type="file" class="form-control" id="logoFile" accept="image/*">
                     <button type="button" class="btn btn-primary mt-2" id="btnUploadLogo">Subir Logo</button>
