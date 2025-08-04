@@ -92,7 +92,7 @@ namespace DataAccess.CRUD
                 IBAN = (string)row["IBAN"],
                 FinancialEntityID = (int)row["FinancialEntityID"],
                 ValidationStatus = (string)row["ValidationStatus"],
-                Balance = (double)row["Balance"]
+                Balance = Convert.ToDouble(row["Balance"])
             };
         }
     }

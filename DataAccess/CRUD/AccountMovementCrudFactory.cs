@@ -94,7 +94,7 @@ namespace DataAccess.CRUD
                 SourceAccountDescription = (string)row["SourceAccountDescription"],
                 DestinationAccountDescription = (string)row["DestinationAccountDescription"],
                 MovementType = (string)row["MovementType"],
-                Amount = (double)row["Amount"]
+                Amount = Convert.ToDouble(row["Amount"])
             };
         }
     }

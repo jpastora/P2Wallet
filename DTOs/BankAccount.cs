@@ -12,7 +12,6 @@ namespace DTOs
         public string IBAN { get; set; }
         public int FinancialEntityID { get; set; }
         public String ValidationStatus { get; set; }
-
         public double Balance { get; set; }
     }
 }
