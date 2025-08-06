@@ -1,0 +1,411 @@
+@page
+@model WebApp.Pages.Merchant.PaymentStatusModel
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Estado de Solicitudes de Pago";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-list-check me-2"></i>Estado de Solicitudes de Pago
+                @if (!string.IsNullOrEmpty(Model.MerchantName))
+                {
+                    <small class="text-muted">- @Model.MerchantName</small>
+                }
+            </h1>
+
+            @if (!string.IsNullOrEmpty(Model.Message))
+            {
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>@Model.Message
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">@Model.TotalRequests</h4>
+                            <p class="mb-0">Total Solicitudes</p>
+                        </div>
+                        <i class="bi bi-clipboard-data fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">@Model.ActiveCount</h4>
+                            <p class="mb-0">Activas</p>
+                        </div>
+                        <i class="bi bi-clock fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">@Model.CompletedCount</h4>
+                            <p class="mb-0">Completadas</p>
+                        </div>
+                        <i class="bi bi-check-circle fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-lg-6 col-md-6 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">?@Model.TodaySales.ToString("N0")</h4>
+                            <p class="mb-0">Ventas Hoy</p>
+                        </div>
+                        <i class="bi bi-currency-dollar fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+                <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>Nueva Solicitud
+                </a>
+                <button type="button" class="btn btn-outline-primary" onclick="refreshPage()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
+                </button>
+                <a href="/Merchant/MerchantProfile?merchantId=@Model.MerchantID" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>Volver al Panel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs para categorías -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="paymentTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" 
+                            type="button" role="tab" aria-controls="active" aria-selected="true">
+                        <i class="bi bi-clock me-1"></i>Activas (@Model.ActiveCount)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" 
+                            type="button" role="tab" aria-controls="completed" aria-selected="false">
+                        <i class="bi bi-check-circle me-1"></i>Completadas (@Model.CompletedCount)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" 
+                            type="button" role="tab" aria-controls="expired" aria-selected="false">
+                        <i class="bi bi-x-circle me-1"></i>Expiradas (@Model.ExpiredCount)
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="paymentTabsContent">
+                <!-- Solicitudes Activas -->
+                <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="bi bi-clock me-2"></i>Solicitudes Activas
+                                <small class="text-muted">- Esperando pago del cliente</small>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.ActiveRequests.Any())
+                            {
+                                <div class="row">
+                                    @foreach (var request in Model.ActiveRequests)
+                                    {
+                                        <div class="col-xl-4 col-lg-6 col-md-6 mb-3">
+                                            <div class="card border-warning">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="card-title mb-0">@request.Description</h6>
+                                                        <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                                                    </div>
+                                                    
+                                                    <div class="text-center mb-3">
+                                                        <img src="@request.QRCodeUrl" alt="QR Code" class="img-fluid" style="max-width: 120px;" />
+                                                    </div>
+                                                    
+                                                    <div class="mb-2">
+                                                        <strong>Monto:</strong> ?@request.GrossAmount.ToString("N2")<br>
+                                                        <strong>Código:</strong> <code>@request.PaymentRequestCode</code><br>
+                                                        <strong>Tiempo restante:</strong> <span class="text-warning">@request.TimeRemaining</span>
+                                                    </div>
+                                                    
+                                                    <div class="d-grid gap-1">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                                onclick="showQR('@request.PaymentRequestCode', '@request.QRCodeUrl')">
+                                                            <i class="bi bi-eye me-1"></i>Ver QR Grande
+                                                        </button>
+                                                        <form method="post" class="d-inline" asp-page-handler="CancelRequest">
+                                                            <input type="hidden" name="paymentCode" value="@request.PaymentRequestCode" />
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100"
+                                                                    onclick="return confirm('¿Está seguro de cancelar esta solicitud?')">
+                                                                <i class="bi bi-x me-1"></i>Cancelar
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4">
+                                    <i class="bi bi-clock fs-1 text-muted mb-3"></i>
+                                    <h5>No hay solicitudes activas</h5>
+                                    <p class="text-muted">Las solicitudes aparecerán aquí cuando las cree</p>
+                                    <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
+                                        <i class="bi bi-plus me-1"></i>Crear Primera Solicitud
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Solicitudes Completadas -->
+                <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-check-circle me-2"></i>Solicitudes Completadas
+                                <small>- Total: ?@Model.TotalSales.ToString("N2")</small>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.CompletedRequests.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Descripción</th>
+                                                <th>Código</th>
+                                                <th class="text-end">Monto Bruto</th>
+                                                <th class="text-end">Monto Neto</th>
+                                                <th class="text-center">Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var request in Model.CompletedRequests.OrderByDescending(r => r.CreatedAt))
+                                            {
+                                                <tr>
+                                                    <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                                    <td>@request.Description</td>
+                                                    <td><code>@request.PaymentRequestCode</code></td>
+                                                    <td class="text-end">?@request.GrossAmount.ToString("N2")</td>
+                                                    <td class="text-end">?@request.NetAmount.ToString("N2")</td>
+                                                    <td class="text-center">
+                                                        <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4">
+                                    <i class="bi bi-check-circle fs-1 text-muted mb-3"></i>
+                                    <h5>No hay solicitudes completadas</h5>
+                                    <p class="text-muted">Los pagos completados aparecerán aquí</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Solicitudes Expiradas -->
+                <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
+                    <div class="card">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0">
+                                <i class="bi bi-x-circle me-2"></i>Solicitudes Expiradas/Canceladas
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            @if (Model.ExpiredRequests.Any())
+                            {
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Descripción</th>
+                                                <th>Código</th>
+                                                <th class="text-end">Monto</th>
+                                                <th class="text-center">Estado</th>
+                                                <th>Expiró</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var request in Model.ExpiredRequests.OrderByDescending(r => r.CreatedAt))
+                                            {
+                                                <tr>
+                                                    <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                                    <td>@request.Description</td>
+                                                    <td><code>@request.PaymentRequestCode</code></td>
+                                                    <td class="text-end">?@request.GrossAmount.ToString("N2")</td>
+                                                    <td class="text-center">
+                                                        <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                                                    </td>
+                                                    <td>@request.ExpiresAt?.ToString("dd/MM/yyyy HH:mm")</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center py-4">
+                                    <i class="bi bi-x-circle fs-1 text-muted mb-3"></i>
+                                    <h5>No hay solicitudes expiradas</h5>
+                                    <p class="text-muted">Las solicitudes expiradas aparecerán aquí</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar QR grande -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrModalLabel">Código QR de Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalQRImage" src="" alt="QR Code" class="img-fluid mb-3" style="max-width: 300px;" />
+                <p><strong>Código:</strong> <span id="modalQRCode"></span></p>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-primary" onclick="downloadModalQR()">
+                        <i class="bi bi-download me-1"></i>Descargar
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="printModalQR()">
+                        <i class="bi bi-printer me-1"></i>Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        function refreshPage() {
+            window.location.reload();
+        }
+        
+        function showQR(code, qrUrl) {
+            document.getElementById('modalQRImage').src = qrUrl.replace('150x150', '300x300');
+            document.getElementById('modalQRCode').textContent = code;
+            
+            var modal = new bootstrap.Modal(document.getElementById('qrModal'));
+            modal.show();
+        }
+        
+        function downloadModalQR() {
+            const qrImage = document.getElementById('modalQRImage');
+            const code = document.getElementById('modalQRCode').textContent;
+            
+            const link = document.createElement('a');
+            link.download = `qr-pago-${code}.jpg`;
+            link.href = qrImage.src;
+            link.click();
+        }
+        
+        function printModalQR() {
+            const qrImage = document.getElementById('modalQRImage').src;
+            const code = document.getElementById('modalQRCode').textContent;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head><title>Código QR - ${code}</title></head>
+                    <body style="text-align: center; font-family: Arial;">
+                        <h2>@Model.MerchantName</h2>
+                        <h3>Código QR de Pago</h3>
+                        <img src="${qrImage}" style="max-width: 300px;" />
+                        <p><strong>Código:</strong> ${code}</p>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        // Auto-refresh cada 30 segundos para solicitudes activas
+        setInterval(function() {
+            if (document.getElementById('active-tab').classList.contains('active')) {
+                // Solo refrescar si estamos en la pestaña activa
+                const currentUrl = window.location.href;
+                if (currentUrl.indexOf('#') === -1) {
+                    refreshPage();
+                }
+            }
+        }, 30000);
+        
+        // Actualizar contadores de tiempo en tiempo real
+        function updateTimeCounters() {
+            const timeElements = document.querySelectorAll('[data-expires]');
+            timeElements.forEach(element => {
+                const expiresAt = new Date(element.getAttribute('data-expires'));
+                const now = new Date();
+                const timeLeft = expiresAt - now;
+                
+                if (timeLeft <= 0) {
+                    element.textContent = 'Expirado';
+                    element.className = 'text-danger';
+                } else {
+                    const minutes = Math.floor(timeLeft / 60000);
+                    const seconds = Math.floor((timeLeft % 60000) / 1000);
+                    element.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            });
+        }
+        
+        // Actualizar cada segundo
+        setInterval(updateTimeCounters, 1000);
+    </script>
+}

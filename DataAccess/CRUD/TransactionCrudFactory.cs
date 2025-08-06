@@ -84,7 +84,6 @@ namespace DataAccess.CRUD
             var transaction = baseDTO as Transaction;
             var sqlOperation = new SqlOperation() { ProcedureName = "UPDATE_TRANSACTION_PR" };
 
-
             sqlOperation.AddIntParam("@P_TransactionID", transaction.ID);
             sqlOperation.AddIntParam("@P_UserID", transaction.UserID);
             sqlOperation.AddIntParam("@P_MerchantID", transaction.MerchantID);
@@ -101,31 +100,145 @@ namespace DataAccess.CRUD
             _sqlDao.ExecuteProcedure(sqlOperation);
         }
 
+        // Crea una solicitud de pago que genera un código QR para que el usuario pueda pagar
+        // Crea una solicitud de pago que genera un código QR para que el usuario pueda pagar
+        public Transaction CreatePaymentRequest(int merchantId, decimal saleAmount, string description = "")
+        {
+                var sqlOperation = new SqlOperation() { ProcedureName = "CREATE_PAYMENT_REQUEST_PR" };
+
+                sqlOperation.AddIntParam("@P_MerchantID", merchantId);
+                sqlOperation.AddDoubleParam("@P_SaleAmount", (double)saleAmount);
+                sqlOperation.AddStringParameter("@P_Description", description);
+                sqlOperation.AddIntParam("@P_ExpirationMinutes", 30);
+
+                // Parámetros de salida
+                sqlOperation.Parameters.Add(new SqlParameter("@P_TransactionID", SqlDbType.Int) { Direction = ParameterDirection.Output });
+                sqlOperation.Parameters.Add(new SqlParameter("@P_PaymentRequestCode", SqlDbType.NVarChar, 50) { Direction = ParameterDirection.Output });
+
+                var results = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+
+                if (results.Count > 0)
+                {
+                    return BuildTransaction(results[0]);
+                }
+
+                return null;
+            }
+        
+
+        // Obtiene una solicitud de pago activa por su código QR
+
+        public Transaction RetrieveByPaymentCode(string paymentRequestCode)
+        {
+            var sqlOperation = new SqlOperation() { ProcedureName = "RET_TRANSACTION_BY_PAYMENT_CODE_PR" };
+            sqlOperation.AddStringParameter("@P_PaymentRequestCode", paymentRequestCode);
+
+            var results = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+
+            if (results.Count > 0)
+            {
+                return BuildTransaction(results[0]);
+            }
+
+            return null;
+        }
+
+
+        // Ejecuta el pago de una solicitud aplicando promoción opcional
+
+        public bool ExecutePaymentWithPromotion(string paymentRequestCode, int userId, int bankAccountId, int? promotionId = null, string promotionType = null)
+        {
+            var sqlOperation = new SqlOperation() { ProcedureName = "EXECUTE_PAYMENT_WITH_PROMOTION_PR" };
+            
+            sqlOperation.AddStringParameter("@P_PaymentRequestCode", paymentRequestCode);
+            sqlOperation.AddIntParam("@P_UserID", userId);
+            sqlOperation.AddIntParam("@P_BankAccountID", bankAccountId);
+            sqlOperation.Parameters.Add(new SqlParameter("@P_SelectedPromotionID", (object?)promotionId ?? DBNull.Value));
+            sqlOperation.AddStringParameter("@P_SelectedPromotionType", promotionType ?? "");
+
+            try
+            {
+                var results = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+                return results.Count > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        // Obtiene las promociones aplicables para un comercio y entidad financiera específicos
+
+        public List<object> GetApplicablePromotions(int merchantId, int? financialEntityId = null)
+        {
+            var sqlOperation = new SqlOperation() { ProcedureName = "GET_APPLICABLE_PROMOTIONS_PR" };
+            sqlOperation.AddIntParam("@P_MerchantID", merchantId);
+            
+            if (financialEntityId.HasValue)
+            {
+                sqlOperation.AddIntParam("@P_FinancialEntityID", financialEntityId.Value);
+            }
+
+            var results = _sqlDao.ExecuteQueryProcedure(sqlOperation);
+            var promotions = new List<object>();
+
+            foreach (var row in results)
+            {
+                promotions.Add(new
+                {
+                    PromotionID = Convert.ToInt32(row["PromotionID"]),
+                    PromotionType = row["PromotionType"].ToString(),
+                    Name = row["Name"].ToString(),
+                    Description = row["Description"].ToString(),
+                    DiscountPercentage = Convert.ToDecimal(row["DiscountPercentage"]),
+                    MaxRefund = Convert.ToDecimal(row["MaxRefund"]),
+                    AvailableQuantity = Convert.ToInt32(row["AvailableQuantity"]),
+                    SourceName = row["SourceName"].ToString()
+                });
+            }
+
+            return promotions;
+        }
+
         private Transaction BuildTransaction(Dictionary<string, object> row)
         {
             double GetDouble(string key)
             {
                 return row.ContainsKey(key) && row[key] != DBNull.Value ? Convert.ToDouble(row[key]) : 0.0;
             }
+            
+            int GetInt(string key)
+            {
+                return row.ContainsKey(key) && row[key] != DBNull.Value ? Convert.ToInt32(row[key]) : 0;
+            }
+            
             int? GetNullableInt(string key)
             {
                 return row.ContainsKey(key) && row[key] != DBNull.Value ? (int?)Convert.ToInt32(row[key]) : null;
             }
+            
             string GetString(string key)
             {
                 return row.ContainsKey(key) && row[key] != DBNull.Value ? row[key].ToString() : string.Empty;
             }
+            
             DateTime GetDateTime(string key)
             {
                 return row.ContainsKey(key) && row[key] != DBNull.Value ? Convert.ToDateTime(row[key]) : DateTime.MinValue;
             }
+            
+            DateTime? GetNullableDateTime(string key)
+            {
+                return row.ContainsKey(key) && row[key] != DBNull.Value ? (DateTime?)Convert.ToDateTime(row[key]) : null;
+            }
 
             return new Transaction
             {
-                ID = row.ContainsKey("TransactionID") ? Convert.ToInt32(row["TransactionID"]) : 0,
-                UserID = row.ContainsKey("UserID") ? Convert.ToInt32(row["UserID"]) : 0,
-                MerchantID = row.ContainsKey("MerchantID") ? Convert.ToInt32(row["MerchantID"]) : 0,
-                BankAccountID = row.ContainsKey("BankAccountID") ? Convert.ToInt32(row["BankAccountID"]) : 0,
+                ID = GetInt("TransactionID"),
+                UserID = GetInt("UserID"),
+                MerchantID = GetInt("MerchantID"),
+                BankAccountID = GetInt("BankAccountID"),
                 GrossAmount = GetDouble("GrossAmount"),
                 NetAmount = GetDouble("NetAmount"),
                 CommissionApplied = GetDouble("CommissionApplied"),
@@ -134,7 +247,12 @@ namespace DataAccess.CRUD
                 Timestamp = GetDateTime("Timestamp"),
                 TransactionStatus = GetString("TransactionStatus"),
                 FinancialPromotionID = GetNullableInt("FinancialPromotionID"),
-                MerchantPromotionID = GetNullableInt("MerchantPromotionID")
+                MerchantPromotionID = GetNullableInt("MerchantPromotionID"),
+                
+                // Nuevos campos para solicitudes de pago QR
+                PaymentRequestCode = GetString("PaymentRequestCode"),
+                Description = GetString("Description"),
+                ExpiresAt = GetNullableDateTime("ExpiresAt")
             };
         }
     }

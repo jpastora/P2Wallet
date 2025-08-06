@@ -1,0 +1,185 @@
+@page
+@model WebApp.Pages.User.UserBusinessManagerModel
+@{
+    var user = Model.CurrentUser;
+    ViewData["Title"] = "Mis Comercios y Entidades";
+}
+
+<div class="container py-4 mb-5">
+    <h2 class="mb-4">Mis Comercios y Entidades</h2>
+    
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Comercios Asignados -->
+    @if (Model.HasMerchantAccess)
+    {
+        <h4 class="mb-3">Comercios Asignados</h4>
+        
+        @if (Model.UserMerchants.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre del Comercio</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Comisión</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var merchant in Model.UserMerchants)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@merchant.MerchantName</strong><br>
+                                    <small class="text-muted">Tax ID: @merchant.TaxID</small>
+                                </td>
+                                <td>@merchant.Email</td>
+                                <td>@merchant.ContactPhone</td>
+                                <td>@merchant.CommissionPercentage.ToString("N2")%</td>
+                                <td>
+                                    <span class="badge bg-@Model.GetMerchantStatusBadgeClass(merchant.ValidationStatus)">
+                                        @Model.GetMerchantStatusText(merchant.ValidationStatus)
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <a href="/Merchant/CreatePaymentRequest?merchantId=@merchant.ID" 
+                                           class="btn btn-sm btn-primary" title="Generar código QR para cobro">
+                                            Generar Cobro
+                                        </a>
+                                        <a href="/Merchant/MerchantProfile?merchantId=@merchant.ID" 
+                                           class="btn btn-sm btn-outline-secondary" title="Editar información del comercio">
+                                            Editar
+                                        </a>
+                                        <a href="/Merchant/CreateMerchantPromotion?merchantId=@merchant.ID" 
+                                           class="btn btn-sm btn-outline-success" title="Crear nueva promoción">
+                                            Promoción
+                                        </a>
+                                        <a href="/User/UserPaymentStatus?merchantId=@merchant.ID" 
+                                           class="btn btn-sm btn-outline-info" title="Ver estado de solicitudes de pago">
+                                            Estado
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No tienes comercios asignados actualmente.
+            </div>
+        }
+        
+        <hr />
+    }
+
+    <!-- Entidades Financieras Asignadas -->
+    @if (Model.HasFinancialEntityAccess)
+    {
+        <h4 class="mb-3">Entidades Financieras Asignadas</h4>
+        
+        @if (Model.UserFinancialEntities.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre de la Entidad</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entity in Model.UserFinancialEntities)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@entity.EntityName</strong><br>
+                                    <small class="text-muted">Tax ID: @entity.TaxID</small>
+                                </td>
+                                <td>@entity.Email</td>
+                                <td>@entity.ContactPhone</td>
+                                <td>
+                                    <span class="badge bg-@Model.GetEntityStatusBadgeClass(entity.ValidationStatus)">
+                                        @Model.GetEntityStatusText(entity.ValidationStatus)
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <a href="/FinancialEntity/FinancialEntityProfile?financialEntityId=@entity.ID" 
+                                           class="btn btn-sm btn-outline-secondary" title="Editar información de la entidad">
+                                            Editar
+                                        </a>
+                                        <a href="/FinancialEntity/CreateFinancialPromotion?financialEntityId=@entity.ID" 
+                                           class="btn btn-sm btn-outline-success" title="Crear nueva promoción financiera">
+                                            Promoción
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                No tienes entidades financieras asignadas actualmente.
+            </div>
+        }
+    }
+
+    <!-- Si no tiene acceso a nada -->
+    @if (!Model.HasMerchantAccess && !Model.HasFinancialEntityAccess)
+    {
+        <div class="alert alert-warning text-center">
+            <h4>Sin Asignaciones</h4>
+            <p>No tienes comercios ni entidades financieras asignadas.</p>
+            <small class="text-muted">
+                Contacta al administrador para obtener acceso a comercios o entidades financieras.
+            </small>
+        </div>
+    }
+
+    <!-- Navegación -->
+    <div class="mt-4">
+        <a href="/User/UserPanel" class="btn btn-outline-primary">
+            Volver al Panel Principal
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto hover para las filas de la tabla
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        });
+    </script>
+}

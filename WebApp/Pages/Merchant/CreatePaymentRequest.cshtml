@@ -1,0 +1,283 @@
+﻿@page
+@model WebApp.Pages.Merchant.CreatePaymentRequestModel
+@{
+    ViewData["Title"] = "Generar Cobro";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-12">
+            
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2><i class="bi bi-qr-code me-2"></i>Generar Cobro</h2>
+                @if (!string.IsNullOrEmpty(Model.MerchantName))
+                {
+                    <p class="text-muted">@Model.MerchantName</p>
+                }
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Message))
+            {
+                var alertClass = Model.PaymentRequestCreated ? "alert-success" : "alert-danger";
+                <div class="alert @alertClass alert-dismissible fade show" role="alert">
+                    <i class="bi @(Model.PaymentRequestCreated ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                    @Model.Message
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (!Model.PaymentRequestCreated)
+            {
+                <!-- Formulario para crear solicitud -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Nueva Solicitud de Pago</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post">
+                            <input type="hidden" asp-for="MerchantID" />
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="SaleAmount" class="form-label">Monto de Venta</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₡</span>
+                                        <input asp-for="SaleAmount" type="number" step="0.01" min="0.01" max="999999" 
+                                               class="form-control" placeholder="0.00" required />
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="ExpirationMinutes" class="form-label">Tiempo de Expiración</label>
+                                    <select asp-for="ExpirationMinutes" class="form-select">
+                                        <option value="5">5 minutos</option>
+                                        <option value="15">15 minutos</option>
+                                        <option value="30" selected>30 minutos</option>
+                                        <option value="60">1 hora</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Description" class="form-label">Descripción (Opcional)</label>
+                                <textarea asp-for="Description" class="form-control" rows="2" 
+                                          placeholder="Descripción del producto o servicio..."></textarea>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="/User/UserPanel" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-qr-code me-1"></i>Generar Código QR
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información de ayuda -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6 class="text-primary">¿Cómo funciona?</h6>
+                        <ol class="small mb-0">
+                            <li>Ingresa el monto y detalles de la venta</li>
+                            <li>Se genera un código QR único</li>
+                            <li>Muestra el QR al cliente para que pague</li>
+                            <li>Recibirás confirmación cuando se complete el pago</li>
+                        </ol>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Mostrar QR generado -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white text-center">
+                        <h5 class="mb-0"><i class="bi bi-check-circle me-2"></i>¡Código QR Generado!</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        
+                        <!-- QR Code -->
+                        <div class="mb-4">
+                            <img src="@Model.QRCodeUrl" alt="Código QR de Pago" 
+                                 class="img-fluid border rounded" style="max-width: 300px;" id="qrImage" />
+                        </div>
+                        
+                        <!-- Detalles del pago -->
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <h6 class="text-muted mb-1">Monto</h6>
+                                <h4 class="text-primary">?@Model.GrossAmount.ToString("N2")</h4>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-muted mb-1">Código</h6>
+                                <code class="d-block">@Model.PaymentRequestCode</code>
+                            </div>
+                            <div class="col-4">
+                                <h6 class="text-muted mb-1">Expira</h6>
+                                <span id="countdown" class="text-warning d-block"></span>
+                            </div>
+                        </div>
+
+                        @if (Model.SalesTaxAmount > 0)
+                        {
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    Incluye ?@Model.SalesTaxAmount.ToString("N2") de impuestos
+                                </small>
+                            </div>
+                        }
+
+                        <!-- Instrucciones para el cliente -->
+                        <div class="alert alert-light">
+                            <h6>Instrucciones para el cliente:</h6>
+                            <p class="mb-0 small">
+                                1. Abrir la app Yavi<br>
+                                2. Tocar "Pagar" o el botón de escáner<br>
+                                3. Escanear este código QR<br>
+                                4. Confirmar el pago
+                            </p>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                            <button type="button" class="btn btn-outline-primary" onclick="shareQR()">
+                                <i class="bi bi-share me-1"></i>Compartir
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="printQR()">
+                                <i class="bi bi-printer me-1"></i>Imprimir
+                            </button>
+                            <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
+                                <i class="bi bi-plus me-1"></i>Nuevo Cobro
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado y navegación -->
+                <div class="text-center mt-4">
+                    <div class="btn-group" role="group">
+                        <a href="/Merchant/PaymentStatus?merchantId=@Model.MerchantID" class="btn btn-outline-info">
+                            <i class="bi bi-list me-1"></i>Ver Estado
+                        </a>
+                        <a href="/User/UserPanel" class="btn btn-outline-secondary">
+                            <i class="bi bi-house me-1"></i>Inicio
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    @if (Model.PaymentRequestCreated)
+    {
+        <script>
+            // Countdown timer
+            const expiresAt = new Date('@Model.ExpiresAt?.ToString("yyyy-MM-ddTHH:mm:ss")');
+            
+            function updateCountdown() {
+                const now = new Date();
+                const timeLeft = expiresAt - now;
+                
+                if (timeLeft <= 0) {
+                    document.getElementById('countdown').innerHTML = '<span class="text-danger">Expirado</span>';
+                    return;
+                }
+                
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                
+                document.getElementById('countdown').innerHTML = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+            
+            // Funciones de utilidad
+            function shareQR() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Código QR de Pago - @Model.MerchantName',
+                        text: 'Paga con Yavi escaneando este código QR',
+                        url: '@Model.QRContent'
+                    });
+                } else {
+                    navigator.clipboard.writeText('@Model.QRContent').then(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Copiado!',
+                            text: 'Enlace copiado al portapapeles',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    });
+                }
+            }
+            
+            function printQR() {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Código QR - @Model.MerchantName</title>
+                            <style>
+                                body { text-align: center; font-family: Arial; margin: 20px; }
+                                img { max-width: 300px; margin: 20px 0; }
+                                .details { margin: 20px 0; font-size: 18px; }
+                            </style>
+                        </head>
+                        <body>
+                            <h2>@Model.MerchantName</h2>
+                            <h3>Código QR de Pago</h3>
+                            <img src="@Model.QRCodeUrl" />
+                            <div class="details">
+                                <strong>Monto:</strong> ?@Model.GrossAmount.ToString("N2")<br>
+                                <strong>Código:</strong> @Model.PaymentRequestCode<br>
+                                <strong>Válido hasta:</strong> @Model.ExpiresAt?.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                printWindow.print();
+            }
+        </script>
+    }
+    
+    <script>
+        // Validación del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form[method="post"]');
+            if (form && !@Model.PaymentRequestCreated.ToString().ToLower()) {
+                form.addEventListener('submit', function(e) {
+                    const amount = document.querySelector('input[name="SaleAmount"]').value;
+                    if (!amount || parseFloat(amount) <= 0) {
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Debe ingresar un monto válido'
+                        });
+                        return;
+                    }
+                    
+                    // Mostrar loading
+                    Swal.fire({
+                        title: 'Generando código QR...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}

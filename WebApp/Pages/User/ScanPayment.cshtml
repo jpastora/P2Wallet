@@ -1,0 +1,264 @@
+@page
+@model WebApp.Pages.User.ScanPaymentModel
+@{
+    ViewData["Title"] = "Pagar con QR";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10 col-12">
+            
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h2><i class="bi bi-qr-code-scan me-2"></i>Pagar con QR</h2>
+                <p class="text-muted">Escanea o ingresa el código de pago</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Message))
+            {
+                var alertClass = Model.PaymentExecuted ? "alert-success" : 
+                               Model.PaymentRequestFound ? "alert-info" : "alert-danger";
+                <div class="alert @alertClass alert-dismissible fade show" role="alert">
+                    <i class="bi @(Model.PaymentExecuted ? "bi-check-circle" : Model.PaymentRequestFound ? "bi-info-circle" : "bi-exclamation-triangle") me-2"></i>
+                    @Model.Message
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (Model.PaymentExecuted)
+            {
+                <!-- Pago completado exitosamente -->
+                <div class="card shadow-sm border-success">
+                    <div class="card-header bg-success text-white text-center">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>¡Pago Realizado!</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                        <h6 class="mt-3">Tu pago ha sido procesado exitosamente</h6>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="/User/UserPanel" class="btn btn-primary">
+                                <i class="bi bi-house me-1"></i>Volver al Panel
+                            </a>
+                            <button type="button" class="btn btn-outline-primary" onclick="pagarOtro()">
+                                <i class="bi bi-qr-code-scan me-1"></i>Pagar Otro QR
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (!Model.PaymentRequestFound)
+            {
+                <!-- Escáner/Input de código QR -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>Escanear Código</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Botón para activar cámara -->
+                        <div class="text-center mb-4">
+                            <button type="button" class="btn btn-lg btn-outline-primary" id="btnActivarCamara">
+                                <i class="bi bi-camera me-2"></i>Activar Cámara
+                            </button>
+                            <p class="text-muted mt-2 mb-0">O ingresa el código manualmente</p>
+                        </div>
+
+                        <!-- Área de escáner (placeholder) -->
+                        <div id="scanner-container" class="d-none mb-4">
+                            <div class="border rounded p-4 text-center bg-light">
+                                <i class="bi bi-camera-video fs-1 text-muted mb-3"></i>
+                                <p class="text-muted mb-0">
+                                    Apunta la cámara al código QR<br>
+                                    <small>La cámara se activará aquí</small>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Formulario para código manual -->
+                        <form method="post" asp-page-handler="Scan">
+                            <div class="mb-3">
+                                <label asp-for="PaymentCode" class="form-label">Código de Pago</label>
+                                <input asp-for="PaymentCode" type="text" class="form-control" 
+                                       placeholder="Ingresa el código del QR" />
+                                <small class="form-text text-muted">
+                                    Ejemplo: PAY202501081500001234
+                                </small>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-1"></i>Buscar Pago
+                                </button>
+                                <a href="/User/UserPanel" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información de ayuda -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6 class="text-primary">Cómo Pagar:</h6>
+                        <ol class="small mb-0">
+                            <li>Activa la cámara o ingresa el código</li>
+                            <li>Revisa los detalles del pago</li>
+                            <li>Selecciona tu cuenta bancaria</li>
+                            <li>Confirma el pago</li>
+                        </ol>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <!-- Mostrar detalles de la solicitud de pago -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Confirmar Pago</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Detalles del pago -->
+                        <div class="row mb-3">
+                            <div class="col-4"><strong>Descripción:</strong></div>
+                            <div class="col-8">@Model.PaymentRequest?.Description</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-4"><strong>Monto:</strong></div>
+                            <div class="col-8">
+                                <span class="fs-5 text-success">?@Model.PaymentRequest?.GrossAmount.ToString("N2")</span>
+                            </div>
+                        </div>
+                        @if (Model.MerchantInfo != null)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-4"><strong>Comercio:</strong></div>
+                                <div class="col-8">@Model.MerchantInfo.MerchantName</div>
+                            </div>
+                        }
+
+                        <hr>
+
+                        <form method="post" asp-page-handler="Execute">
+                            <input type="hidden" asp-for="PaymentCode" />
+                            
+                            <!-- Selección de cuenta bancaria -->
+                            <div class="mb-3">
+                                <label asp-for="SelectedBankAccountId" class="form-label">Pagar con</label>
+                                <select asp-for="SelectedBankAccountId" class="form-select" required>
+                                    <option value="">Selecciona una cuenta</option>
+                                    @foreach (var account in Model.UserAccountsInfo)
+                                    {
+                                        <option value="@account.ID">@account.DisplayText</option>
+                                    }
+                                </select>
+                                @if (!Model.UserAccountsInfo.Any())
+                                {
+                                    <small class="text-danger">
+                                        No tienes cuentas bancarias. 
+                                        <a href="/User/UserBankAccount">Agregar cuenta</a>
+                                    </small>
+                                }
+                            </div>
+
+                            <!-- Promociones disponibles -->
+                            @if (Model.AvailablePromotions.Any())
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">Promociones Disponibles</label>
+                                    <div class="border rounded p-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="promotionSelection" 
+                                                   id="noPromotion" value="" checked 
+                                                   onchange="selectPromotion('', '')">
+                                            <label class="form-check-label" for="noPromotion">
+                                                Sin promoción
+                                            </label>
+                                        </div>
+                                        @foreach (var promo in Model.AvailablePromotions)
+                                        {
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="promotionSelection" 
+                                                       id="promo@(promo.Id)" value="@promo.Id" 
+                                                       onchange="selectPromotion('@promo.Id', '@promo.Type')">
+                                                <label class="form-check-label" for="promo@(promo.Id)">
+                                                    <strong>@promo.Name</strong> - @promo.DiscountPercentage% desc.<br>
+                                                    <small class="text-muted">@promo.Description</small>
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                    <input type="hidden" asp-for="SelectedPromotionId" />
+                                    <input type="hidden" asp-for="SelectedPromotionType" />
+                                </div>
+                            }
+
+                            <div class="d-grid gap-2">
+                                @if (Model.UserAccountsInfo.Any())
+                                {
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-check-circle me-1"></i>Confirmar Pago
+                                    </button>
+                                }
+                                <button type="button" class="btn btn-outline-secondary" onclick="buscarOtro()">
+                                    <i class="bi bi-arrow-left me-1"></i>Buscar Otro QR
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Información de seguridad -->
+                <div class="alert alert-light mt-4">
+                    <h6><i class="bi bi-shield-check me-1"></i>Pago Seguro</h6>
+                    <small>Verifica que el comercio y monto sean correctos antes de confirmar</small>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Botón para activar cámara (placeholder por ahora)
+            document.getElementById('btnActivarCamara')?.addEventListener('click', function() {
+                const scannerContainer = document.getElementById('scanner-container');
+                if (scannerContainer.classList.contains('d-none')) {
+                    scannerContainer.classList.remove('d-none');
+                    this.innerHTML = '<i class="bi bi-camera-video me-2"></i>Cámara Activa';
+                    this.classList.add('btn-success');
+                    this.classList.remove('btn-outline-primary');
+                    
+                    // Placeholder para futura implementación de cámara
+                    Swal.fire({
+                        title: 'Cámara (Próximamente)',
+                        text: 'Por ahora, usa el campo de texto para ingresar el código manualmente.',
+                        icon: 'info',
+                        confirmButtonText: 'Entendido'
+                    });
+                } else {
+                    scannerContainer.classList.add('d-none');
+                    this.innerHTML = '<i class="bi bi-camera me-2"></i>Activar Cámara';
+                    this.classList.remove('btn-success');
+                    this.classList.add('btn-outline-primary');
+                }
+            });
+        });
+
+        function selectPromotion(id, type) {
+            document.querySelector('input[name="SelectedPromotionId"]').value = id || '';
+            document.querySelector('input[name="SelectedPromotionType"]').value = type || '';
+        }
+
+        function buscarOtro() {
+            window.location.href = '/User/ScanPayment';
+        }
+
+        function pagarOtro() {
+            window.location.href = '/User/ScanPayment';
+        }
+    </script>
+}

@@ -20,5 +20,10 @@ namespace DTOs
         public string TransactionStatus { get; set; }
         public int? FinancialPromotionID { get; set; }
         public int? MerchantPromotionID { get; set; }
+        
+        // Nuevos campos para solicitudes de pago QR
+        public string PaymentRequestCode { get; set; }  // Código único para QR
+        public string Description { get; set; }         // Descripción del comercio
+        public DateTime? ExpiresAt { get; set; }        // Fecha de expiración de la solicitud
     }
 }

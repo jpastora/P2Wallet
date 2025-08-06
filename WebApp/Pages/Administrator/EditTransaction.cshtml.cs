@@ -25,8 +25,11 @@ namespace WebApp.Pages.Administrator
         {
             "Completed" => "Completada",
             "Pending" => "Pendiente",
+            "PendingUserApproval" => "Pendiente de Aprobación",
             "Failed" => "Fallida",
             "Cancelled" => "Cancelada",
+            "Processing" => "Procesando",
+            "Rejected" => "Rechazada",
             _ => status ?? "Desconocido"
         };
 
