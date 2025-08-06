@@ -14,8 +14,8 @@
     }
 }
 
-<!-- FAB Escanear QR -->
-<button id="escanearQR" class="btn btn-primary fab">
+<!-- FAB Escanear QR - Ahora funcional -->
+<button id="escanearQR" class="btn btn-primary fab" onclick="abrirEscanerQR()" title="Escanear código QR para pagar">
     <i class="bi bi-qr-code-scan fs-4"></i>
 </button>
 
@@ -29,6 +29,9 @@
     </a>
     <a href="/User/UserTransactionID" class="nav-item flex-fill text-center @(currentPath == "/user/usertransactionid" ? "active" : "")">
         <i class="bi bi-card-checklist fs-5"></i><br>Transacciones
+    </a>
+    <a href="/User/UserBusinessManager" class="nav-item flex-fill text-center @(currentPath == "/user/userbusinessmanager" ? "active" : "")">
+        <i class="bi bi-briefcase fs-5"></i><br>Negocios
     </a>
     
     @if (isAdmin)
@@ -48,6 +51,37 @@
         </button>
     </form>
 </nav>
+
+<script>
+    // Funcionalidad del FAB de escanear QR
+    function abrirEscanerQR() {
+        // Redirigir a la página de escaneo de QR
+        window.location.href = '/User/ScanPayment';
+    }
+
+    // Añadir efecto visual al FAB
+    document.addEventListener('DOMContentLoaded', function() {
+        const fabButton = document.getElementById('escanearQR');
+        if (fabButton) {
+            // Efecto de pulse en el FAB para llamar la atención
+            fabButton.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+            
+            fabButton.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+
+            // Efecto de click
+            fabButton.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        }
+    });
+</script>
 
 @if (isAdmin)
 {

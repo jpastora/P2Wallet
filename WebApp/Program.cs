@@ -3,6 +3,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 
+// Agregar HttpClient para llamadas a APIs
+builder.Services.AddHttpClient();
+
 // Agregar autenticación por cookies
 builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>

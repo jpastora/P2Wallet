@@ -2,96 +2,280 @@
 @model WebApp.Pages.User.UserPanelModel
 @{
     var user = Model.CurrentUser;
-    var cuentas = Model.UserAccounts;
     ViewData["Title"] = "Panel de Usuario";
 }
 
 <!-- Encabezado -->
-<header class="p-4 text-center">
-    <img src="@(user?.ProfilePhotoUrl ?? "https://picsum.photos/seed/40/40")" class="rounded-circle mb-2" alt="Usuario" width="100" height="100"/>
+<header class="text-center py-4">
+    <img src="@(user?.ProfilePhotoUrl ?? "https://picsum.photos/seed/40/40")" class="rounded-circle mb-2" alt="Usuario" width="80" height="80"/>
     <h4>Hola, @(user?.FirstName ?? "Usuario")</h4>
 </header>
 
-<!-- Saldo -->
+<!-- Botones de acción -->
 <section class="container mb-4">
-    <div class="card text-center shadow saldo-card">
-        <div class="card-body">
-            <h6 class="text-muted">Saldo Total Disponible</h6>
-            <h2 class="text-primary fw-bold">₡1,234.000.56</h2>
-            <div class="d-flex justify-content-around mt-4">
-                <button class="btn btn-outline-primary"><i class="bi bi-arrow-up-circle"></i> Enviar</button>
-                <button class="btn btn-outline-success"><i class="bi bi-arrow-down-circle"></i> Recibir</button>
-                <button class="btn btn-outline-warning"><i class="bi bi-credit-card"></i> Pagar</button>
-            </div>
+    <div class="row g-2">
+        <div class="col-6">
+            <button class="btn btn-warning w-100 py-3" onclick="pagarConQR()">
+                <i class="bi bi-qr-code-scan fs-4"></i><br>Pagar
+            </button>
         </div>
+        @if (Model.HasMerchantAccess)
+        {
+            <div class="col-6">
+                <button class="btn btn-info w-100 py-3" onclick="generarCobro()">
+                    <i class="bi bi-receipt fs-4"></i><br>Cobrar
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="col-6">
+                <button class="btn btn-secondary w-100 py-3" disabled>
+                    <i class="bi bi-receipt fs-4"></i><br>Cobrar
+                </button>
+            </div>
+        }
     </div>
 </section>
 
 <!-- Mis Cuentas -->
 <section class="container mb-4">
-    <h5>Mis Cuentas</h5>
-    <ul class="list-group">
-        @if (cuentas != null && cuentas.Count > 0)
-        {
-            foreach (var cuenta in cuentas)
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Mis Cuentas</h5>
+        <a href="/User/UserBankAccount" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-plus-circle"></i> Administrar
+        </a>
+    </div>
+    
+    @if (Model.UserAccounts != null && Model.UserAccounts.Count > 0)
+    {
+        <ul class="list-group">
+            @foreach (var cuenta in Model.UserAccounts)
             {
+                var entity = Model.FinancialEntities.GetValueOrDefault(cuenta.FinancialEntityID);
+                var entityName = entity?.EntityName ?? "Banco Desconocido";
+                var statusClass = cuenta.ValidationStatus == "Active" ? "success" : "warning";
+                
                 <li class="list-group-item d-flex align-items-center">
-                    <img src="https://picsum.photos/seed/banco2/40/40" class="me-3" alt="Banco" />
-                    IBAN: @cuenta.IBAN
+                    <div class="bank-logo-container me-3">
+                        @if (!string.IsNullOrEmpty(entity?.LogoImage))
+                        {
+                            <img src="@entity.LogoImage" 
+                                 class="bank-logo" 
+                                 alt="@entityName" 
+                                 onerror="this.onerror=null; this.src='https://picsum.photos/seed/@cuenta.FinancialEntityID/40/40'"/>
+                        }
+                        else
+                        {
+                            <img src="https://picsum.photos/seed/@cuenta.FinancialEntityID/40/40" 
+                                 class="bank-logo" 
+                                 alt="@entityName"/>
+                        }
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong>@entityName</strong><br>
+                        <small class="text-muted">IBAN: @cuenta.IBAN</small><br>
+                        <small class="text-@(cuenta.Balance >= 0 ? "success" : "danger")">
+                            Saldo: ₡@cuenta.Balance.ToString("N2")
+                        </small>
+                    </div>
+                    <span class="badge bg-@statusClass">
+                        @(cuenta.ValidationStatus == "Active" ? "Activa" : "Inactiva")
+                    </span>
                 </li>
             }
-        }
-        else
-        {
-            <li class="list-group-item">No tienes cuentas registradas.</li>
-        }
-        <li class="list-group-item">
-            <a href="/User/UserBankAccount" id="agregarCuenta" class="text-decoration-none text-primary"><i class="bi bi-plus-circle"></i> Agregar nueva cuenta</a>
-        </li>
-    </ul>
+        </ul>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-credit-card fs-1 text-muted"></i>
+            <p class="text-muted">No tienes cuentas registradas</p>
+            <a href="/User/UserBankAccount" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Agregar cuenta
+            </a>
+        </div>
+    }
 </section>
+
+@if (Model.HasMerchantAccess && Model.UserMerchants?.Count > 0)
+{
+    <!-- Mis Comercios -->
+    <section class="container mb-4">
+        <h5>Mis Comercios</h5>
+        <ul class="list-group">
+            @foreach (var merchant in Model.UserMerchants.Take(3))
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>@merchant.MerchantName</strong>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <a href="/Merchant/CreatePaymentRequest?merchantId=@merchant.ID" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-qr-code"></i> QR
+                        </a>
+                        <a href="/User/UserPaymentStatus?merchantId=@merchant.ID" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-list"></i> Estado
+                        </a>
+                    </div>
+                </li>
+            }
+            @if (Model.UserMerchants.Count > 3)
+            {
+                <li class="list-group-item text-center">
+                    <a href="/User/UserBusinessManager" class="btn btn-link btn-sm">
+                        Ver todos los comercios (@Model.UserMerchants.Count)
+                    </a>
+                </li>
+            }
+        </ul>
+    </section>
+}
 
 <!-- Actividad Reciente -->
 <section class="container mb-5">
     <h5>Actividad Reciente</h5>
-    <ul class="list-group">
-        @if (Model.LastTransactions != null && Model.LastTransactions.Count > 0)
-        {
-            foreach (var txn in Model.LastTransactions)
+    @if (Model.LastTransactions != null && Model.LastTransactions.Count > 0)
+    {
+        <ul class="list-group">
+            @foreach (var txn in Model.LastTransactions)
             {
-                var merchant = Model.MerchantNames.ContainsKey(txn.MerchantID) ? Model.MerchantNames[txn.MerchantID] : "-";
-                var iban = Model.AccountIBANs.ContainsKey(txn.BankAccountID) ? Model.AccountIBANs[txn.BankAccountID] : "-";
-                var bank = "-";
-                if (Model.AccountIBANs.ContainsKey(txn.BankAccountID))
-                {
-                    var accountManager = new CoreApp.BankAccountManager();
-                    var acc = accountManager.RetrieveBankAccountById(txn.BankAccountID);
-                    if (acc != null && Model.BankNames.ContainsKey(acc.FinancialEntityID))
-                    {
-                        bank = Model.BankNames[acc.FinancialEntityID];
-                    }
-                }
-                <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
-                    <div>
-                        <i class="bi bi-shop me-2 text-secondary"></i>
-                        <strong>@merchant</strong>
-                        <span class="text-muted small ms-2">IBAN: @iban</span>
-                        <span class="text-muted small ms-2">Banco: @bank</span>
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>@Model.MerchantNames.GetValueOrDefault(txn.MerchantID, "Comercio")</strong><br>
+                            <small class="text-muted">
+                                @txn.Timestamp.ToString("dd/MM/yyyy HH:mm")
+                                @if (!string.IsNullOrEmpty(txn.Description))
+                                {
+                                    <span> - @txn.Description</span>
+                                }
+                            </small>
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-success">₡@txn.NetAmount.ToString("N2")</strong><br>
+                            <small class="badge bg-@(UserPanelModel.GetStatusBadgeClass(txn.TransactionStatus))">
+                                @UserPanelModel.GetStatusText(txn.TransactionStatus)
+                            </small>
+                        </div>
                     </div>
-                    <div class="d-flex align-items-center mt-2 mt-md-0">
-                        <span class="me-3" style="font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial;">₡</span>@txn.NetAmount.ToString("N2")
-                        <small class="text-muted d-block ms-3">@txn.TransactionStatus</small>
-                        <a asp-page="/User/UserTransactionInvoice" asp-route-id="@txn.ID" class="btn btn-sm btn-outline-info ms-3">Ver Detalle</a>
+                    <div class="mt-2">
+                        <a href="/User/UserTransactionInvoice/@txn.ID" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-receipt"></i> Ver Factura
+                        </a>
                     </div>
                 </li>
             }
-        }
-        else
-        {
-            <li class="list-group-item">No hay transacciones recientes.</li>
-        }
-        <li class="list-group-item text-center">
-            <a href="/User/UserTransactionID" id="verHistorial">Ver todo el historial</a>
-        </li>
-    </ul>
+            <li class="list-group-item text-center">
+                <a href="/User/UserTransactionID" class="text-decoration-none">Ver todas las transacciones</a>
+            </li>
+        </ul>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-receipt fs-1 text-muted"></i>
+            <p class="text-muted">No hay transacciones recientes</p>
+            <small class="text-muted">Tus pagos aparecerán aquí</small>
+        </div>
+    }
 </section>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        function pagarConQR() {
+            Swal.fire({
+                title: 'Abriendo escáner...',
+                text: 'Preparando cámara para escanear códigos QR',
+                icon: 'info',
+                timer: 1500,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                willClose: () => {
+                    window.location.href = '/User/ScanPayment';
+                }
+            });
+        }
+
+        function generarCobro() {
+            @if (Model.UserMerchants?.Count == 1)
+            {
+                var merchant = Model.UserMerchants.First();
+                <text>
+                // Solo un comercio, ir directamente
+                window.location.href = '/Merchant/CreatePaymentRequest?merchantId=@merchant.ID';
+                </text>
+            }
+            else if (Model.UserMerchants?.Count > 1)
+            {
+                <text>
+                // Múltiples comercios, mostrar selector
+                const merchantOptions = {};
+                @foreach (var merchant in Model.UserMerchants)
+                {
+                    <text>merchantOptions['@merchant.ID'] = '@merchant.MerchantName';</text>
+                }
+                
+                Swal.fire({
+                    title: 'Seleccionar Comercio',
+                    text: 'Elige el comercio para el cual generar el cobro',
+                    input: 'select',
+                    inputOptions: merchantOptions,
+                    inputPlaceholder: 'Selecciona un comercio',
+                    showCancelButton: true,
+                    confirmButtonText: 'Generar Cobro',
+                    cancelButtonText: 'Cancelar',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Debes seleccionar un comercio';
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `/Merchant/CreatePaymentRequest?merchantId=${result.value}`;
+                    }
+                });
+                </text>
+            }
+            else
+            {
+                <text>
+                // Sin comercios
+                Swal.fire({
+                    title: 'Sin Comercios',
+                    text: 'No tienes comercios asignados. Contacta al administrador para obtener acceso.',
+                    icon: 'warning',
+                    confirmButtonText: 'Entendido'
+                });
+                </text>
+            }
+        }
+    </script>
+}
+
+<style>
+    .bank-logo-container {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 6px;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+    }
+    
+    .bank-logo {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+    }
+    
+
+</style>

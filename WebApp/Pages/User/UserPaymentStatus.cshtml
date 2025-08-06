@@ -1,0 +1,191 @@
+﻿@page
+@model WebApp.Pages.User.UserPaymentStatusModel
+@{
+    ViewData["Title"] = "Estado de Solicitudes de Pago";
+}
+
+<div class="container py-4 mb-5">
+    <h2 class="mb-4">Estado de Solicitudes de Pago</h2>
+    
+    @if (!string.IsNullOrEmpty(Model.MerchantName))
+    {
+        <p class="text-muted mb-4">Comercio: <strong>@Model.MerchantName</strong></p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @Model.Message
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Estadísticas básicas -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="text-warning mb-1">@Model.ActiveCount</h4>
+                    <small class="text-muted">Solicitudes Pendientes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="text-success mb-1">@Model.CompletedCount</h4>
+                    <small class="text-muted">Pagos Completados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h4 class="text-primary mb-1">₡@Model.TodaySales.ToString("N0")</h4>
+                    <small class="text-muted">Ventas de Hoy</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="mb-4">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
+                Nueva Solicitud
+            </a>
+            <button type="button" class="btn btn-outline-primary" onclick="window.location.reload()">
+                Actualizar
+            </button>
+            <a href="/User/UserBusinessManager" class="btn btn-outline-secondary">
+                Volver a Mis Comercios
+            </a>
+        </div>
+    </div>
+
+    <!-- Solicitudes Pendientes -->
+    @if (Model.ActiveRequests.Any())
+    {
+        <h4 class="mb-3">Solicitudes Pendientes</h4>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Código</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.ActiveRequests)
+                    {
+                        <tr>
+                            <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@request.Description</td>
+                            <td><code>@request.PaymentRequestCode</code></td>
+                            <td>₡@request.GrossAmount.ToString("N2")</td>
+                            <td>
+                                <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <form method="post" asp-page-handler="CancelRequest" class="d-inline">
+                                        <input type="hidden" name="paymentCode" value="@request.PaymentRequestCode" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('¿Está seguro de cancelar esta solicitud?')">
+                                            Cancelar
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <h5>No hay solicitudes pendientes</h5>
+            <p class="mb-0">Las solicitudes de pago activas aparecerán aquí.</p>
+        </div>
+    }
+
+    <!-- Pagos Completados -->
+    @if (Model.CompletedRequests.Any())
+    {
+        <hr />
+        <h4 class="mb-3">Pagos Completados Recientes</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Código</th>
+                        <th>Monto Bruto</th>
+                        <th>Monto Neto</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var request in Model.CompletedRequests.Take(10))
+                    {
+                        <tr>
+                            <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@request.Description</td>
+                            <td><code>@request.PaymentRequestCode</code></td>
+                            <td>₡@request.GrossAmount.ToString("N2")</td>
+                            <td>₡@request.NetAmount.ToString("N2")</td>
+                            <td>
+                                <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        
+        @if (Model.CompletedRequests.Count > 10)
+        {
+            <div class="text-center mt-3">
+                <small class="text-muted">Mostrando los 10 pagos más recientes de @Model.CompletedRequests.Count total</small>
+            </div>
+        }
+    }
+    else
+    {
+        <hr />
+        <div class="alert alert-info">
+            <h5>No hay pagos completados</h5>
+            <p class="mb-0">Los pagos completados aparecerán aquí cuando los clientes paguen las solicitudes.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-refresh cada 30 segundos para mantener actualizado el estado
+            setInterval(function() {
+                window.location.reload();
+            }, 30000);
+
+            // Efecto hover para las filas de la tabla
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+            });
+        });
+    </script>
+}

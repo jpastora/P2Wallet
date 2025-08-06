@@ -24,7 +24,7 @@
         <div class="col-xl-8 col-lg-7 col-md-12 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
-                    <h6 class="mb-0"><i class="bi bi-receipt me-2"></i>Información de la Transacción</h6>
+                    <h7 class="mb-0"><i class="bi bi-receipt me-2"></i>Información de la Transacción</h7>
                 </div>
                 <div class="card-body">
                     <form method="post" id="editTransactionForm">
@@ -62,9 +62,12 @@
                                 </label>
                                 <select asp-for="TransactionToEdit.TransactionStatus" class="form-select">
                                     <option value="Pending">Pendiente</option>
+                                    <option value="PendingUserApproval">Pendiente de Aprobación</option>
+                                    <option value="Processing">Procesando</option>
                                     <option value="Completed">Completada</option>
                                     <option value="Failed">Fallida</option>
                                     <option value="Cancelled">Cancelada</option>
+                                    <option value="Rejected">Rechazada</option>
                                 </select>
                             </div>
                         </div>
@@ -170,7 +173,7 @@
         <div class="col-xl-4 col-lg-5 col-md-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
-                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información Adicional</h6>
+                    <h7 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información Adicional</h7>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -199,8 +202,11 @@
                             {
                                 "Completed" => "bg-success",
                                 "Pending" => "bg-warning text-dark",
+                                "PendingUserApproval" => "bg-warning text-dark",
+                                "Processing" => "bg-info text-white",
                                 "Failed" => "bg-danger",
                                 "Cancelled" => "bg-secondary",
+                                "Rejected" => "bg-danger",
                                 _ => "bg-secondary"
                             };
                         }
