@@ -234,6 +234,7 @@
         let qrScanner = null;
         let videoElement = null;
         let isScanning = false;
+        let cameraStream = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             videoElement = document.getElementById('qr-video');
@@ -243,58 +244,148 @@
             const scanStatus = document.getElementById('scan-status');
             const paymentCodeInput = document.getElementById('paymentCodeInput');
 
+            // Función para verificar soporte de cámara
+            function checkCameraSupport() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    return false;
+                }
+                return true;
+            }
+
+            // Función para solicitar permisos de cámara de forma más robusta
+            async function requestCameraPermission() {
+                try {
+                    // Primero verificar si ya tenemos permisos
+                    const permissions = await navigator.permissions.query({ name: 'camera' });
+                    
+                    if (permissions.state === 'granted') {
+                        return true;
+                    } else if (permissions.state === 'denied') {
+                        throw new Error('Permisos de cámara denegados. Ve a configuración del navegador para habilitarlos.');
+                    }
+                    
+                    // Si no sabemos el estado, intentar acceso directo
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    });
+                    
+                    // Si llega aquí, tenemos permisos
+                    cameraStream = stream;
+                    return true;
+                    
+                } catch (error) {
+                    console.error('Error solicitando permisos:', error);
+                    
+                    if (error.name === 'NotAllowedError') {
+                        throw new Error('Acceso a cámara denegado. Por favor permite el acceso y recarga la página.');
+                    } else if (error.name === 'NotFoundError') {
+                        throw new Error('No se encontró ninguna cámara en el dispositivo.');
+                    } else if (error.name === 'NotReadableError') {
+                        throw new Error('La cámara está siendo usada por otra aplicación.');
+                    } else {
+                        throw new Error('Error desconocido: ' + error.message);
+                    }
+                }
+            }
+
             // Botón para activar cámara
             btnActivar?.addEventListener('click', async function() {
                 try {
-                    scanStatus.innerHTML = '<small class="text-info">Iniciando cámara...</small>';
+                    scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Verificando permisos...</small>';
                     
-                    // Verificar soporte de cámara
-                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                        throw new Error('La cámara no está disponible en este dispositivo/navegador');
+                    // Verificar soporte básico
+                    if (!checkCameraSupport()) {
+                        throw new Error('Tu navegador no soporta acceso a cámara. Usa Chrome, Firefox o Safari actualizado.');
                     }
 
-                    // Mostrar container y cambiar botones
+                    // Solicitar permisos de cámara
+                    scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Solicitando permisos de cámara...</small>';
+                    await requestCameraPermission();
+
+                    // Mostrar interfaz de escáner
                     scannerContainer.classList.remove('d-none');
                     btnActivar.classList.add('d-none');
                     btnDetener.classList.remove('d-none');
 
-                    // Inicializar escáner QR
+                    scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Iniciando escáner QR...</small>';
+
+                    // Inicializar escáner QR con configuración mejorada
                     qrScanner = new QrScanner(
                         videoElement,
                         result => {
-                            // QR detectado
+                            console.log('QR detectado:', result.data);
                             handleQRDetected(result.data);
                         },
                         {
                             onDecodeError: error => {
                                 // Error de decodificación (normal cuando no hay QR visible)
-                                scanStatus.innerHTML = '<small class="text-muted">Buscando código QR...</small>';
+                                if (isScanning) {
+                                    scanStatus.innerHTML = '<small class="text-muted">Buscando código QR...</small>';
+                                }
                             },
-                            preferredCamera: 'environment', // Usar cámara trasera en móviles
+                            preferredCamera: 'environment', // Cámara trasera preferida
                             highlightScanRegion: true,
                             highlightCodeOutline: true,
+                            maxScansPerSecond: 5, // Limitar escaneos para mejor rendimiento
+                            calculateScanRegion: (video) => {
+                                // Región de escaneo personalizada (centro del video)
+                                const smallerDimension = Math.min(video.videoWidth, video.videoHeight);
+                                const scanRegionSize = Math.round(0.6 * smallerDimension);
+                                return {
+                                    x: Math.round((video.videoWidth - scanRegionSize) / 2),
+                                    y: Math.round((video.videoHeight - scanRegionSize) / 2),
+                                    width: scanRegionSize,
+                                    height: scanRegionSize,
+                                };
+                            }
                         }
                     );
+
+                    // Usar stream existente si ya lo tenemos
+                    if (cameraStream) {
+                        videoElement.srcObject = cameraStream;
+                    }
 
                     // Iniciar escáner
                     await qrScanner.start();
                     isScanning = true;
-                    scanStatus.innerHTML = '<small class="text-success">Cámara activa - Apunta al código QR</small>';
+                    scanStatus.innerHTML = '<small class="text-success"><i class="bi bi-camera-video me-1"></i>Cámara activa - Apunta al código QR</small>';
 
                 } catch (error) {
                     console.error('Error al iniciar cámara:', error);
-                    scanStatus.innerHTML = '<small class="text-danger">Error: ' + error.message + '</small>';
+                    scanStatus.innerHTML = '<small class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>' + error.message + '</small>';
                     
-                    // Ocultar container y restaurar botones
-                    scannerContainer.classList.add('d-none');
-                    btnActivar.classList.remove('d-none');
-                    btnDetener.classList.add('d-none');
+                    // Limpiar y restaurar estado
+                    stopScanner();
 
+                    // Mostrar alerta con opciones
                     Swal.fire({
                         title: 'Error de Cámara',
-                        text: 'No se pudo acceder a la cámara. Por favor, permite el acceso o usa el campo de texto.',
+                        html: `
+                            <p>${error.message}</p>
+                            <div class="mt-3">
+                                <strong>Soluciones:</strong>
+                                <ul class="text-start">
+                                    <li>Permite el acceso a la cámara cuando el navegador lo solicite</li>
+                                    <li>Verifica que ninguna otra aplicación esté usando la cámara</li>
+                                    <li>Recarga la página e intenta nuevamente</li>
+                                    <li>Usa el campo de texto para ingresar el código manualmente</li>
+                                </ul>
+                            </div>
+                        `,
                         icon: 'error',
-                        confirmButtonText: 'Entendido'
+                        confirmButtonText: 'Entendido',
+                        showCancelButton: true,
+                        cancelButtonText: 'Recargar Página',
+                        width: '500px'
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.cancel) {
+                            window.location.reload();
+                        }
                     });
                 }
             });
@@ -308,54 +399,81 @@
             function handleQRDetected(qrData) {
                 if (!isScanning) return;
 
-                // Detener escáner
+                console.log('Procesando QR:', qrData);
+                
+                // Detener escáner inmediatamente
                 stopScanner();
 
                 // Llenar campo de código
                 paymentCodeInput.value = qrData;
 
-                // Mostrar confirmación
+                // Procesar automáticamente sin confirmación adicional
                 Swal.fire({
                     title: '¡QR Detectado!',
-                    text: 'Código: ' + qrData,
+                    text: 'Procesando pago...',
                     icon: 'success',
-                    showCancelButton: true,
-                    confirmButtonText: 'Buscar Pago',
-                    cancelButtonText: 'Escanear Otro',
-                    timer: 5000,
-                    timerProgressBar: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Enviar formulario automáticamente
-                        document.getElementById('scanForm').submit();
-                    } else {
-                        // Limpiar código y reactivar escáner si el usuario cancela
-                        paymentCodeInput.value = '';
-                        btnActivar.click();
-                    }
+                    timer: 1500,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                }).then(() => {
+                    // Enviar formulario automáticamente para ir directo al pago
+                    document.getElementById('scanForm').submit();
                 });
             }
 
             // Función para detener escáner
             function stopScanner() {
+                console.log('Deteniendo escáner...');
+                
                 if (qrScanner) {
                     qrScanner.destroy();
                     qrScanner = null;
                 }
+                
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => {
+                        track.stop();
+                        console.log('Track detenido:', track.label);
+                    });
+                    cameraStream = null;
+                }
+                
+                if (videoElement) {
+                    videoElement.srcObject = null;
+                }
+                
                 isScanning = false;
                 
+                // Restaurar interfaz
                 const scannerContainer = document.getElementById('scanner-container');
                 const btnActivar = document.getElementById('btnActivarCamara');
                 const btnDetener = document.getElementById('btnDetenerCamara');
                 
-                scannerContainer.classList.add('d-none');
-                btnActivar.classList.remove('d-none');
-                btnDetener.classList.add('d-none');
+                if (scannerContainer) scannerContainer.classList.add('d-none');
+                if (btnActivar) btnActivar.classList.remove('d-none');
+                if (btnDetener) btnDetener.classList.add('d-none');
             }
 
-            // Detener cámara al salir de la página
+            // Detener cámara al salir de la página o cambiar de pestaña
             window.addEventListener('beforeunload', function() {
                 stopScanner();
+            });
+
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden && isScanning) {
+                    console.log('Página oculta, pausando escáner...');
+                    if (qrScanner) {
+                        qrScanner.stop();
+                    }
+                } else if (!document.hidden && qrScanner && !isScanning) {
+                    console.log('Página visible, reanudando escáner...');
+                    qrScanner.start().then(() => {
+                        isScanning = true;
+                    }).catch(error => {
+                        console.error('Error reanudando escáner:', error);
+                    });
+                }
             });
         });
 

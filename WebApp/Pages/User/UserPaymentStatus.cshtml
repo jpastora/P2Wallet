@@ -12,14 +12,6 @@
         <p class="text-muted mb-4">Comercio: <strong>@Model.MerchantName</strong></p>
     }
 
-    @if (!string.IsNullOrEmpty(Model.Message))
-    {
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
-            @Model.Message
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    }
-
     <!-- Resumen de estadísticas -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
@@ -62,7 +54,7 @@
             <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
                 Nueva Solicitud
             </a>
-            <button type="button" class="btn btn-outline-primary" onclick="window.location.reload()">
+            <button type="button" class="btn btn-outline-primary" onclick="refreshPayments()">
                 Actualizar
             </button>
             <a href="/User/UserBusinessManager" class="btn btn-outline-secondary">
@@ -126,13 +118,10 @@
                                                 onclick="showQR('@request.PaymentRequestCode', '@request.QRCodeUrl')">
                                             Ver QR Grande
                                         </button>
-                                        <form method="post" asp-page-handler="CancelRequest" class="d-inline">
-                                            <input type="hidden" name="paymentCode" value="@request.PaymentRequestCode" />
-                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100"
-                                                    onclick="return confirm('¿Está seguro de cancelar esta solicitud?')">
-                                                Cancelar
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                onclick="confirmCancelPayment('@request.PaymentRequestCode', '@Html.Raw(Json.Serialize(request.Description))', '@request.GrossAmount.ToString("N2")')">
+                                            Cancelar Solicitud
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -301,64 +290,22 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        function showQR(code, qrUrl) {
-            document.getElementById('modalQRImage').src = qrUrl.replace('150x150', '300x300');
-            document.getElementById('modalQRCode').textContent = code;
-            
-            var modal = new bootstrap.Modal(document.getElementById('qrModal'));
-            modal.show();
-        }
-        
-        function downloadModalQR() {
-            const qrImage = document.getElementById('modalQRImage');
-            const code = document.getElementById('modalQRCode').textContent;
-            
-            const link = document.createElement('a');
-            link.download = `qr-pago-${code}.jpg`;
-            link.href = qrImage.src;
-            link.click();
-        }
-        
-        function printModalQR() {
-            const qrImage = document.getElementById('modalQRImage').src;
-            const code = document.getElementById('modalQRCode').textContent;
-            
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head><title>Código QR - ${code}</title></head>
-                    <body style="text-align: center; font-family: Arial;">
-                        <h2>@Model.MerchantName</h2>
-                        <h3>Código QR de Pago</h3>
-                        <img src="${qrImage}" style="max-width: 300px;" />
-                        <p><strong>Código:</strong> ${code}</p>
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-        
-        // Auto-refresh cada 30 segundos solo en pestaña activa
-        setInterval(function() {
-            if (document.getElementById('active-tab').classList.contains('active')) {
-                window.location.reload();
-            }
-        }, 30000);
+<!-- Formulario oculto para cancelación -->
+<form id="cancelPaymentForm" method="post" asp-page-handler="CancelRequest" style="display: none;">
+    <input type="hidden" id="cancelPaymentCode" name="paymentCode" />
+</form>
 
-        // Efecto hover para las filas de la tabla
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/UserPaymentStatus.js"></script>
+    
+    <script>
+        // Configurar el manager con datos del servidor
         document.addEventListener('DOMContentLoaded', function() {
-            const tableRows = document.querySelectorAll('tbody tr');
-            tableRows.forEach(row => {
-                row.addEventListener('mouseenter', function() {
-                    this.style.backgroundColor = '#f8f9fa';
-                });
-                
-                row.addEventListener('mouseleave', function() {
-                    this.style.backgroundColor = '';
-                });
+            window.UserPaymentStatusManager.configure({
+                merchantName: @Html.Raw(Json.Serialize(Model.MerchantName)),
+                activeCount: @Model.ActiveCount,
+                message: @Html.Raw(Json.Serialize(Model.Message))
             });
         });
     </script>

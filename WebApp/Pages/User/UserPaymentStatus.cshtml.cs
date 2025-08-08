@@ -74,7 +74,10 @@ namespace WebApp.Pages.User
             }
 
             if (!IsAuthorized)
+            {
+                TempData["ErrorMessage"] = "No tienes autorización para acceder a este comercio.";
                 return RedirectToPage("/User/UserBusinessManager");
+            }
 
             // Obtener información del comercio
             var merchantManager = new MerchantManager();
@@ -87,6 +90,16 @@ namespace WebApp.Pages.User
             // Cargar solicitudes de pago
             await LoadPaymentRequests();
 
+            // Transferir mensajes de TempData si existen
+            if (TempData.ContainsKey("SuccessMessage"))
+            {
+                Message = TempData["SuccessMessage"]?.ToString() ?? "";
+            }
+            else if (TempData.ContainsKey("ErrorMessage"))
+            {
+                Message = TempData["ErrorMessage"]?.ToString() ?? "";
+            }
+
             return Page();
         }
 
@@ -97,57 +110,59 @@ namespace WebApp.Pages.User
                 await ReloadMerchantData();
 
                 if (!IsAuthorized)
+                {
+                    TempData["ErrorMessage"] = "No tienes autorización para realizar esta acción.";
                     return RedirectToPage("/User/UserBusinessManager");
+                }
 
                 if (string.IsNullOrEmpty(paymentCode))
                 {
-                    Message = "Código de solicitud inválido.";
-                    await LoadPaymentRequests();
-                    return Page();
+                    TempData["ErrorMessage"] = "Código de solicitud inválido.";
+                    return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
                 }
 
-                // Intentar cancelar vía API
+                // Cancelar vía API
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/Cancel/{paymentCode}";
                 
-                try
-                {
-                    var response = await httpClient.PostAsync(apiUrl, null);
+                var response = await httpClient.PostAsync(apiUrl, null);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Message = "Solicitud cancelada exitosamente.";
-                    }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        Message = $"Error al cancelar: {errorContent}";
-                    }
-                }
-                catch (HttpRequestException)
+                if (response.IsSuccessStatusCode)
                 {
-                    // Fallback usando TransactionManager directamente
-                    var transactionManager = new TransactionManager();
-                    bool cancelled = transactionManager.CancelPaymentRequest(paymentCode);
+                    TempData["SuccessMessage"] = "? La solicitud de pago ha sido cancelada correctamente.";
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
                     
-                    if (cancelled)
+                    // Interpretar diferentes tipos de errores
+                    if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                     {
-                        Message = "Solicitud cancelada exitosamente (modo offline).";
+                        TempData["ErrorMessage"] = "? No se puede cancelar esta solicitud. Puede que ya esté procesada o haya expirado.";
+                    }
+                    else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    {
+                        TempData["ErrorMessage"] = "? La solicitud de pago no fue encontrada.";
                     }
                     else
                     {
-                        Message = "No se pudo cancelar la solicitud. Puede que ya esté procesada.";
+                        TempData["ErrorMessage"] = $"? Error al cancelar: {errorContent}";
                     }
                 }
 
-                await LoadPaymentRequests();
+                // Redirigir para limpiar el POST y mostrar los mensajes via TempData
+                return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
+            }
+            catch (HttpRequestException httpEx)
+            {
+                TempData["ErrorMessage"] = "? Error de conexión con el servidor. Verifica tu conexión a internet.";
+                return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
             }
             catch (Exception ex)
             {
-                Message = $"Error inesperado: {ex.Message}";
+                TempData["ErrorMessage"] = $"? Error inesperado: {ex.Message}";
+                return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
             }
-
-            return Page();
         }
 
         private async Task LoadPaymentRequests()
@@ -195,8 +210,20 @@ namespace WebApp.Pages.User
             }
             catch (Exception ex)
             {
-                Message = $"Error al cargar solicitudes: {ex.Message}";
+                Message = $"? Error al cargar solicitudes: {ex.Message}";
                 PaymentRequests = new List<PaymentRequestInfo>();
+                
+                // Inicializar listas vacías para evitar errores en la vista
+                ActiveRequests = new List<PaymentRequestInfo>();
+                CompletedRequests = new List<PaymentRequestInfo>();
+                ExpiredRequests = new List<PaymentRequestInfo>();
+                
+                TotalRequests = 0;
+                ActiveCount = 0;
+                CompletedCount = 0;
+                ExpiredCount = 0;
+                TotalSales = 0;
+                TodaySales = 0;
             }
         }
 
@@ -235,7 +262,7 @@ namespace WebApp.Pages.User
 
         private string GetApiBaseUrl()
         {
-            return "https://localhost:7071"; // Puerto del WebAPI
+            return "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net";
         }
 
         // Clase auxiliar para información de solicitudes de pago
@@ -276,14 +303,34 @@ namespace WebApp.Pages.User
             {
                 get
                 {
+                    // Si no tiene fecha de expiración, está expirado o completado, no mostrar tiempo
                     if (!ExpiresAt.HasValue || IsExpired || IsCompleted)
                         return "";
 
+                    // Usar DateTime.Now para zona horaria local (consistente con IsExpired)
                     var timeLeft = ExpiresAt.Value - DateTime.Now;
-                    if (timeLeft.TotalHours >= 1)
+                    
+                    // Si el tiempo es negativo o muy pequeño, considerar expirado
+                    if (timeLeft.TotalSeconds <= 0)
+                        return "";
+
+                    // Formatear el tiempo restante
+                    if (timeLeft.TotalDays >= 1)
+                    {
+                        return $"{(int)timeLeft.TotalDays}d {timeLeft.Hours}h";
+                    }
+                    else if (timeLeft.TotalHours >= 1)
+                    {
                         return $"{timeLeft.Hours}h {timeLeft.Minutes}m";
-                    else
+                    }
+                    else if (timeLeft.TotalMinutes >= 1)
+                    {
                         return $"{timeLeft.Minutes}m {timeLeft.Seconds}s";
+                    }
+                    else
+                    {
+                        return $"{timeLeft.Seconds}s";
+                    }
                 }
             }
         }

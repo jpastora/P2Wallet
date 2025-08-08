@@ -1,4 +1,4 @@
-@page
+ï»¿@page
 @model WebApp.Pages.User.PaymentSuccessModel
 @{
     ViewData["Title"] = "Pago Exitoso";
@@ -7,12 +7,12 @@
 <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-xl-8 col-lg-10 col-md-12">
-            <!-- Header de éxito -->
+            <!-- Header de Ã©xito -->
             <div class="text-center mb-4">
                 <div class="success-icon mb-3">
                     <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
                 </div>
-                <h1 class="text-success mb-2">¡Pago Realizado!</h1>
+                <h1 class="text-success mb-2">Â¡Pago Realizado!</h1>
                 <p class="text-muted">Tu pago se ha procesado correctamente</p>
             </div>
 
@@ -24,24 +24,24 @@
                 </div>
             }
 
-            <!-- Detalles de la transacción -->
+            <!-- Detalles de la transacciÃ³n -->
             @if (Model.Transaction != null)
             {
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">
-                            <i class="bi bi-receipt me-2"></i>Detalles de la Transacción
+                            <i class="bi bi-receipt me-2"></i>Detalles de la TransacciÃ³n
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <strong>ID de Transacción:</strong><br>
+                                    <strong>ID de TransacciÃ³n:</strong><br>
                                     <code class="fs-6">#@Model.Transaction.ID</code>
                                 </div>
                                 <div class="mb-3">
-                                    <strong>Descripción:</strong><br>
+                                    <strong>DescripciÃ³n:</strong><br>
                                     <span class="text-muted">@Model.Transaction.Description</span>
                                 </div>
                                 <div class="mb-3">
@@ -73,21 +73,21 @@
                                 <div class="border rounded p-3 mb-3">
                                     <i class="bi bi-currency-dollar text-primary fs-4"></i>
                                     <h6 class="mt-2 mb-1">Monto Pagado</h6>
-                                    <h4 class="text-primary">?@Model.Transaction.GrossAmount.ToString("N2")</h4>
+                                    <h4 class="text-primary">â‚¡@Model.Transaction.GrossAmount.ToString("N2")</h4>
                                 </div>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="border rounded p-3 mb-3">
                                     <i class="bi bi-percent text-success fs-4"></i>
                                     <h6 class="mt-2 mb-1">Descuento Aplicado</h6>
-                                    <h4 class="text-success">?@Model.DiscountApplied.ToString("N2")</h4>
+                                    <h4 class="text-success">â‚¡@Model.DiscountApplied.ToString("N2")</h4>
                                 </div>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div class="border rounded p-3 mb-3">
                                     <i class="bi bi-receipt text-info fs-4"></i>
                                     <h6 class="mt-2 mb-1">Monto Final</h6>
-                                    <h4 class="text-info">?@Model.Transaction.NetAmount.ToString("N2")</h4>
+                                    <h4 class="text-info">â‚¡@Model.Transaction.NetAmount.ToString("N2")</h4>
                                 </div>
                             </div>
                         </div>
@@ -96,7 +96,7 @@
                         {
                             <div class="alert alert-success">
                                 <h6 class="alert-heading">
-                                    <i class="bi bi-tag-fill me-1"></i>Promoción Aplicada
+                                    <i class="bi bi-tag-fill me-1"></i>PromociÃ³n Aplicada
                                 </h6>
                                 <strong>@Model.PromotionApplied.Name</strong><br>
                                 <small>@Model.PromotionApplied.Description</small>
@@ -109,7 +109,7 @@
             <!-- Acciones -->
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h6 class="card-title">¿Qué quieres hacer ahora?</h6>
+                    <h6 class="card-title">Â¿QuÃ© quieres hacer ahora?</h6>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <a href="/User/UserTransactionInvoice?transactionId=@Model.Transaction?.ID" class="btn btn-outline-primary w-100">
@@ -142,9 +142,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
-        // Animación de entrada
+        // AnimaciÃ³n de entrada
         document.addEventListener('DOMContentLoaded', function() {
-            // Animar icono de éxito
+            // Animar icono de Ã©xito
             const successIcon = document.querySelector('.success-icon i');
             if (successIcon) {
                 successIcon.style.transform = 'scale(0)';
@@ -156,7 +156,7 @@
             }
         });
 
-        // Función para compartir pago
+        // FunciÃ³n para compartir pago
         function sharePayment() {
             const shareData = {
                 title: 'Pago realizado con Yavi',
@@ -174,14 +174,14 @@
                     navigator.clipboard.writeText(shareText).then(() => {
                         Swal.fire({
                             icon: 'success',
-                            title: '¡Copiado!',
-                            text: 'Información del pago copiada al portapapeles',
+                            title: 'Â¡Copiado!',
+                            text: 'InformaciÃ³n del pago copiada al portapapeles',
                             timer: 2000,
                             showConfirmButton: false
                         });
                     });
                 } else {
-                    // Fallback más básico
+                    // Fallback mÃ¡s bÃ¡sico
                     prompt('Copia este texto para compartir:', shareText);
                 }
             }
@@ -193,7 +193,7 @@
             animation: bounce 1s ease-out;
         }
 
-        /* Keyframe para animación bounce */
+        /* Keyframe para animaciÃ³n bounce */
         @@keyframes bounce {
             0%, 20%, 53%, 80%, 100% {
                 animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
