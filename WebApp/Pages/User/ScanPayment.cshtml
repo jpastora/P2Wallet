@@ -60,26 +60,34 @@
                             <button type="button" class="btn btn-lg btn-outline-primary" id="btnActivarCamara">
                                 <i class="bi bi-camera me-2"></i>Activar Cámara
                             </button>
+                            <button type="button" class="btn btn-lg btn-outline-danger d-none" id="btnDetenerCamara">
+                                <i class="bi bi-camera-video-off me-2"></i>Detener Cámara
+                            </button>
                             <p class="text-muted mt-2 mb-0">O ingresa el código manualmente</p>
                         </div>
 
-                        <!-- Área de escáner (placeholder) -->
+                        <!-- Área de escáner con video real -->
                         <div id="scanner-container" class="d-none mb-4">
-                            <div class="border rounded p-4 text-center bg-light">
-                                <i class="bi bi-camera-video fs-1 text-muted mb-3"></i>
-                                <p class="text-muted mb-0">
-                                    Apunta la cámara al código QR<br>
-                                    <small>La cámara se activará aquí</small>
-                                </p>
+                            <div class="position-relative">
+                                <video id="qr-video" class="w-100 rounded" style="max-height: 400px; object-fit: cover;" autoplay muted playsinline></video>
+                                <div id="qr-overlay" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center">
+                                    <div class="border border-success border-3 rounded" style="width: 250px; height: 250px; background: rgba(0, 255, 0, 0.1);"></div>
+                                </div>
+                                <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-white text-center">
+                                    <small>Enfoca el código QR dentro del recuadro</small>
+                                </div>
+                            </div>
+                            <div id="scan-status" class="text-center mt-2">
+                                <small class="text-muted">Iniciando cámara...</small>
                             </div>
                         </div>
 
                         <!-- Formulario para código manual -->
-                        <form method="post" asp-page-handler="Scan">
+                        <form method="post" asp-page-handler="Scan" id="scanForm">
                             <div class="mb-3">
                                 <label asp-for="PaymentCode" class="form-label">Código de Pago</label>
-                                <input asp-for="PaymentCode" type="text" class="form-control" 
-                                       placeholder="Ingresa el código del QR" />
+                                <input asp-for="PaymentCode" type="text" class="form-control" id="paymentCodeInput"
+                                       placeholder="Ingresa el código del QR o escanea con la cámara" />
                                 <small class="form-text text-muted">
                                     Ejemplo: PAY202501081500001234
                                 </small>
@@ -102,7 +110,7 @@
                     <div class="card-body">
                         <h6 class="text-primary">Cómo Pagar:</h6>
                         <ol class="small mb-0">
-                            <li>Activa la cámara o ingresa el código</li>
+                            <li>Activa la cámara para escanear o ingresa el código manualmente</li>
                             <li>Revisa los detalles del pago</li>
                             <li>Selecciona tu cuenta bancaria</li>
                             <li>Confirma el pago</li>
@@ -220,31 +228,134 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/qr-scanner/qr-scanner.min.js"></script>
     
     <script>
+        let qrScanner = null;
+        let videoElement = null;
+        let isScanning = false;
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Botón para activar cámara (placeholder por ahora)
-            document.getElementById('btnActivarCamara')?.addEventListener('click', function() {
-                const scannerContainer = document.getElementById('scanner-container');
-                if (scannerContainer.classList.contains('d-none')) {
-                    scannerContainer.classList.remove('d-none');
-                    this.innerHTML = '<i class="bi bi-camera-video me-2"></i>Cámara Activa';
-                    this.classList.add('btn-success');
-                    this.classList.remove('btn-outline-primary');
+            videoElement = document.getElementById('qr-video');
+            const btnActivar = document.getElementById('btnActivarCamara');
+            const btnDetener = document.getElementById('btnDetenerCamara');
+            const scannerContainer = document.getElementById('scanner-container');
+            const scanStatus = document.getElementById('scan-status');
+            const paymentCodeInput = document.getElementById('paymentCodeInput');
+
+            // Botón para activar cámara
+            btnActivar?.addEventListener('click', async function() {
+                try {
+                    scanStatus.innerHTML = '<small class="text-info">Iniciando cámara...</small>';
                     
-                    // Placeholder para futura implementación de cámara
+                    // Verificar soporte de cámara
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error('La cámara no está disponible en este dispositivo/navegador');
+                    }
+
+                    // Mostrar container y cambiar botones
+                    scannerContainer.classList.remove('d-none');
+                    btnActivar.classList.add('d-none');
+                    btnDetener.classList.remove('d-none');
+
+                    // Inicializar escáner QR
+                    qrScanner = new QrScanner(
+                        videoElement,
+                        result => {
+                            // QR detectado
+                            handleQRDetected(result.data);
+                        },
+                        {
+                            onDecodeError: error => {
+                                // Error de decodificación (normal cuando no hay QR visible)
+                                scanStatus.innerHTML = '<small class="text-muted">Buscando código QR...</small>';
+                            },
+                            preferredCamera: 'environment', // Usar cámara trasera en móviles
+                            highlightScanRegion: true,
+                            highlightCodeOutline: true,
+                        }
+                    );
+
+                    // Iniciar escáner
+                    await qrScanner.start();
+                    isScanning = true;
+                    scanStatus.innerHTML = '<small class="text-success">Cámara activa - Apunta al código QR</small>';
+
+                } catch (error) {
+                    console.error('Error al iniciar cámara:', error);
+                    scanStatus.innerHTML = '<small class="text-danger">Error: ' + error.message + '</small>';
+                    
+                    // Ocultar container y restaurar botones
+                    scannerContainer.classList.add('d-none');
+                    btnActivar.classList.remove('d-none');
+                    btnDetener.classList.add('d-none');
+
                     Swal.fire({
-                        title: 'Cámara (Próximamente)',
-                        text: 'Por ahora, usa el campo de texto para ingresar el código manualmente.',
-                        icon: 'info',
+                        title: 'Error de Cámara',
+                        text: 'No se pudo acceder a la cámara. Por favor, permite el acceso o usa el campo de texto.',
+                        icon: 'error',
                         confirmButtonText: 'Entendido'
                     });
-                } else {
-                    scannerContainer.classList.add('d-none');
-                    this.innerHTML = '<i class="bi bi-camera me-2"></i>Activar Cámara';
-                    this.classList.remove('btn-success');
-                    this.classList.add('btn-outline-primary');
                 }
+            });
+
+            // Botón para detener cámara
+            btnDetener?.addEventListener('click', function() {
+                stopScanner();
+            });
+
+            // Función para manejar QR detectado
+            function handleQRDetected(qrData) {
+                if (!isScanning) return;
+
+                // Detener escáner
+                stopScanner();
+
+                // Llenar campo de código
+                paymentCodeInput.value = qrData;
+
+                // Mostrar confirmación
+                Swal.fire({
+                    title: '¡QR Detectado!',
+                    text: 'Código: ' + qrData,
+                    icon: 'success',
+                    showCancelButton: true,
+                    confirmButtonText: 'Buscar Pago',
+                    cancelButtonText: 'Escanear Otro',
+                    timer: 5000,
+                    timerProgressBar: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Enviar formulario automáticamente
+                        document.getElementById('scanForm').submit();
+                    } else {
+                        // Limpiar código y reactivar escáner si el usuario cancela
+                        paymentCodeInput.value = '';
+                        btnActivar.click();
+                    }
+                });
+            }
+
+            // Función para detener escáner
+            function stopScanner() {
+                if (qrScanner) {
+                    qrScanner.destroy();
+                    qrScanner = null;
+                }
+                isScanning = false;
+                
+                const scannerContainer = document.getElementById('scanner-container');
+                const btnActivar = document.getElementById('btnActivarCamara');
+                const btnDetener = document.getElementById('btnDetenerCamara');
+                
+                scannerContainer.classList.add('d-none');
+                btnActivar.classList.remove('d-none');
+                btnDetener.classList.add('d-none');
+            }
+
+            // Detener cámara al salir de la página
+            window.addEventListener('beforeunload', function() {
+                stopScanner();
             });
         });
 
