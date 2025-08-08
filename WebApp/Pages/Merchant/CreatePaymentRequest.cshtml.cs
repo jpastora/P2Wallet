@@ -136,7 +136,6 @@ namespace WebApp.Pages.Merchant
                     "application/json"
                 );
 
-                // Construir URL del API (ajustar según tu configuración)
                 var apiUrl = GetApiBaseUrl() + "/api/PaymentRequest/Create";
                 var response = await httpClient.PostAsync(apiUrl, jsonContent);
 
@@ -170,40 +169,9 @@ namespace WebApp.Pages.Merchant
                     Message = $"Error al crear solicitud: {errorContent}";
                 }
             }
-            catch (HttpRequestException)
-            {
-                // Si no hay conexión al API, usar TransactionManager directamente
-                try
-                {
-                    var transactionManager = new TransactionManager();
-                    var paymentRequest = transactionManager.CreatePaymentRequest(MerchantID, SaleAmount, Description);
-
-                    if (paymentRequest != null)
-                    {
-                        PaymentRequestCode = paymentRequest.PaymentRequestCode;
-                        QRCodeUrl = QRCodeHelper.GeneratePaymentQR(paymentRequest.PaymentRequestCode);
-                        QRContent = QRCodeHelper.GeneratePaymentQRContent(paymentRequest.PaymentRequestCode);
-                        GrossAmount = (decimal)paymentRequest.GrossAmount;
-                        NetAmount = (decimal)paymentRequest.NetAmount;
-                        SalesTaxAmount = (decimal)paymentRequest.SalesTaxAmount;
-                        ExpiresAt = paymentRequest.ExpiresAt ?? DateTime.Now.AddMinutes(ExpirationMinutes);
-                        PaymentRequestCreated = true;
-                        
-                        Message = "¡Solicitud de pago creada exitosamente! (Modo offline)";
-                    }
-                    else
-                    {
-                        Message = "Error: No se pudo crear la solicitud de pago.";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Message = $"Error al crear solicitud: {ex.Message}";
-                }
-            }
             catch (Exception ex)
             {
-                Message = $"Error inesperado: {ex.Message}";
+                Message = $"Error al crear solicitud de pago: {ex.Message}";
             }
 
             return Page();
@@ -244,8 +212,7 @@ namespace WebApp.Pages.Merchant
 
         private string GetApiBaseUrl()
         {
-            // Ajustar según tu configuración - puede ser desde appsettings.json
-            return "https://localhost:7071"; // Puerto del WebAPI
+            return "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net";
         }
 
         // Clase auxiliar para deserializar la respuesta del API

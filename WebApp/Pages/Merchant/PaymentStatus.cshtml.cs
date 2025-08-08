@@ -105,45 +105,27 @@ namespace WebApp.Pages.Merchant
                     return Page();
                 }
 
-                // Intentar cancelar vía API
+                // Cancelar vía API
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/Cancel/{paymentCode}";
                 
-                try
-                {
-                    var response = await httpClient.PostAsync(apiUrl, null);
+                var response = await httpClient.PostAsync(apiUrl, null);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        Message = "Solicitud cancelada exitosamente.";
-                    }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        Message = $"Error al cancelar: {errorContent}";
-                    }
-                }
-                catch (HttpRequestException)
+                if (response.IsSuccessStatusCode)
                 {
-                    // Fallback usando TransactionManager directamente
-                    var transactionManager = new TransactionManager();
-                    bool cancelled = transactionManager.CancelPaymentRequest(paymentCode);
-                    
-                    if (cancelled)
-                    {
-                        Message = "Solicitud cancelada exitosamente (modo offline).";
-                    }
-                    else
-                    {
-                        Message = "No se pudo cancelar la solicitud. Puede que ya esté procesada.";
-                    }
+                    Message = "Solicitud cancelada exitosamente.";
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Message = $"Error al cancelar: {errorContent}";
                 }
 
                 await LoadPaymentRequests();
             }
             catch (Exception ex)
             {
-                Message = $"Error inesperado: {ex.Message}";
+                Message = $"Error al cancelar solicitud: {ex.Message}";
             }
 
             return Page();
@@ -234,7 +216,7 @@ namespace WebApp.Pages.Merchant
 
         private string GetApiBaseUrl()
         {
-            return "https://localhost:7071"; // Puerto del WebAPI
+            return "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net";
         }
 
         // Clase auxiliar para información de solicitudes de pago
@@ -275,14 +257,34 @@ namespace WebApp.Pages.Merchant
             {
                 get
                 {
+                    // Si no tiene fecha de expiración, está expirado o completado, no mostrar tiempo
                     if (!ExpiresAt.HasValue || IsExpired || IsCompleted)
                         return "";
 
+                    // Usar DateTime.Now para zona horaria local (consistente con IsExpired)
                     var timeLeft = ExpiresAt.Value - DateTime.Now;
-                    if (timeLeft.TotalHours >= 1)
+                    
+                    // Si el tiempo es negativo o muy pequeño, considerar expirado
+                    if (timeLeft.TotalSeconds <= 0)
+                        return "";
+
+                    // Formatear el tiempo restante
+                    if (timeLeft.TotalDays >= 1)
+                    {
+                        return $"{(int)timeLeft.TotalDays}d {timeLeft.Hours}h";
+                    }
+                    else if (timeLeft.TotalHours >= 1)
+                    {
                         return $"{timeLeft.Hours}h {timeLeft.Minutes}m";
-                    else
+                    }
+                    else if (timeLeft.TotalMinutes >= 1)
+                    {
                         return $"{timeLeft.Minutes}m {timeLeft.Seconds}s";
+                    }
+                    else
+                    {
+                        return $"{timeLeft.Seconds}s";
+                    }
                 }
             }
         }

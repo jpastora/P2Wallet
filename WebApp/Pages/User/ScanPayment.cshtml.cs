@@ -90,73 +90,47 @@ namespace WebApp.Pages.User
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/GetByCode/{cleanCode}";
                 
-                try
+                var response = await httpClient.GetAsync(apiUrl);
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await httpClient.GetAsync(apiUrl);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var paymentResponse = JsonConvert.DeserializeObject<PaymentRequestResponse>(responseContent);
                     
-                    if (response.IsSuccessStatusCode)
+                    if (paymentResponse != null)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        var paymentResponse = JsonConvert.DeserializeObject<PaymentRequestResponse>(responseContent);
+                        // Convertir response a Transaction para la vista
+                        PaymentRequest = new Transaction
+                        {
+                            ID = paymentResponse.TransactionId,
+                            PaymentRequestCode = paymentResponse.PaymentRequestCode,
+                            Description = paymentResponse.Description,
+                            GrossAmount = (double)paymentResponse.GrossAmount,
+                            NetAmount = (double)paymentResponse.NetAmount,
+                            SalesTaxAmount = (double)paymentResponse.SalesTaxAmount,
+                            ExpiresAt = paymentResponse.ExpiresAt,
+                            TransactionStatus = paymentResponse.Status,
+                            MerchantID = GetMerchantIdFromTransaction(paymentResponse.TransactionId)
+                        };
                         
-                        if (paymentResponse != null)
-                        {
-                            // Convertir response a Transaction para la vista
-                            PaymentRequest = new Transaction
-                            {
-                                ID = paymentResponse.TransactionId,
-                                PaymentRequestCode = paymentResponse.PaymentRequestCode,
-                                Description = paymentResponse.Description,
-                                GrossAmount = (double)paymentResponse.GrossAmount,
-                                NetAmount = (double)paymentResponse.NetAmount,
-                                SalesTaxAmount = (double)paymentResponse.SalesTaxAmount,
-                                ExpiresAt = paymentResponse.ExpiresAt,
-                                TransactionStatus = paymentResponse.Status,
-                                MerchantID = GetMerchantIdFromTransaction(paymentResponse.TransactionId)
-                            };
-                            
-                            PaymentRequestFound = true;
-                            Message = "Solicitud de pago encontrada. Revisa los detalles y confirma el pago.";
-                            
-                            // Cargar promociones disponibles
-                            await LoadAvailablePromotions(cleanCode);
-                            
-                            // Cargar información del comercio
-                            await LoadMerchantInfo();
-                        }
-                        else
-                        {
-                            Message = "Error: Respuesta inválida del servidor.";
-                        }
-                    }
-                    else
-                    {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        Message = $"Solicitud no encontrada o expirada: {errorContent}";
-                    }
-                }
-                catch (HttpRequestException)
-                {
-                    // Fallback: usar TransactionManager directamente
-                    var transactionManager = new TransactionManager();
-                    PaymentRequest = transactionManager.GetPaymentRequestByCode(cleanCode);
-                    
-                    if (PaymentRequest != null && transactionManager.IsPaymentRequestValid(cleanCode))
-                    {
                         PaymentRequestFound = true;
-                        Message = "Solicitud de pago encontrada (modo offline). Revisa los detalles y confirma el pago.";
+                        Message = "Solicitud de pago encontrada. Revisa los detalles y confirma el pago.";
                         
-                        // Cargar promociones offline
-                        var promotions = transactionManager.GetApplicablePromotionsForPayment(cleanCode);
-                        ConvertPromotionsToInfo(promotions);
+                        // Cargar promociones disponibles
+                        await LoadAvailablePromotions(cleanCode);
                         
                         // Cargar información del comercio
                         await LoadMerchantInfo();
                     }
                     else
                     {
-                        Message = "Solicitud de pago no encontrada o expirada.";
+                        Message = "Error: Respuesta inválida del servidor.";
                     }
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Message = $"Solicitud no encontrada o expirada: {errorContent}";
                 }
             }
             catch (Exception ex)
@@ -209,63 +183,37 @@ namespace WebApp.Pages.User
                     "application/json"
                 );
 
-                try
+                var response = await httpClient.PostAsync(apiUrl, jsonContent);
+                
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await httpClient.PostAsync(apiUrl, jsonContent);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    ExecutionResult = JsonConvert.DeserializeObject<PaymentExecutionResponse>(responseContent);
                     
-                    if (response.IsSuccessStatusCode)
+                    if (ExecutionResult?.Success == true)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        ExecutionResult = JsonConvert.DeserializeObject<PaymentExecutionResponse>(responseContent);
+                        PaymentExecuted = true;
+                        Message = "¡Pago realizado exitosamente!";
                         
-                        if (ExecutionResult?.Success == true)
-                        {
-                            PaymentExecuted = true;
-                            Message = "¡Pago realizado exitosamente!";
-                            
-                            // Redirigir a página de confirmación después de un delay
-                            return RedirectToPage("/User/PaymentSuccess", new { transactionId = ExecutionResult.TransactionId });
-                        }
-                        else
-                        {
-                            Message = "Error al procesar el pago. Intenta nuevamente.";
-                            await OnPostScanAsync(); // Recargar datos
-                        }
+                        // Redirigir a página de confirmación después de un delay
+                        return RedirectToPage("/User/PaymentSuccess", new { transactionId = ExecutionResult.TransactionId });
                     }
                     else
                     {
-                        var errorContent = await response.Content.ReadAsStringAsync();
-                        Message = $"Error al ejecutar pago: {errorContent}";
+                        Message = "Error al procesar el pago. Intenta nuevamente.";
                         await OnPostScanAsync(); // Recargar datos
                     }
                 }
-                catch (HttpRequestException)
+                else
                 {
-                    // Fallback: usar TransactionManager directamente
-                    var transactionManager = new TransactionManager();
-                    bool success = transactionManager.ExecutePaymentWithPromotion(
-                        PaymentCode, CurrentUser.ID, SelectedBankAccountId, 
-                        SelectedPromotionId, SelectedPromotionType);
-                    
-                    if (success)
-                    {
-                        PaymentExecuted = true;
-                        Message = "¡Pago realizado exitosamente! (modo offline)";
-                        
-                        // Para modo offline, buscar el ID de transacción
-                        var updatedTransaction = transactionManager.GetPaymentRequestByCode(PaymentCode);
-                        return RedirectToPage("/User/PaymentSuccess", new { transactionId = updatedTransaction?.ID ?? 0 });
-                    }
-                    else
-                    {
-                        Message = "Error al procesar el pago. Verifica tus fondos e intenta nuevamente.";
-                        await OnPostScanAsync(); // Recargar datos
-                    }
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Message = $"Error al ejecutar pago: {errorContent}";
+                    await OnPostScanAsync(); // Recargar datos
                 }
             }
             catch (Exception ex)
             {
-                Message = $"Error inesperado: {ex.Message}";
+                Message = $"Error al procesar el pago: {ex.Message}";
                 await OnPostScanAsync(); // Recargar datos
             }
 
@@ -385,7 +333,7 @@ namespace WebApp.Pages.User
 
         private string GetApiBaseUrl()
         {
-            return "https://localhost:7071"; // Ajustar según tu configuración
+            return "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net";
         }
 
         // Clases auxiliares para deserialización y UI
