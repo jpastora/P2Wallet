@@ -214,8 +214,8 @@ namespace WebApp.Pages.User
                     ExpiresAt = t.ExpiresAt,
                     QRCodeUrl = !string.IsNullOrEmpty(t.PaymentRequestCode) ? 
                         QRCodeHelper.GeneratePaymentQR(t.PaymentRequestCode, 150) : "",
-                    // CAMBIO PRINCIPAL: Usar hora de Costa Rica para determinar expiración
-                    IsExpired = t.ExpiresAt.HasValue && t.ExpiresAt.Value < GetCostaRicaTime(),
+                    // CORRECCIÓN: Usar DateTime.Now para comparación
+                    IsExpired = t.ExpiresAt.HasValue && t.ExpiresAt.Value < DateTime.Now,
                     IsActive = t.TransactionStatus == "PendingUserApproval",
                     IsCompleted = t.TransactionStatus == "Completed"
                 }).ToList();
@@ -349,30 +349,18 @@ namespace WebApp.Pages.User
                     if (!ExpiresAt.HasValue || IsExpired || IsCompleted)
                         return "";
 
-                    // CAMBIO PRINCIPAL: Usar hora de Costa Rica en lugar de DateTime.Now
-                    var timeLeft = ExpiresAt.Value - GetCostaRicaTime();
-                    
-                    // Si el tiempo es negativo o muy pequeño, considerar expirado
+                    // CORRECCIÓN: Usar DateTime.Now para cálculo
+                    var timeLeft = ExpiresAt.Value - DateTime.Now;
                     if (timeLeft.TotalSeconds <= 0)
                         return "";
-
-                    // Formatear el tiempo restante
                     if (timeLeft.TotalDays >= 1)
-                    {
                         return $"{(int)timeLeft.TotalDays}d {timeLeft.Hours}h";
-                    }
                     else if (timeLeft.TotalHours >= 1)
-                    {
                         return $"{timeLeft.Hours}h {timeLeft.Minutes}m";
-                    }
                     else if (timeLeft.TotalMinutes >= 1)
-                    {
                         return $"{timeLeft.Minutes}m {timeLeft.Seconds}s";
-                    }
                     else
-                    {
                         return $"{timeLeft.Seconds}s";
-                    }
                 }
             }
         }

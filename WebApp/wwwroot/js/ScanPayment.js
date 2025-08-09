@@ -422,14 +422,21 @@ class ScanPaymentManager {
     }
 
     reloadPromotions(paymentCode, accountId) {
-        // Llamada AJAX para recargar promociones
+        // Llamada AJAX para recargar promociones con cuenta bancaria específica
         fetch(`/User/ScanPayment?handler=Promotions&paymentCode=${encodeURIComponent(paymentCode)}&accountId=${encodeURIComponent(accountId)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                return response.json();
+            })
             .then(data => {
                 this.updatePromotionsUI(data);
             })
             .catch(error => {
                 console.error('Error recargando promociones:', error);
+                // En caso de error, mostrar solo la opción sin promoción
+                this.updatePromotionsUI([]);
             });
     }
 

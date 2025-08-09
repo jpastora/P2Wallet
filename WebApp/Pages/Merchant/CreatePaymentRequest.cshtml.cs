@@ -69,7 +69,8 @@ namespace WebApp.Pages.Merchant
             if (!ExpiresAt.HasValue)
                 return "";
 
-            var timeLeft = ExpiresAt.Value - GetCostaRicaTime();
+            // CORRECCIÓN: Las fechas del API ya vienen en hora de Costa Rica
+            var timeLeft = ExpiresAt.Value - DateTime.Now;
             
             if (timeLeft.TotalSeconds <= 0)
                 return "Expirado";
