@@ -35,9 +35,25 @@ namespace WebApp.Pages.User
 
         private readonly IHttpClientFactory _httpClientFactory;
 
+        // Zona horaria de Costa Rica (UTC-6)
+        private static readonly TimeZoneInfo CostaRicaTimeZone = 
+            TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+
         public ScanPaymentModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+        }
+
+        // Método para obtener hora actual de Costa Rica
+        private static DateTime GetCostaRicaTime()
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CostaRicaTimeZone);
+        }
+
+        // Método para verificar si una solicitud está expirada
+        private bool IsPaymentRequestExpired(DateTime? expiresAt)
+        {
+            return expiresAt.HasValue && expiresAt.Value < GetCostaRicaTime();
         }
 
         public async Task<IActionResult> OnGetAsync([FromQuery] string? code = null)
@@ -72,6 +88,13 @@ namespace WebApp.Pages.User
                     var paymentResponse = JsonConvert.DeserializeObject<PaymentRequestResponse>(await response.Content.ReadAsStringAsync());
                     if (paymentResponse != null)
                     {
+                        // Verificar si la solicitud está expirada usando hora de Costa Rica
+                        if (IsPaymentRequestExpired(paymentResponse.ExpiresAt))
+                        {
+                            Message = "La solicitud de pago ha expirado. No se puede procesar el pago.";
+                            return Page();
+                        }
+
                         PaymentRequest = new Transaction
                         {
                             ID = paymentResponse.TransactionId,
@@ -121,6 +144,15 @@ namespace WebApp.Pages.User
                 await OnPostScanAsync();
                 return Page();
             }
+            
+            // Verificar nuevamente si no ha expirado antes de ejecutar
+            if (PaymentRequest?.ExpiresAt != null && IsPaymentRequestExpired(PaymentRequest.ExpiresAt))
+            {
+                Message = "La solicitud de pago ha expirado mientras procesabas el pago.";
+                PaymentRequestFound = false;
+                return Page();
+            }
+
             try
             {
                 var selectedAccount = UserAccountsInfo.FirstOrDefault(a => a.ID == SelectedBankAccountId);
@@ -169,6 +201,25 @@ namespace WebApp.Pages.User
                 await OnPostScanAsync();
             }
             return Page();
+        }
+
+        // Método auxiliar para calcular tiempo restante
+        public string GetTimeRemaining()
+        {
+            if (PaymentRequest?.ExpiresAt == null)
+                return "";
+
+            var timeLeft = PaymentRequest.ExpiresAt.Value - GetCostaRicaTime();
+            
+            if (timeLeft.TotalSeconds <= 0)
+                return "Expirado";
+
+            if (timeLeft.TotalMinutes < 1)
+                return $"{(int)timeLeft.TotalSeconds} segundos";
+            else if (timeLeft.TotalHours < 1)
+                return $"{(int)timeLeft.TotalMinutes} minutos";
+            else
+                return $"{(int)timeLeft.TotalHours}h {timeLeft.Minutes}m";
         }
 
         private async Task LoadUserData()

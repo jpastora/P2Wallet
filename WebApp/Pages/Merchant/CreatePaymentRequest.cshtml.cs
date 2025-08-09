@@ -42,9 +42,44 @@ namespace WebApp.Pages.Merchant
 
         private readonly IHttpClientFactory _httpClientFactory;
 
+        // Zona horaria de Costa Rica (UTC-6)
+        private static readonly TimeZoneInfo CostaRicaTimeZone = 
+            TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+
         public CreatePaymentRequestModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+        }
+
+        // Método para obtener hora actual de Costa Rica
+        private static DateTime GetCostaRicaTime()
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CostaRicaTimeZone);
+        }
+
+        // Método para convertir fecha a zona horaria de Costa Rica para mostrar
+        private static DateTime ConvertToCostaRicaTime(DateTime utcDateTime)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, CostaRicaTimeZone);
+        }
+
+        // Método para calcular tiempo restante hasta expiración
+        public string GetTimeUntilExpiration()
+        {
+            if (!ExpiresAt.HasValue)
+                return "";
+
+            var timeLeft = ExpiresAt.Value - GetCostaRicaTime();
+            
+            if (timeLeft.TotalSeconds <= 0)
+                return "Expirado";
+
+            if (timeLeft.TotalMinutes < 1)
+                return $"{(int)timeLeft.TotalSeconds} segundos";
+            else if (timeLeft.TotalHours < 1)
+                return $"{(int)timeLeft.TotalMinutes} minutos";
+            else
+                return $"{(int)timeLeft.TotalHours}h {timeLeft.Minutes}m";
         }
 
         public async Task<IActionResult> OnGetAsync([FromQuery] int merchantId)
@@ -153,10 +188,14 @@ namespace WebApp.Pages.Merchant
                         GrossAmount = paymentResponse.GrossAmount;
                         NetAmount = paymentResponse.NetAmount;
                         SalesTaxAmount = paymentResponse.SalesTaxAmount;
+                        
+                        // Convertir la fecha de expiración a zona horaria de Costa Rica para mostrar
                         ExpiresAt = paymentResponse.ExpiresAt;
+                        
                         PaymentRequestCreated = true;
                         
-                        Message = "¡Solicitud de pago creada exitosamente! Muestra el código QR al cliente.";
+                        var expirationTime = GetTimeUntilExpiration();
+                        Message = $"¡Solicitud de pago creada exitosamente! Expira en {expirationTime}. Muestra el código QR al cliente.";
                     }
                     else
                     {
