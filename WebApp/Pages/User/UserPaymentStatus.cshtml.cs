@@ -39,9 +39,25 @@ namespace WebApp.Pages.User
 
         private readonly IHttpClientFactory _httpClientFactory;
 
+        // Zona horaria de Costa Rica (UTC-6)
+        private static readonly TimeZoneInfo CostaRicaTimeZone = 
+            TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+
         public UserPaymentStatusModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
+        }
+
+        // Método para obtener hora actual de Costa Rica
+        private static DateTime GetCostaRicaTime()
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CostaRicaTimeZone);
+        }
+
+        // Método para convertir UTC a Costa Rica (si es necesario)
+        private static DateTime ConvertToCostaRicaTime(DateTime utcDateTime)
+        {
+            return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, CostaRicaTimeZone);
         }
 
         public async Task<IActionResult> OnGetAsync([FromQuery] int merchantId)
@@ -198,7 +214,8 @@ namespace WebApp.Pages.User
                     ExpiresAt = t.ExpiresAt,
                     QRCodeUrl = !string.IsNullOrEmpty(t.PaymentRequestCode) ? 
                         QRCodeHelper.GeneratePaymentQR(t.PaymentRequestCode, 150) : "",
-                    IsExpired = t.ExpiresAt.HasValue && t.ExpiresAt.Value < DateTime.Now,
+                    // CAMBIO PRINCIPAL: Usar hora de Costa Rica para determinar expiración
+                    IsExpired = t.ExpiresAt.HasValue && t.ExpiresAt.Value < GetCostaRicaTime(),
                     IsActive = t.TransactionStatus == "PendingUserApproval",
                     IsCompleted = t.TransactionStatus == "Completed"
                 }).ToList();
@@ -332,8 +349,8 @@ namespace WebApp.Pages.User
                     if (!ExpiresAt.HasValue || IsExpired || IsCompleted)
                         return "";
 
-                    // Usar DateTime.Now para zona horaria local (consistente con IsExpired)
-                    var timeLeft = ExpiresAt.Value - DateTime.Now;
+                    // CAMBIO PRINCIPAL: Usar hora de Costa Rica en lugar de DateTime.Now
+                    var timeLeft = ExpiresAt.Value - GetCostaRicaTime();
                     
                     // Si el tiempo es negativo o muy pequeño, considerar expirado
                     if (timeLeft.TotalSeconds <= 0)
