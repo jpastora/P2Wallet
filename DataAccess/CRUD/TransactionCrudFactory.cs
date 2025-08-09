@@ -201,6 +201,13 @@ namespace DataAccess.CRUD
             return promotions;
         }
 
+        public void CancelPaymentRequest(int transactionId)
+        {
+            var sqlOperation = new SqlOperation() { ProcedureName = "CANCEL_PAYMENT_REQUEST_PR" };
+            sqlOperation.AddIntParam("@P_TransactionID", transactionId);
+            _sqlDao.ExecuteProcedure(sqlOperation);
+        }
+
         private Transaction BuildTransaction(Dictionary<string, object> row)
         {
             double GetDouble(string key)

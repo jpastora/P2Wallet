@@ -255,26 +255,13 @@ namespace CoreApp
         // Devuelve true si se canceló exitosamente
         public bool CancelPaymentRequest(string paymentRequestCode)
         {
-            try
-            {
-                var paymentRequest = GetPaymentRequestByCode(paymentRequestCode);
-                
-                if (paymentRequest == null || paymentRequest.TransactionStatus != "PendingUserApproval")
-                {
-                    return false;
-                }
-
-                // Cambiar estado a Cancelled
-                paymentRequest.TransactionStatus = "Cancelled";
-                UpdateTransaction(paymentRequest);
-                
-                return true;
-            }
-            catch (Exception ex)
-            {
-                ManageException(ex);
+            var paymentRequest = GetPaymentRequestByCode(paymentRequestCode);
+            if (paymentRequest == null || paymentRequest.TransactionStatus != "PendingUserApproval")
                 return false;
-            }
+
+            var transactionCrud = new TransactionCrudFactory();
+            transactionCrud.CancelPaymentRequest(paymentRequest.ID);
+            return true;
         }
     }
 }
