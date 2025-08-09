@@ -53,7 +53,8 @@ namespace WebApp.Pages.User
         // Método para verificar si una solicitud está expirada
         private bool IsPaymentRequestExpired(DateTime? expiresAt)
         {
-            return expiresAt.HasValue && expiresAt.Value < GetCostaRicaTime();
+            // CORRECCIÓN: Las fechas del API ya vienen en hora de Costa Rica
+            return expiresAt.HasValue && expiresAt.Value < DateTime.Now;
         }
 
         public async Task<IActionResult> OnGetAsync([FromQuery] string? code = null)
@@ -209,7 +210,8 @@ namespace WebApp.Pages.User
             if (PaymentRequest?.ExpiresAt == null)
                 return "";
 
-            var timeLeft = PaymentRequest.ExpiresAt.Value - GetCostaRicaTime();
+            // CORRECCIÓN: Las fechas del API ya vienen en hora de Costa Rica
+            var timeLeft = PaymentRequest.ExpiresAt.Value - DateTime.Now;
             
             if (timeLeft.TotalSeconds <= 0)
                 return "Expirado";
@@ -256,26 +258,10 @@ namespace WebApp.Pages.User
         {
             try
             {
-                int? financialEntityId = null;
-                if (SelectedBankAccountId > 0 && UserAccountsInfo != null)
-                {
-                    var selectedAccount = UserAccountsInfo.FirstOrDefault(a => a.ID == SelectedBankAccountId);
-                    if (selectedAccount != null)
-                    {
-                        var accountManager = new BankAccountManager();
-                        var account = accountManager.RetrieveBankAccountById(selectedAccount.ID);
-                        if (account != null)
-                        {
-                            financialEntityId = account.FinancialEntityID;
-                        }
-                    }
-                }
+                // Obtener promociones generales del comercio (sin entidad financiera específica)
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/GetPromotions/{paymentCode}";
-                if (financialEntityId.HasValue)
-                {
-                    apiUrl += $"?financialEntityId={financialEntityId.Value}";
-                }
+                
                 var response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
@@ -293,9 +279,50 @@ namespace WebApp.Pages.User
             }
         }
 
-        private void ConvertPromotionsToInfo(List<object> promotions)
+        // Método adicional para recargar promociones cuando se selecciona cuenta bancaria
+        public async Task<IActionResult> OnGetPromotionsAsync(string paymentCode, int accountId)
         {
-            AvailablePromotions = promotions.Select(p => {
+            try
+            {
+                if (string.IsNullOrEmpty(paymentCode) || accountId <= 0)
+                {
+                    return new JsonResult(new List<object>());
+                }
+
+                // Obtener la entidad financiera de la cuenta seleccionada
+                var accountManager = new BankAccountManager();
+                var account = accountManager.RetrieveBankAccountById(accountId);
+                
+                if (account == null)
+                {
+                    return new JsonResult(new List<object>());
+                }
+
+                // Llamar al API con la entidad financiera
+                var httpClient = _httpClientFactory.CreateClient();
+                var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/GetPromotions/{paymentCode}?financialEntityId={account.FinancialEntityID}";
+                
+                var response = await httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var promotions = JsonConvert.DeserializeObject<List<object>>(await response.Content.ReadAsStringAsync());
+                    var convertedPromotions = ConvertPromotionsToInfo(promotions ?? new List<object>());
+                    return new JsonResult(convertedPromotions);
+                }
+                else
+                {
+                    return new JsonResult(new List<object>());
+                }
+            }
+            catch
+            {
+                return new JsonResult(new List<object>());
+            }
+        }
+
+        private List<PromotionInfo> ConvertPromotionsToInfo(List<object> promotions)
+        {
+            var promotionList = promotions.Select(p => {
                 var type = p.GetType();
                 return new PromotionInfo
                 {
@@ -311,6 +338,9 @@ namespace WebApp.Pages.User
                     MaxRefund = Convert.ToDouble(type.GetProperty("MaxRefund")?.GetValue(p) ?? 0)
                 };
             }).ToList();
+
+            AvailablePromotions = promotionList;
+            return promotionList;
         }
 
         private async Task LoadMerchantInfo()
