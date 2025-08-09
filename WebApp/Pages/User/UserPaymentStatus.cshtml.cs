@@ -27,14 +27,15 @@ namespace WebApp.Pages.User
         public List<PaymentRequestInfo> ActiveRequests { get; set; } = new();
         public List<PaymentRequestInfo> CompletedRequests { get; set; } = new();
         public List<PaymentRequestInfo> ExpiredRequests { get; set; } = new();
+        public List<PaymentRequestInfo> CancelledRequests { get; set; } = new();
 
         // Estadísticas
         public int TotalRequests { get; set; }
         public int ActiveCount { get; set; }
         public int CompletedCount { get; set; }
         public int ExpiredCount { get; set; }
+        public int CancelledCount { get; set; }
         public decimal TotalSales { get; set; }
-        public decimal TodaySales { get; set; }
 
         private readonly IHttpClientFactory _httpClientFactory;
 
@@ -140,22 +141,22 @@ namespace WebApp.Pages.User
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["SuccessMessage"] = "? La solicitud de pago ha sido cancelada correctamente.";
+                    TempData["SuccessMessage"] = "La solicitud de pago ha sido cancelada correctamente.";
                 }
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                     {
-                        TempData["ErrorMessage"] = "? No se puede cancelar esta solicitud. Puede que ya esté procesada o haya expirado.";
+                        TempData["ErrorMessage"] = "No se puede cancelar esta solicitud. Puede que ya esté procesada o haya expirado.";
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
-                        TempData["ErrorMessage"] = "? La solicitud de pago no fue encontrada.";
+                        TempData["ErrorMessage"] = "La solicitud de pago no fue encontrada.";
                     }
                     else
                     {
-                        TempData["ErrorMessage"] = $"? Error al cancelar: {errorContent}";
+                        TempData["ErrorMessage"] = $"Error al cancelar: {errorContent}";
                     }
                 }
 
@@ -164,12 +165,12 @@ namespace WebApp.Pages.User
             }
             catch (HttpRequestException httpEx)
             {
-                TempData["ErrorMessage"] = "? Error de conexión con el servidor. Verifica tu conexión a internet.";
+                TempData["ErrorMessage"] = "Error de conexión con el servidor. Verifica tu conexión a internet.";
                 return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"? Error inesperado: {ex.Message}";
+                TempData["ErrorMessage"] = $"Error inesperado: {ex.Message}";
                 return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
             }
         }
@@ -178,16 +179,16 @@ namespace WebApp.Pages.User
         {
             try
             {
-                // Obtener todas las transacciones del comercio
+                // Obtener TODAS las transacciones del comercio (sin filtrar por PaymentRequestCode)
                 var transactionManager = new TransactionManager();
                 var allTransactions = transactionManager.RetrieveAllTransactions()
-                    .Where(t => t.MerchantID == MerchantID && !string.IsNullOrEmpty(t.PaymentRequestCode))
+                    .Where(t => t.MerchantID == MerchantID)
                     .OrderByDescending(t => t.Timestamp)
                     .ToList();
 
                 PaymentRequests = allTransactions.Select(t => new PaymentRequestInfo
                 {
-                    PaymentRequestCode = t.PaymentRequestCode,
+                    PaymentRequestCode = t.PaymentRequestCode ?? "",
                     Description = t.Description,
                     GrossAmount = (decimal)t.GrossAmount,
                     NetAmount = (decimal)t.NetAmount,
@@ -195,46 +196,57 @@ namespace WebApp.Pages.User
                     Status = t.TransactionStatus,
                     CreatedAt = t.Timestamp,
                     ExpiresAt = t.ExpiresAt,
-                    QRCodeUrl = QRCodeHelper.GeneratePaymentQR(t.PaymentRequestCode, 150),
+                    QRCodeUrl = !string.IsNullOrEmpty(t.PaymentRequestCode) ? 
+                        QRCodeHelper.GeneratePaymentQR(t.PaymentRequestCode, 150) : "",
                     IsExpired = t.ExpiresAt.HasValue && t.ExpiresAt.Value < DateTime.Now,
-                    IsActive = t.TransactionStatus == "PendingUserApproval" && (!t.ExpiresAt.HasValue || t.ExpiresAt.Value > DateTime.Now),
+                    IsActive = t.TransactionStatus == "PendingUserApproval",
                     IsCompleted = t.TransactionStatus == "Completed"
                 }).ToList();
 
-                // Categorizar solicitudes
-                ActiveRequests = PaymentRequests.Where(p => p.IsActive).ToList();
-                CompletedRequests = PaymentRequests.Where(p => p.IsCompleted).ToList();
-                ExpiredRequests = PaymentRequests.Where(p => p.IsExpired || p.Status == "Cancelled").ToList();
+                // Categorizar solicitudes por estado específico
+                ActiveRequests = PaymentRequests
+                    .Where(p => p.Status == "PendingUserApproval" && !p.IsExpired)
+                    .ToList();
+
+                CompletedRequests = PaymentRequests
+                    .Where(p => p.Status == "Completed")
+                    .ToList();
+
+                // Separar expiradas de canceladas
+                ExpiredRequests = PaymentRequests
+                    .Where(p => p.Status == "PendingUserApproval" && p.IsExpired)
+                    .ToList();
+
+                CancelledRequests = PaymentRequests
+                    .Where(p => p.Status == "Canceled" || p.Status == "Failed")
+                    .ToList();
 
                 // Calcular estadísticas
                 TotalRequests = PaymentRequests.Count;
                 ActiveCount = ActiveRequests.Count;
                 CompletedCount = CompletedRequests.Count;
                 ExpiredCount = ExpiredRequests.Count;
+                CancelledCount = CancelledRequests.Count;
 
                 TotalSales = CompletedRequests.Sum(p => p.NetAmount);
-
-                // Calcular ventas de hoy usando DateTime.Now
-                TodaySales = CompletedRequests
-                    .Where(p => p.CreatedAt.Date == DateTime.Now.Date)
-                    .Sum(p => p.NetAmount);
             }
             catch (Exception ex)
             {
-                Message = $"? Error al cargar solicitudes: {ex.Message}";
+                Message = $"Error al cargar solicitudes: {ex.Message}";
                 PaymentRequests = new List<PaymentRequestInfo>();
                 
                 // Inicializar listas vacías para evitar errores en la vista
                 ActiveRequests = new List<PaymentRequestInfo>();
                 CompletedRequests = new List<PaymentRequestInfo>();
                 ExpiredRequests = new List<PaymentRequestInfo>();
+                CancelledRequests = new List<PaymentRequestInfo>();
                 
                 TotalRequests = 0;
                 ActiveCount = 0;
                 CompletedCount = 0;
                 ExpiredCount = 0;
+                CancelledCount = 0;
                 TotalSales = 0;
-                TodaySales = 0;
             }
         }
 
@@ -298,6 +310,7 @@ namespace WebApp.Pages.User
                 "PendingUserApproval" => IsExpired ? "bg-danger" : "bg-warning text-dark",
                 "Failed" => "bg-danger",
                 "Cancelled" => "bg-secondary",
+                "Canceled" => "bg-secondary",
                 _ => "bg-secondary"
             };
 
@@ -307,6 +320,7 @@ namespace WebApp.Pages.User
                 "PendingUserApproval" => IsExpired ? "Expirado" : "Pendiente",
                 "Failed" => "Fallido",
                 "Cancelled" => "Cancelado",
+                "Canceled" => "Cancelado",
                 _ => Status
             };
 
