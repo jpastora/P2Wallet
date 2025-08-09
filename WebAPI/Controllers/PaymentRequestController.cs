@@ -79,6 +79,11 @@ namespace WebAPI.Controllers
                     return BadRequest("La expiración debe estar entre 5 y 120 minutos");
                 }
 
+                // Obtener hora de Costa Rica
+                var costaRicaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+                var nowCR = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, costaRicaTimeZone);
+                var expiresAtCR = nowCR.AddMinutes(request.ExpirationMinutes);
+
                 // Crear solicitud de pago
                 var transactionManager = new TransactionManager();
                 var paymentRequest = transactionManager.CreatePaymentRequest(
@@ -106,7 +111,7 @@ namespace WebAPI.Controllers
                     GrossAmount = (decimal)paymentRequest.GrossAmount,
                     NetAmount = (decimal)paymentRequest.NetAmount,
                     SalesTaxAmount = (decimal)paymentRequest.SalesTaxAmount,
-                    ExpiresAt = paymentRequest.ExpiresAt ?? DateTime.Now.AddMinutes(request.ExpirationMinutes),
+                    ExpiresAt = paymentRequest.ExpiresAt ?? expiresAtCR,
                     Status = paymentRequest.TransactionStatus,
                     Description = paymentRequest.Description
                 };
@@ -152,6 +157,12 @@ namespace WebAPI.Controllers
                 var qrCodeUrl = QRCodeHelper.GeneratePaymentQR(paymentRequest.PaymentRequestCode);
                 var qrContent = QRCodeHelper.GeneratePaymentQRContent(paymentRequest.PaymentRequestCode);
 
+                // Hora de Costa Rica
+                var costaRicaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+                var expiresAtCR = paymentRequest.ExpiresAt.HasValue
+                    ? TimeZoneInfo.ConvertTimeFromUtc(paymentRequest.ExpiresAt.Value.ToUniversalTime(), costaRicaTimeZone)
+                    : TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow.AddMinutes(30), costaRicaTimeZone);
+
                 var response = new PaymentRequestResponse
                 {
                     TransactionId = paymentRequest.ID,
@@ -161,7 +172,7 @@ namespace WebAPI.Controllers
                     GrossAmount = (decimal)paymentRequest.GrossAmount,
                     NetAmount = (decimal)paymentRequest.NetAmount,
                     SalesTaxAmount = (decimal)paymentRequest.SalesTaxAmount,
-                    ExpiresAt = paymentRequest.ExpiresAt ?? DateTime.Now.AddMinutes(30),
+                    ExpiresAt = expiresAtCR,
                     Status = paymentRequest.TransactionStatus,
                     Description = paymentRequest.Description
                 };
@@ -174,7 +185,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        /// Obtiene las promociones aplicables para una solicitud de pago específica
+        //Obtiene las promociones aplicables para una solicitud de pago específica
         // Código de la solicitud de pago
         // ID de la entidad financiera
         // Lista de promociones aplicables
@@ -209,11 +220,9 @@ namespace WebAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Ejecuta el pago de una solicitud aplicando promoción opcional
-        /// </summary>
-        /// <param name="request">Datos para ejecutar el pago</param>
-        /// <returns>Resultado de la ejecución del pago</returns>
+        //Ejecuta el pago de una solicitud aplicando promoción opcional
+        //Datos para ejecutar el pago
+        //Resultado de la ejecución del pago
         [HttpPost]
         [Route("Execute")]
         public ActionResult<PaymentExecutionResponse> ExecutePayment(ExecutePaymentDto request)
@@ -247,15 +256,12 @@ namespace WebAPI.Controllers
                 }
 
                 var transactionManager = new TransactionManager();
-                
-                // Verificar que la solicitud sea válida antes de ejecutar
                 bool isValid = transactionManager.IsPaymentRequestValid(request.PaymentRequestCode);
                 if (!isValid)
                 {
                     return BadRequest("La solicitud de pago no es válida, ha expirado o ya fue procesada");
                 }
 
-                // Obtener solicitud original para cálculos
                 var originalRequest = transactionManager.GetPaymentRequestByCode(request.PaymentRequestCode);
                 if (originalRequest == null)
                 {
@@ -273,16 +279,20 @@ namespace WebAPI.Controllers
 
                 if (success)
                 {
-                    // Obtener la transacción actualizada para ver el resultado final
                     var updatedTransaction = transactionManager.GetPaymentRequestByCode(request.PaymentRequestCode);
-                    
+                    // Hora de Costa Rica
+                    var costaRicaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+                    var timestampCR = updatedTransaction != null
+                        ? TimeZoneInfo.ConvertTimeFromUtc(updatedTransaction.Timestamp.ToUniversalTime(), costaRicaTimeZone)
+                        : TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, costaRicaTimeZone);
+
                     var response = new PaymentExecutionResponse
                     {
                         Success = true,
                         TransactionId = originalRequest.ID,
                         FinalAmount = updatedTransaction != null ? (decimal)updatedTransaction.GrossAmount : (decimal)originalRequest.GrossAmount,
                         DiscountApplied = 0, // Se calculará en el SP
-                        Message = "Pago ejecutado exitosamente"
+                        Message = $"Pago ejecutado exitosamente a las {timestampCR:dd/MM/yyyy HH:mm:ss} (hora CR)"
                     };
 
                     return Ok(response);

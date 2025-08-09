@@ -66,7 +66,9 @@ namespace WebApp.Pages.Merchant
             ValidationStatus = merchant.ValidationStatus;
 
             // Obtener el rol del usuario actual
-            var email = User.Identity?.Name;
+            var email = User.Identity
+                
+                .Name;
             if (!string.IsNullOrEmpty(email))
             {
                 var userManager = new UserManager();

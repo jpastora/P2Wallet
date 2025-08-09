@@ -1,48 +1,76 @@
-/**
+Ôªø/**
  * UserPaymentStatus.js
- * Funcionalidades JavaScript para la p·gina UserPaymentStatus
+ * Funcionalidades JavaScript para la p√°gina UserPaymentStatus
  * P2Wallet - Sistema de Pagos
  */
 
 class UserPaymentStatusManager {
     constructor() {
         this.merchantName = '';
+        this.activeCount = 0;
+        this.message = '';
+        this.initialized = false;
         this.initializeEventListeners();
     }
 
     /**
-     * Inicializar event listeners cuando la p·gina carga
+     * Inicializar event listeners cuando la p√°gina carga
      */
     initializeEventListeners() {
-        document.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.onDOMReady();
+            });
+        } else {
+            this.onDOMReady();
+        }
+    }
+
+    /**
+     * Ejecutar cuando el DOM est√° listo
+     */
+    onDOMReady() {
+        if (!this.initialized) {
             this.setupTableHover();
             this.setupAutoRefresh();
             this.handleInitialMessage();
-        });
+            this.initialized = true;
+        }
     }
 
     /**
      * Configurar datos desde Razor Page
      */
     configure(config) {
-        this.merchantName = config.merchantName || '';
-        this.activeCount = config.activeCount || 0;
-        this.message = config.message || '';
+        if (config) {
+            this.merchantName = config.merchantName || '';
+            this.activeCount = config.activeCount || 0;
+            this.message = config.message || '';
+        }
     }
 
     /**
      * Mostrar QR en modal grande
      */
     showQR(code, qrUrl) {
-        const modalImage = document.getElementById('modalQRImage');
-        const modalCode = document.getElementById('modalQRCode');
-        
-        if (modalImage && modalCode) {
-            modalImage.src = qrUrl.replace('150x150', '300x300');
-            modalCode.textContent = code;
+        try {
+            const modalImage = document.getElementById('modalQRImage');
+            const modalCode = document.getElementById('modalQRCode');
+            const modalElement = document.getElementById('qrModal');
             
-            const modal = new bootstrap.Modal(document.getElementById('qrModal'));
-            modal.show();
+            if (modalImage && modalCode && modalElement) {
+                modalImage.src = qrUrl.replace(/150x150/g, '300x300');
+                modalCode.textContent = code;
+                
+                if (typeof bootstrap !== 'undefined') {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                } else {
+                    console.error('Bootstrap no est√° disponible');
+                }
+            }
+        } catch (error) {
+            console.error('Error showing QR modal:', error);
         }
     }
 
@@ -50,14 +78,20 @@ class UserPaymentStatusManager {
      * Descargar QR modal
      */
     downloadModalQR() {
-        const qrImage = document.getElementById('modalQRImage');
-        const code = document.getElementById('modalQRCode');
-        
-        if (qrImage && code) {
-            const link = document.createElement('a');
-            link.download = `qr-pago-${code.textContent}.jpg`;
-            link.href = qrImage.src;
-            link.click();
+        try {
+            const qrImage = document.getElementById('modalQRImage');
+            const code = document.getElementById('modalQRCode');
+            
+            if (qrImage && code && qrImage.src) {
+                const link = document.createElement('a');
+                link.download = `qr-pago-${code.textContent}.jpg`;
+                link.href = qrImage.src;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        } catch (error) {
+            console.error('Error downloading QR:', error);
         }
     }
 
@@ -65,205 +99,337 @@ class UserPaymentStatusManager {
      * Imprimir QR modal
      */
     printModalQR() {
-        const qrImage = document.getElementById('modalQRImage');
-        const code = document.getElementById('modalQRCode');
-        
-        if (qrImage && code) {
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head><title>CÛdigo QR - ${code.textContent}</title></head>
-                    <body style="text-align: center; font-family: Arial;">
-                        <h2>${this.merchantName}</h2>
-                        <h3>CÛdigo QR de Pago</h3>
-                        <img src="${qrImage.src}" style="max-width: 300px;" />
-                        <p><strong>CÛdigo:</strong> ${code.textContent}</p>
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
+        try {
+            const qrImage = document.getElementById('modalQRImage');
+            const code = document.getElementById('modalQRCode');
+            
+            if (qrImage && code && qrImage.src) {
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <html>
+                            <head>
+                                <title>C√≥digo QR - ${code.textContent}</title>
+                                <style>
+                                    body { text-align: center; font-family: Arial, sans-serif; }
+                                    img { max-width: 300px; }
+                                </style>
+                            </head>
+                            <body>
+                                <h2>${this.merchantName}</h2>
+                                <h3>C√≥digo QR de Pago</h3>
+                                <img src="${qrImage.src}" alt="QR Code" />
+                                <p><strong>C√≥digo:</strong> ${code.textContent}</p>
+                            </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.print();
+                }
+            }
+        } catch (error) {
+            console.error('Error printing QR:', error);
         }
     }
 
     /**
-     * Confirmar cancelaciÛn de pago con SweetAlert
+     * Confirmar cancelaci√≥n de pago con SweetAlert
      */
     confirmCancelPayment(paymentCode, description, amount) {
-        Swal.fire({
-            title: 'øCancelar Solicitud?',
-            html: `
-                <div class="text-start">
-                    <p><strong>DescripciÛn:</strong> ${description}</p>
-                    <p><strong>Monto:</strong> ?${amount}</p>
-                    <p><strong>CÛdigo:</strong> ${paymentCode}</p>
-                </div>
-                <div class="alert alert-warning mt-3">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    Esta acciÛn no se puede deshacer
-                </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'SÌ, Cancelar',
-            cancelButtonText: 'No, Mantener',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
+        if (typeof Swal === 'undefined') {
+            if (confirm(`¬øEst√° seguro de cancelar la solicitud: ${description}?`)) {
                 this.cancelPaymentRequest(paymentCode);
             }
-        });
-    }
+            return;
+        }
 
-    /**
-     * Cancelar pago vÌa formulario
-     */
-    cancelPaymentRequest(paymentCode) {
-        // Mostrar loading
-        Swal.fire({
-            title: 'Cancelando solicitud...',
-            text: 'Por favor espera',
-            icon: 'info',
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
+        try {
+            Swal.fire({
+                title: '¬øCancelar Solicitud?',
+                html: `
+                    <div class="text-start">
+                        <p><strong>Descripci√≥n:</strong> ${this.escapeHtml(description)}</p>
+                        <p><strong>Monto:</strong> ‚Ç°${this.escapeHtml(amount)}</p>
+                        <p><strong>C√≥digo:</strong> ${this.escapeHtml(paymentCode)}</p>
+                    </div>
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Esta acci√≥n no se puede deshacer
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'S√≠, Cancelar',
+                cancelButtonText: 'No, Mantener',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.cancelPaymentRequest(paymentCode);
+                }
+            });
+        } catch (error) {
+            console.error('Error in confirmCancelPayment:', error);
+            if (confirm(`¬øEst√° seguro de cancelar la solicitud: ${description}?`)) {
+                this.cancelPaymentRequest(paymentCode);
             }
-        });
-        
-        // Enviar formulario
-        const paymentCodeInput = document.getElementById('cancelPaymentCode');
-        const cancelForm = document.getElementById('cancelPaymentForm');
-        
-        if (paymentCodeInput && cancelForm) {
-            paymentCodeInput.value = paymentCode;
-            cancelForm.submit();
         }
     }
 
     /**
-     * Refrescar pagos con animaciÛn
+     * Escapar HTML para prevenir XSS
+     */
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Cancelar pago v√≠a formulario
+     */
+    cancelPaymentRequest(paymentCode) {
+        try {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Cancelando solicitud...',
+                    text: 'Por favor espera',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+            
+            // Enviar formulario
+            const paymentCodeInput = document.getElementById('cancelPaymentCode');
+            const cancelForm = document.getElementById('cancelPaymentForm');
+            
+            if (paymentCodeInput && cancelForm) {
+                paymentCodeInput.value = paymentCode;
+                cancelForm.submit();
+            } else {
+                console.error('Form elements not found');
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo procesar la cancelaci√≥n'
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error in cancelPaymentRequest:', error);
+        }
+    }
+
+    /**
+     * Refrescar pagos con animaci√≥n
      */
     refreshPayments() {
-        Swal.fire({
-            title: 'Actualizando...',
-            text: 'Cargando datos m·s recientes',
-            icon: 'info',
-            timer: 1000,
-            timerProgressBar: true,
-            showConfirmButton: false,
-            willClose: () => {
+        try {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Actualizando...',
+                    text: 'Cargando datos m√°s recientes',
+                    icon: 'info',
+                    timer: 1000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    willClose: () => {
+                        window.location.reload();
+                    }
+                });
+            } else {
                 window.location.reload();
             }
-        });
+        } catch (error) {
+            console.error('Error in refreshPayments:', error);
+            window.location.reload();
+        }
     }
 
     /**
      * Configurar hover en filas de tabla
      */
     setupTableHover() {
-        const tableRows = document.querySelectorAll('tbody tr');
-        tableRows.forEach(row => {
-            row.addEventListener('mouseenter', function() {
-                this.style.backgroundColor = '#f8f9fa';
+        try {
+            const tableRows = document.querySelectorAll('tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
             });
-            
-            row.addEventListener('mouseleave', function() {
-                this.style.backgroundColor = '';
-            });
-        });
+        } catch (error) {
+            console.error('Error setting up table hover:', error);
+        }
     }
 
     /**
      * Configurar auto-refresh inteligente
      */
     setupAutoRefresh() {
-        // Auto-refresh cada 30 segundos solo en pestaÒa activa y si hay solicitudes activas
-        setInterval(() => {
-            const activeTab = document.getElementById('active-tab');
-            if (activeTab && activeTab.classList.contains('active')) {
-                // Solo refrescar si hay solicitudes activas
-                if (this.activeCount > 0) {
-                    window.location.reload();
+        try {
+            setInterval(() => {
+                const activeTab = document.getElementById('active-tab');
+                if (activeTab && activeTab.classList.contains('active')) {
+                    if (this.activeCount > 0) {
+                        window.location.reload();
+                    }
                 }
-            }
-        }, 30000);
+            }, 30000);
+        } catch (error) {
+            console.error('Error setting up auto-refresh:', error);
+        }
     }
 
     /**
      * Manejar mensaje inicial de TempData
      */
     handleInitialMessage() {
-        if (this.message && this.message.trim() !== '') {
-            // Determinar tipo de mensaje basado en contenido
+        if (!this.message || this.message.trim() === '') {
+            return;
+        }
+
+        try {
             let messageType = 'info';
-            if (this.message.includes('?')) {
+            let cleanMessage = this.message;
+
+            if (this.message.includes('‚úÖ')) {
                 messageType = 'success';
-            } else if (this.message.includes('?')) {
+                cleanMessage = this.message.replace(/‚úÖ/g, '').trim();
+            } else if (this.message.includes('‚ùå')) {
                 messageType = 'error';
+                cleanMessage = this.message.replace(/‚ùå/g, '').trim();
             }
             
-            Swal.fire({
-                icon: messageType,
-                title: messageType === 'success' ? '°…xito!' : messageType === 'error' ? 'Error' : 'InformaciÛn',
-                text: this.message.replace(/?|?/g, '').trim(),
-                confirmButtonText: 'Entendido',
-                timer: 5000,
-                timerProgressBar: true
-            });
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: messageType,
+                    title: messageType === 'success' ? '¬°√âxito!' : messageType === 'error' ? 'Error' : 'Informaci√≥n',
+                    text: cleanMessage,
+                    confirmButtonText: 'Entendido',
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            } else if (cleanMessage) {
+                alert(cleanMessage);
+            }
+        } catch (error) {
+            console.error('Error handling initial message:', error);
         }
     }
 
     /**
-     * Mostrar mensaje de Èxito
+     * Mostrar mensaje de √©xito
      */
     showSuccessMessage(message) {
-        Swal.fire({
-            icon: 'success',
-            title: '°…xito!',
-            text: message,
-            confirmButtonText: 'Entendido',
-            timer: 3000,
-            timerProgressBar: true
-        });
+        try {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¬°√âxito!',
+                    text: message,
+                    confirmButtonText: 'Entendido',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            console.error('Error showing success message:', error);
+            alert(message);
+        }
     }
 
     /**
      * Mostrar mensaje de error
      */
     showErrorMessage(message) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: message,
-            confirmButtonText: 'Entendido'
-        });
+        try {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: message,
+                    confirmButtonText: 'Entendido'
+                });
+            } else {
+                alert(message);
+            }
+        } catch (error) {
+            console.error('Error showing error message:', error);
+            alert(message);
+        }
     }
 }
 
-// Crear instancia global
-window.UserPaymentStatusManager = new UserPaymentStatusManager();
+// Crear instancia global de forma segura
+try {
+    window.UserPaymentStatusManager = new UserPaymentStatusManager();
+} catch (error) {
+    console.error('Error creating UserPaymentStatusManager:', error);
+}
 
 // Funciones globales para compatibilidad con Razor
 function showQR(code, qrUrl) {
-    window.UserPaymentStatusManager.showQR(code, qrUrl);
+    try {
+        if (window.UserPaymentStatusManager) {
+            window.UserPaymentStatusManager.showQR(code, qrUrl);
+        }
+    } catch (error) {
+        console.error('Error in showQR:', error);
+    }
 }
 
 function downloadModalQR() {
-    window.UserPaymentStatusManager.downloadModalQR();
+    try {
+        if (window.UserPaymentStatusManager) {
+            window.UserPaymentStatusManager.downloadModalQR();
+        }
+    } catch (error) {
+        console.error('Error in downloadModalQR:', error);
+    }
 }
 
 function printModalQR() {
-    window.UserPaymentStatusManager.printModalQR();
+    try {
+        if (window.UserPaymentStatusManager) {
+            window.UserPaymentStatusManager.printModalQR();
+        }
+    } catch (error) {
+        console.error('Error in printModalQR:', error);
+    }
 }
 
 function confirmCancelPayment(paymentCode, description, amount) {
-    window.UserPaymentStatusManager.confirmCancelPayment(paymentCode, description, amount);
+    try {
+        if (window.UserPaymentStatusManager) {
+            window.UserPaymentStatusManager.confirmCancelPayment(paymentCode, description, amount);
+        }
+    } catch (error) {
+        console.error('Error in confirmCancelPayment:', error);
+    }
 }
 
 function refreshPayments() {
-    window.UserPaymentStatusManager.refreshPayments();
+    try {
+        if (window.UserPaymentStatusManager) {
+            window.UserPaymentStatusManager.refreshPayments();
+        } else {
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error('Error in refreshPayments:', error);
+        window.location.reload();
+    }
 }

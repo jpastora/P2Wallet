@@ -1,4 +1,4 @@
-@page
+ï»¿@page
 @model WebApp.Pages.User.ScanPaymentModel
 @{
     ViewData["Title"] = "Pagar con QR";
@@ -11,26 +11,15 @@
             <!-- Header -->
             <div class="text-center mb-4">
                 <h2><i class="bi bi-qr-code-scan me-2"></i>Pagar con QR</h2>
-                <p class="text-muted">Escanea o ingresa el código de pago</p>
+                <p class="text-muted">Escanea o ingresa el cÃ³digo de pago</p>
             </div>
-
-            @if (!string.IsNullOrEmpty(Model.Message))
-            {
-                var alertClass = Model.PaymentExecuted ? "alert-success" : 
-                               Model.PaymentRequestFound ? "alert-info" : "alert-danger";
-                <div class="alert @alertClass alert-dismissible fade show" role="alert">
-                    <i class="bi @(Model.PaymentExecuted ? "bi-check-circle" : Model.PaymentRequestFound ? "bi-info-circle" : "bi-exclamation-triangle") me-2"></i>
-                    @Model.Message
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
 
             @if (Model.PaymentExecuted)
             {
                 <!-- Pago completado exitosamente -->
                 <div class="card shadow-sm border-success">
                     <div class="card-header bg-success text-white text-center">
-                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>¡Pago Realizado!</h5>
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Â¡Pago Realizado!</h5>
                     </div>
                     <div class="card-body text-center">
                         <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
@@ -49,24 +38,24 @@
             }
             else if (!Model.PaymentRequestFound)
             {
-                <!-- Escáner/Input de código QR -->
+                <!-- EscÃ¡ner/Input de cÃ³digo QR -->
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>Escanear Código</h5>
+                        <h5 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>Escanear CÃ³digo</h5>
                     </div>
                     <div class="card-body">
-                        <!-- Botón para activar cámara -->
+                        <!-- BotÃ³n para activar cÃ¡mara -->
                         <div class="text-center mb-4">
                             <button type="button" class="btn btn-lg btn-outline-primary" id="btnActivarCamara">
-                                <i class="bi bi-camera me-2"></i>Activar Cámara
+                                <i class="bi bi-camera me-2"></i>Activar CÃ¡mara
                             </button>
                             <button type="button" class="btn btn-lg btn-outline-danger d-none" id="btnDetenerCamara">
-                                <i class="bi bi-camera-video-off me-2"></i>Detener Cámara
+                                <i class="bi bi-camera-video-off me-2"></i>Detener CÃ¡mara
                             </button>
-                            <p class="text-muted mt-2 mb-0">O ingresa el código manualmente</p>
+                            <p class="text-muted mt-2 mb-0">O ingresa el cÃ³digo manualmente</p>
                         </div>
 
-                        <!-- Área de escáner con video real -->
+                        <!-- Ãrea de escÃ¡ner con video real -->
                         <div id="scanner-container" class="d-none mb-4">
                             <div class="position-relative">
                                 <video id="qr-video" class="w-100 rounded" style="max-height: 400px; object-fit: cover;" autoplay muted playsinline></video>
@@ -74,20 +63,20 @@
                                     <div class="border border-success border-3 rounded" style="width: 250px; height: 250px; background: rgba(0, 255, 0, 0.1);"></div>
                                 </div>
                                 <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-dark bg-opacity-75 text-white text-center">
-                                    <small>Enfoca el código QR dentro del recuadro</small>
+                                    <small>Enfoca el cÃ³digo QR dentro del recuadro</small>
                                 </div>
                             </div>
                             <div id="scan-status" class="text-center mt-2">
-                                <small class="text-muted">Iniciando cámara...</small>
+                                <small class="text-muted">Iniciando cÃ¡mara...</small>
                             </div>
                         </div>
 
-                        <!-- Formulario para código manual -->
+                        <!-- Formulario para cÃ³digo manual -->
                         <form method="post" asp-page-handler="Scan" id="scanForm">
                             <div class="mb-3">
-                                <label asp-for="PaymentCode" class="form-label">Código de Pago</label>
+                                <label asp-for="PaymentCode" class="form-label">CÃ³digo de Pago</label>
                                 <input asp-for="PaymentCode" type="text" class="form-control" id="paymentCodeInput"
-                                       placeholder="Ingresa el código del QR o escanea con la cámara" />
+                                       placeholder="Ingresa el cÃ³digo del QR o escanea con la cÃ¡mara" />
                                 <small class="form-text text-muted">
                                     Ejemplo: PAY202501081500001234
                                 </small>
@@ -105,12 +94,12 @@
                     </div>
                 </div>
 
-                <!-- Información de ayuda -->
+                <!-- InformaciÃ³n de ayuda -->
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h6 class="text-primary">Cómo Pagar:</h6>
+                        <h6 class="text-primary">CÃ³mo Pagar:</h6>
                         <ol class="small mb-0">
-                            <li>Activa la cámara para escanear o ingresa el código manualmente</li>
+                            <li>Activa la cÃ¡mara para escanear o ingresa el cÃ³digo manualmente</li>
                             <li>Revisa los detalles del pago</li>
                             <li>Selecciona tu cuenta bancaria</li>
                             <li>Confirma el pago</li>
@@ -128,13 +117,13 @@
                     <div class="card-body">
                         <!-- Detalles del pago -->
                         <div class="row mb-3">
-                            <div class="col-4"><strong>Descripción:</strong></div>
+                            <div class="col-4"><strong>DescripciÃ³n:</strong></div>
                             <div class="col-8">@Model.PaymentRequest?.Description</div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-4"><strong>Monto:</strong></div>
                             <div class="col-8">
-                                <span class="fs-5 text-success">?@Model.PaymentRequest?.GrossAmount.ToString("N2")</span>
+                                <span class="fs-5 text-success">â‚¡@Model.PaymentRequest?.GrossAmount.ToString("N2")</span>
                             </div>
                         </div>
                         @if (Model.MerchantInfo != null)
@@ -150,14 +139,14 @@
                         <form method="post" asp-page-handler="Execute">
                             <input type="hidden" asp-for="PaymentCode" />
                             
-                            <!-- Selección de cuenta bancaria -->
+                            <!-- SelecciÃ³n de cuenta bancaria -->
                             <div class="mb-3">
                                 <label asp-for="SelectedBankAccountId" class="form-label">Pagar con</label>
                                 <select asp-for="SelectedBankAccountId" class="form-select" required>
                                     <option value="">Selecciona una cuenta</option>
                                     @foreach (var account in Model.UserAccountsInfo)
                                     {
-                                        <option value="@account.ID">@account.DisplayText</option>
+                                        <option value="@account.ID">@account.DisplayText - Saldo: @account.BalanceText</option>
                                     }
                                 </select>
                                 @if (!Model.UserAccountsInfo.Any())
@@ -178,9 +167,9 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="promotionSelection" 
                                                    id="noPromotion" value="" checked 
-                                                   onchange="selectPromotion('', '')">
+                                                   data-type="">
                                             <label class="form-check-label" for="noPromotion">
-                                                Sin promoción
+                                                Sin promociÃ³n
                                             </label>
                                         </div>
                                         @foreach (var promo in Model.AvailablePromotions)
@@ -188,7 +177,7 @@
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="promotionSelection" 
                                                        id="promo@(promo.Id)" value="@promo.Id" 
-                                                       onchange="selectPromotion('@promo.Id', '@promo.Type')">
+                                                       data-type="@promo.Type">
                                                 <label class="form-check-label" for="promo@(promo.Id)">
                                                     <strong>@promo.Name</strong> - @promo.DiscountPercentage% desc.<br>
                                                     <small class="text-muted">@promo.Description</small>
@@ -216,7 +205,7 @@
                     </div>
                 </div>
 
-                <!-- Información de seguridad -->
+                <!-- InformaciÃ³n de seguridad -->
                 <div class="alert alert-light mt-4">
                     <h6><i class="bi bi-shield-check me-1"></i>Pago Seguro</h6>
                     <small>Verifica que el comercio y monto sean correctos antes de confirmar</small>
@@ -229,265 +218,16 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/qr-scanner/qr-scanner.min.js"></script>
+    <script src="~/js/ScanPayment.js"></script>
     
     <script>
-        let qrScanner = null;
-        let videoElement = null;
-        let isScanning = false;
-        let cameraStream = null;
-
+        // Configurar el manager con datos del servidor
         document.addEventListener('DOMContentLoaded', function() {
-            videoElement = document.getElementById('qr-video');
-            const btnActivar = document.getElementById('btnActivarCamara');
-            const btnDetener = document.getElementById('btnDetenerCamara');
-            const scannerContainer = document.getElementById('scanner-container');
-            const scanStatus = document.getElementById('scan-status');
-            const paymentCodeInput = document.getElementById('paymentCodeInput');
-
-            // Función para verificar soporte de cámara
-            function checkCameraSupport() {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    return false;
-                }
-                return true;
-            }
-
-            // Función para solicitar permisos de cámara de forma más robusta
-            async function requestCameraPermission() {
-                try {
-                    // Primero verificar si ya tenemos permisos
-                    const permissions = await navigator.permissions.query({ name: 'camera' });
-                    
-                    if (permissions.state === 'granted') {
-                        return true;
-                    } else if (permissions.state === 'denied') {
-                        throw new Error('Permisos de cámara denegados. Ve a configuración del navegador para habilitarlos.');
-                    }
-                    
-                    // Si no sabemos el estado, intentar acceso directo
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        } 
-                    });
-                    
-                    // Si llega aquí, tenemos permisos
-                    cameraStream = stream;
-                    return true;
-                    
-                } catch (error) {
-                    console.error('Error solicitando permisos:', error);
-                    
-                    if (error.name === 'NotAllowedError') {
-                        throw new Error('Acceso a cámara denegado. Por favor permite el acceso y recarga la página.');
-                    } else if (error.name === 'NotFoundError') {
-                        throw new Error('No se encontró ninguna cámara en el dispositivo.');
-                    } else if (error.name === 'NotReadableError') {
-                        throw new Error('La cámara está siendo usada por otra aplicación.');
-                    } else {
-                        throw new Error('Error desconocido: ' + error.message);
-                    }
-                }
-            }
-
-            // Botón para activar cámara
-            btnActivar?.addEventListener('click', async function() {
-                try {
-                    scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Verificando permisos...</small>';
-                    
-                    // Verificar soporte básico
-                    if (!checkCameraSupport()) {
-                        throw new Error('Tu navegador no soporta acceso a cámara. Usa Chrome, Firefox o Safari actualizado.');
-                    }
-
-                    // Solicitar permisos de cámara
-                    scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Solicitando permisos de cámara...</small>';
-                    await requestCameraPermission();
-
-                    // Mostrar interfaz de escáner
-                    scannerContainer.classList.remove('d-none');
-                    btnActivar.classList.add('d-none');
-                    btnDetener.classList.remove('d-none');
-
-                    scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Iniciando escáner QR...</small>';
-
-                    // Inicializar escáner QR con configuración mejorada
-                    qrScanner = new QrScanner(
-                        videoElement,
-                        result => {
-                            console.log('QR detectado:', result.data);
-                            handleQRDetected(result.data);
-                        },
-                        {
-                            onDecodeError: error => {
-                                // Error de decodificación (normal cuando no hay QR visible)
-                                if (isScanning) {
-                                    scanStatus.innerHTML = '<small class="text-muted">Buscando código QR...</small>';
-                                }
-                            },
-                            preferredCamera: 'environment', // Cámara trasera preferida
-                            highlightScanRegion: true,
-                            highlightCodeOutline: true,
-                            maxScansPerSecond: 5, // Limitar escaneos para mejor rendimiento
-                            calculateScanRegion: (video) => {
-                                // Región de escaneo personalizada (centro del video)
-                                const smallerDimension = Math.min(video.videoWidth, video.videoHeight);
-                                const scanRegionSize = Math.round(0.6 * smallerDimension);
-                                return {
-                                    x: Math.round((video.videoWidth - scanRegionSize) / 2),
-                                    y: Math.round((video.videoHeight - scanRegionSize) / 2),
-                                    width: scanRegionSize,
-                                    height: scanRegionSize,
-                                };
-                            }
-                        }
-                    );
-
-                    // Usar stream existente si ya lo tenemos
-                    if (cameraStream) {
-                        videoElement.srcObject = cameraStream;
-                    }
-
-                    // Iniciar escáner
-                    await qrScanner.start();
-                    isScanning = true;
-                    scanStatus.innerHTML = '<small class="text-success"><i class="bi bi-camera-video me-1"></i>Cámara activa - Apunta al código QR</small>';
-
-                } catch (error) {
-                    console.error('Error al iniciar cámara:', error);
-                    scanStatus.innerHTML = '<small class="text-danger"><i class="bi bi-exclamation-triangle me-1"></i>' + error.message + '</small>';
-                    
-                    // Limpiar y restaurar estado
-                    stopScanner();
-
-                    // Mostrar alerta con opciones
-                    Swal.fire({
-                        title: 'Error de Cámara',
-                        html: `
-                            <p>${error.message}</p>
-                            <div class="mt-3">
-                                <strong>Soluciones:</strong>
-                                <ul class="text-start">
-                                    <li>Permite el acceso a la cámara cuando el navegador lo solicite</li>
-                                    <li>Verifica que ninguna otra aplicación esté usando la cámara</li>
-                                    <li>Recarga la página e intenta nuevamente</li>
-                                    <li>Usa el campo de texto para ingresar el código manualmente</li>
-                                </ul>
-                            </div>
-                        `,
-                        icon: 'error',
-                        confirmButtonText: 'Entendido',
-                        showCancelButton: true,
-                        cancelButtonText: 'Recargar Página',
-                        width: '500px'
-                    }).then((result) => {
-                        if (result.dismiss === Swal.DismissReason.cancel) {
-                            window.location.reload();
-                        }
-                    });
-                }
-            });
-
-            // Botón para detener cámara
-            btnDetener?.addEventListener('click', function() {
-                stopScanner();
-            });
-
-            // Función para manejar QR detectado
-            function handleQRDetected(qrData) {
-                if (!isScanning) return;
-
-                console.log('Procesando QR:', qrData);
-                
-                // Detener escáner inmediatamente
-                stopScanner();
-
-                // Llenar campo de código
-                paymentCodeInput.value = qrData;
-
-                // Procesar automáticamente sin confirmación adicional
-                Swal.fire({
-                    title: '¡QR Detectado!',
-                    text: 'Procesando pago...',
-                    icon: 'success',
-                    timer: 1500,
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                    allowOutsideClick: false
-                }).then(() => {
-                    // Enviar formulario automáticamente para ir directo al pago
-                    document.getElementById('scanForm').submit();
+            if (window.ScanPaymentManager) {
+                window.ScanPaymentManager.configure({
+                    message: @Html.Raw(Json.Serialize(Model.Message))
                 });
             }
-
-            // Función para detener escáner
-            function stopScanner() {
-                console.log('Deteniendo escáner...');
-                
-                if (qrScanner) {
-                    qrScanner.destroy();
-                    qrScanner = null;
-                }
-                
-                if (cameraStream) {
-                    cameraStream.getTracks().forEach(track => {
-                        track.stop();
-                        console.log('Track detenido:', track.label);
-                    });
-                    cameraStream = null;
-                }
-                
-                if (videoElement) {
-                    videoElement.srcObject = null;
-                }
-                
-                isScanning = false;
-                
-                // Restaurar interfaz
-                const scannerContainer = document.getElementById('scanner-container');
-                const btnActivar = document.getElementById('btnActivarCamara');
-                const btnDetener = document.getElementById('btnDetenerCamara');
-                
-                if (scannerContainer) scannerContainer.classList.add('d-none');
-                if (btnActivar) btnActivar.classList.remove('d-none');
-                if (btnDetener) btnDetener.classList.add('d-none');
-            }
-
-            // Detener cámara al salir de la página o cambiar de pestaña
-            window.addEventListener('beforeunload', function() {
-                stopScanner();
-            });
-
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden && isScanning) {
-                    console.log('Página oculta, pausando escáner...');
-                    if (qrScanner) {
-                        qrScanner.stop();
-                    }
-                } else if (!document.hidden && qrScanner && !isScanning) {
-                    console.log('Página visible, reanudando escáner...');
-                    qrScanner.start().then(() => {
-                        isScanning = true;
-                    }).catch(error => {
-                        console.error('Error reanudando escáner:', error);
-                    });
-                }
-            });
         });
-
-        function selectPromotion(id, type) {
-            document.querySelector('input[name="SelectedPromotionId"]').value = id || '';
-            document.querySelector('input[name="SelectedPromotionType"]').value = type || '';
-        }
-
-        function buscarOtro() {
-            window.location.href = '/User/ScanPayment';
-        }
-
-        function pagarOtro() {
-            window.location.href = '/User/ScanPayment';
-        }
     </script>
 }

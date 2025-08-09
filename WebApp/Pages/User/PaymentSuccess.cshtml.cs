@@ -21,6 +21,7 @@ namespace WebApp.Pages.User
         {
             if (transactionId <= 0)
             {
+                TempData["ErrorMessage"] = "? ID de transacción inválido.";
                 return RedirectToPage("/User/UserPanel");
             }
 
@@ -39,6 +40,16 @@ namespace WebApp.Pages.User
                 return RedirectToPage("/Login");
             }
 
+            // Manejar mensajes de TempData
+            if (TempData.ContainsKey("SuccessMessage"))
+            {
+                Message = TempData["SuccessMessage"]?.ToString() ?? "";
+            }
+            else if (TempData.ContainsKey("ErrorMessage"))
+            {
+                Message = TempData["ErrorMessage"]?.ToString() ?? "";
+            }
+
             try
             {
                 // Obtener la transacción
@@ -47,21 +58,21 @@ namespace WebApp.Pages.User
 
                 if (Transaction == null)
                 {
-                    Message = "Transacción no encontrada.";
+                    TempData["ErrorMessage"] = "? Transacción no encontrada.";
                     return RedirectToPage("/User/UserPanel");
                 }
 
                 // Verificar que la transacción pertenezca al usuario actual
                 if (Transaction.UserID != CurrentUser.ID)
                 {
-                    Message = "No tienes autorización para ver esta transacción.";
+                    TempData["ErrorMessage"] = "? No tienes autorización para ver esta transacción.";
                     return RedirectToPage("/User/UserPanel");
                 }
 
                 // Verificar que la transacción esté completada
                 if (Transaction.TransactionStatus != "Completed")
                 {
-                    Message = "Esta transacción aún no ha sido completada.";
+                    TempData["ErrorMessage"] = "? Esta transacción aún no ha sido completada.";
                     return RedirectToPage("/User/ScanPayment");
                 }
 
@@ -77,11 +88,16 @@ namespace WebApp.Pages.User
                 // Cargar información de promoción aplicada
                 await LoadPromotionInfo();
 
-                Message = "Pago procesado exitosamente.";
+                // Si no hay mensaje de éxito de TempData, usar mensaje por defecto
+                if (string.IsNullOrEmpty(Message))
+                {
+                    Message = "? Pago procesado exitosamente.";
+                }
             }
             catch (Exception ex)
             {
-                Message = $"Error al cargar información del pago: {ex.Message}";
+                Message = $"? Error al cargar información del pago: {ex.Message}";
+                TempData["ErrorMessage"] = Message;
                 return RedirectToPage("/User/UserPanel");
             }
 
@@ -98,8 +114,9 @@ namespace WebApp.Pages.User
                     var merchant = merchantManager.RetrieveMerchantById(Transaction.MerchantID);
                     MerchantName = merchant?.MerchantName ?? "Comercio Desconocido";
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Console.WriteLine($"Error loading merchant info: {ex.Message}");
                     MerchantName = "Comercio Desconocido";
                 }
             }
@@ -127,8 +144,9 @@ namespace WebApp.Pages.User
                         AccountInfo = "Cuenta Desconocida";
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    Console.WriteLine($"Error loading account info: {ex.Message}");
                     AccountInfo = "Cuenta Desconocida";
                 }
             }
@@ -138,15 +156,23 @@ namespace WebApp.Pages.User
         {
             if (Transaction != null)
             {
-                // El descuento es la diferencia entre el monto bruto y neto
-                // (sin contar impuestos ya que esos no son descuentos)
-                var grossAmount = Transaction.GrossAmount;
-                var netAmount = Transaction.NetAmount;
-                var taxAmount = Transaction.SalesTaxAmount;
+                try
+                {
+                    // El descuento es la diferencia entre el monto bruto y neto
+                    // (sin contar impuestos ya que esos no son descuentos)
+                    var grossAmount = Transaction.GrossAmount;
+                    var netAmount = Transaction.NetAmount;
+                    var taxAmount = Transaction.SalesTaxAmount;
 
-                // Si hay diferencia entre bruto y neto (más allá de los impuestos), es descuento
-                var expectedNetWithoutDiscount = grossAmount - taxAmount;
-                DiscountApplied = Math.Max(0, expectedNetWithoutDiscount - netAmount);
+                    // Si hay diferencia entre bruto y neto (más allá de los impuestos), es descuento
+                    var expectedNetWithoutDiscount = grossAmount - taxAmount;
+                    DiscountApplied = Math.Max(0, expectedNetWithoutDiscount - netAmount);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error calculating discount: {ex.Message}");
+                    DiscountApplied = 0;
+                }
             }
         }
 
@@ -193,8 +219,9 @@ namespace WebApp.Pages.User
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error loading promotion info: {ex.Message}");
                 // En caso de error, no mostrar promoción
                 PromotionApplied = null;
             }

@@ -119,7 +119,10 @@
                                             Ver QR Grande
                                         </button>
                                         <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                onclick="confirmCancelPayment('@request.PaymentRequestCode', '@Html.Raw(Json.Serialize(request.Description))', '@request.GrossAmount.ToString("N2")')">
+                                                data-payment-code="@request.PaymentRequestCode"
+                                                data-description="@request.Description"
+                                                data-amount="@request.GrossAmount.ToString("N2")"
+                                                onclick="handleCancelClick(this)">
                                             Cancelar Solicitud
                                         </button>
                                     </div>
@@ -302,11 +305,24 @@
     <script>
         // Configurar el manager con datos del servidor
         document.addEventListener('DOMContentLoaded', function() {
-            window.UserPaymentStatusManager.configure({
-                merchantName: @Html.Raw(Json.Serialize(Model.MerchantName)),
-                activeCount: @Model.ActiveCount,
-                message: @Html.Raw(Json.Serialize(Model.Message))
-            });
+            if (window.UserPaymentStatusManager) {
+                window.UserPaymentStatusManager.configure({
+                    merchantName: @Html.Raw(Json.Serialize(Model.MerchantName)),
+                    activeCount: @Model.ActiveCount,
+                    message: @Html.Raw(Json.Serialize(Model.Message))
+                });
+            }
         });
+        
+        // Función auxiliar para manejar click de cancelación
+        function handleCancelClick(button) {
+            const paymentCode = button.getAttribute('data-payment-code');
+            const description = button.getAttribute('data-description');
+            const amount = button.getAttribute('data-amount');
+            
+            if (window.UserPaymentStatusManager) {
+                window.UserPaymentStatusManager.confirmCancelPayment(paymentCode, description, amount);
+            }
+        }
     </script>
 }
