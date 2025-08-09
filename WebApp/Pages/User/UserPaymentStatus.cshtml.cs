@@ -121,10 +121,21 @@ namespace WebApp.Pages.User
                     return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
                 }
 
+                // Obtener el MerchantID desde la transacción si es necesario
+                if (MerchantID == 0)
+                {
+                    var transactionManager = new TransactionManager();
+                    var transaction = transactionManager.RetrieveAllTransactions()
+                        .FirstOrDefault(t => t.PaymentRequestCode == paymentCode);
+                    if (transaction != null)
+                    {
+                        MerchantID = transaction.MerchantID;
+                    }
+                }
+
                 // Cancelar vía API
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/Cancel/{paymentCode}";
-                
                 var response = await httpClient.PostAsync(apiUrl, null);
 
                 if (response.IsSuccessStatusCode)
@@ -134,8 +145,6 @@ namespace WebApp.Pages.User
                 else
                 {
                     var errorContent = await response.Content.ReadAsStringAsync();
-                    
-                    // Interpretar diferentes tipos de errores
                     if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                     {
                         TempData["ErrorMessage"] = "? No se puede cancelar esta solicitud. Puede que ya esté procesada o haya expirado.";
@@ -150,7 +159,7 @@ namespace WebApp.Pages.User
                     }
                 }
 
-                // Redirigir para limpiar el POST y mostrar los mensajes via TempData
+                // Redirigir con el MerchantID correcto
                 return RedirectToPage("/User/UserPaymentStatus", new { merchantId = MerchantID });
             }
             catch (HttpRequestException httpEx)
@@ -204,8 +213,11 @@ namespace WebApp.Pages.User
                 ExpiredCount = ExpiredRequests.Count;
 
                 TotalSales = CompletedRequests.Sum(p => p.NetAmount);
+
+                // Usar la zona horaria de Costa Rica para ventas diarias
+                var costaRicaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
                 TodaySales = CompletedRequests
-                    .Where(p => p.CreatedAt.Date == DateTime.Today)
+                    .Where(p => TimeZoneInfo.ConvertTimeFromUtc(p.CreatedAt.ToUniversalTime(), costaRicaTimeZone).Date == TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, costaRicaTimeZone).Date)
                     .Sum(p => p.NetAmount);
             }
             catch (Exception ex)

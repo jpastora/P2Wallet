@@ -6,6 +6,7 @@ using CoreApp;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.Text;
+using System.Linq;
 
 namespace WebApp.Pages.User
 {
@@ -14,31 +15,21 @@ namespace WebApp.Pages.User
     {
         [BindProperty]
         public string PaymentCode { get; set; } = string.Empty;
-        
         [BindProperty]
         public int SelectedBankAccountId { get; set; }
-        
         [BindProperty]
         public int? SelectedPromotionId { get; set; }
-        
         [BindProperty]
         public string SelectedPromotionType { get; set; } = string.Empty;
 
-        // Estado de la página
         public string Message { get; set; } = string.Empty;
         public bool PaymentRequestFound { get; set; } = false;
         public bool PaymentExecuted { get; set; } = false;
 
-        // Datos del usuario y cuentas
         public DTOs.User CurrentUser { get; set; } = new();
-        public List<BankAccount> UserAccounts { get; set; } = new();
         public List<BankAccountInfo> UserAccountsInfo { get; set; } = new();
-
-        // Datos de la solicitud de pago
         public Transaction? PaymentRequest { get; set; }
         public List<PromotionInfo> AvailablePromotions { get; set; } = new();
-
-        // Para navegación y estado
         public DTOs.Merchant? MerchantInfo { get; set; }
         public PaymentExecutionResponse? ExecutionResult { get; set; }
 
@@ -51,55 +42,36 @@ namespace WebApp.Pages.User
 
         public async Task<IActionResult> OnGetAsync([FromQuery] string? code = null)
         {
-            // Cargar datos del usuario
             await LoadUserData();
-            
-            if (CurrentUser == null)
-                return RedirectToPage("/Login");
-
-            // Si viene un código en la URL, procesarlo automáticamente
+            if (CurrentUser == null) return RedirectToPage("/Login");
             if (!string.IsNullOrEmpty(code))
             {
                 PaymentCode = code;
                 return await OnPostScanAsync();
             }
-
             return Page();
         }
 
         public async Task<IActionResult> OnPostScanAsync()
         {
-            // Cargar datos del usuario
             await LoadUserData();
-            
-            if (CurrentUser == null)
-                return RedirectToPage("/Login");
-
+            if (CurrentUser == null) return RedirectToPage("/Login");
             if (string.IsNullOrWhiteSpace(PaymentCode))
             {
                 Message = "Ingresa un código de pago válido.";
                 return Page();
             }
-
             try
             {
-                // Limpiar y extraer código del QR si es necesario
-                string cleanCode = QRCodeHelper.ExtractPaymentCodeFromQR(PaymentCode) ?? PaymentCode.Trim();
-
-                // Obtener solicitud de pago vía API
+                string cleanCode = PaymentCode.Trim();
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/GetByCode/{cleanCode}";
-                
                 var response = await httpClient.GetAsync(apiUrl);
-                
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var paymentResponse = JsonConvert.DeserializeObject<PaymentRequestResponse>(responseContent);
-                    
+                    var paymentResponse = JsonConvert.DeserializeObject<PaymentRequestResponse>(await response.Content.ReadAsStringAsync());
                     if (paymentResponse != null)
                     {
-                        // Convertir response a Transaction para la vista
                         PaymentRequest = new Transaction
                         {
                             ID = paymentResponse.TransactionId,
@@ -112,14 +84,9 @@ namespace WebApp.Pages.User
                             TransactionStatus = paymentResponse.Status,
                             MerchantID = GetMerchantIdFromTransaction(paymentResponse.TransactionId)
                         };
-                        
                         PaymentRequestFound = true;
-                        Message = "Solicitud de pago encontrada. Revisa los detalles y confirma el pago.";
-                        
-                        // Cargar promociones disponibles
+                        Message = "Solicitud de pago encontrada.";
                         await LoadAvailablePromotions(cleanCode);
-                        
-                        // Cargar información del comercio
                         await LoadMerchantInfo();
                     }
                     else
@@ -129,45 +96,42 @@ namespace WebApp.Pages.User
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Message = $"Solicitud no encontrada o expirada: {errorContent}";
+                    Message = "Solicitud no encontrada o expirada.";
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Message = $"Error al procesar el código: {ex.Message}";
+                Message = "Error al procesar el código.";
             }
-
             return Page();
         }
 
         public async Task<IActionResult> OnPostExecuteAsync()
         {
-            // Cargar datos del usuario
             await LoadUserData();
-            
-            if (CurrentUser == null)
-                return RedirectToPage("/Login");
-
+            if (CurrentUser == null) return RedirectToPage("/Login");
             if (string.IsNullOrWhiteSpace(PaymentCode))
             {
                 Message = "Código de pago requerido.";
                 return Page();
             }
-
             if (SelectedBankAccountId <= 0)
             {
-                Message = "Selecciona una cuenta bancaria para el pago.";
-                await OnPostScanAsync(); // Recargar datos de la solicitud
+                Message = "Selecciona una cuenta bancaria.";
+                await OnPostScanAsync();
                 return Page();
             }
-
             try
             {
-                // Ejecutar pago vía API
+                var selectedAccount = UserAccountsInfo.FirstOrDefault(a => a.ID == SelectedBankAccountId);
+                if (selectedAccount != null && PaymentRequest != null && !selectedAccount.HasSufficientFunds(PaymentRequest.GrossAmount))
+                {
+                    Message = "Fondos insuficientes en la cuenta seleccionada.";
+                    await OnPostScanAsync();
+                    return Page();
+                }
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + "/api/PaymentRequest/Execute";
-                
                 var executeRequest = new
                 {
                     PaymentRequestCode = PaymentCode,
@@ -176,47 +140,34 @@ namespace WebApp.Pages.User
                     PromotionId = SelectedPromotionId,
                     PromotionType = SelectedPromotionType
                 };
-
-                var jsonContent = new StringContent(
-                    JsonConvert.SerializeObject(executeRequest),
-                    Encoding.UTF8,
-                    "application/json"
-                );
-
+                var jsonContent = new StringContent(JsonConvert.SerializeObject(executeRequest), Encoding.UTF8, "application/json");
                 var response = await httpClient.PostAsync(apiUrl, jsonContent);
-                
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    ExecutionResult = JsonConvert.DeserializeObject<PaymentExecutionResponse>(responseContent);
-                    
+                    ExecutionResult = JsonConvert.DeserializeObject<PaymentExecutionResponse>(await response.Content.ReadAsStringAsync());
                     if (ExecutionResult?.Success == true)
                     {
                         PaymentExecuted = true;
                         Message = "¡Pago realizado exitosamente!";
-                        
-                        // Redirigir a página de confirmación después de un delay
                         return RedirectToPage("/User/PaymentSuccess", new { transactionId = ExecutionResult.TransactionId });
                     }
                     else
                     {
-                        Message = "Error al procesar el pago. Intenta nuevamente.";
-                        await OnPostScanAsync(); // Recargar datos
+                        Message = "Error al procesar el pago.";
+                        await OnPostScanAsync();
                     }
                 }
                 else
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    Message = $"Error al ejecutar pago: {errorContent}";
-                    await OnPostScanAsync(); // Recargar datos
+                    Message = "Error al ejecutar pago.";
+                    await OnPostScanAsync();
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                Message = $"Error al procesar el pago: {ex.Message}";
-                await OnPostScanAsync(); // Recargar datos
+                Message = "Error inesperado al procesar el pago.";
+                await OnPostScanAsync();
             }
-
             return Page();
         }
 
@@ -227,29 +178,25 @@ namespace WebApp.Pages.User
             {
                 var userManager = new UserManager();
                 CurrentUser = userManager.RetrieveUserByEmail(new DTOs.User { Email = email });
-                
                 if (CurrentUser != null)
                 {
-                    // Cargar cuentas bancarias del usuario
                     var accountManager = new BankAccountManager();
                     var allAccounts = accountManager.RetrieveAllBankAccounts();
-                    UserAccounts = allAccounts.Where(a => a.UserID == CurrentUser.ID && a.ValidationStatus == "Active").ToList();
-                    
-                    // Crear información detallada de cuentas
                     var entityManager = new FinancialEntityManager();
                     var allEntities = entityManager.RetrieveAllFinancialEntities();
-                    
-                    UserAccountsInfo = UserAccounts.Select(account => {
-                        var entity = allEntities.FirstOrDefault(e => e.ID == account.FinancialEntityID);
-                        return new BankAccountInfo
-                        {
-                            ID = account.ID,
-                            IBAN = account.IBAN,
-                            BankName = entity?.EntityName ?? "Banco Desconocido",
-                            Balance = account.Balance,
-                            LogoUrl = entity?.LogoImage ?? "https://picsum.photos/seed/bank/40/40"
-                        };
-                    }).ToList();
+                    UserAccountsInfo = allAccounts
+                        .Where(a => a.UserID == CurrentUser.ID && a.ValidationStatus == "Active")
+                        .Select(account => {
+                            var entity = allEntities.FirstOrDefault(e => e.ID == account.FinancialEntityID);
+                            return new BankAccountInfo
+                            {
+                                ID = account.ID,
+                                IBAN = account.IBAN,
+                                BankName = entity?.EntityName ?? "Banco Desconocido",
+                                Balance = account.Balance,
+                                LogoUrl = entity?.LogoImage ?? "https://picsum.photos/seed/bank/40/40"
+                            };
+                        }).ToList();
                 }
             }
         }
@@ -258,15 +205,30 @@ namespace WebApp.Pages.User
         {
             try
             {
+                int? financialEntityId = null;
+                if (SelectedBankAccountId > 0 && UserAccountsInfo != null)
+                {
+                    var selectedAccount = UserAccountsInfo.FirstOrDefault(a => a.ID == SelectedBankAccountId);
+                    if (selectedAccount != null)
+                    {
+                        var accountManager = new BankAccountManager();
+                        var account = accountManager.RetrieveBankAccountById(selectedAccount.ID);
+                        if (account != null)
+                        {
+                            financialEntityId = account.FinancialEntityID;
+                        }
+                    }
+                }
                 var httpClient = _httpClientFactory.CreateClient();
                 var apiUrl = GetApiBaseUrl() + $"/api/PaymentRequest/GetPromotions/{paymentCode}";
-                
+                if (financialEntityId.HasValue)
+                {
+                    apiUrl += $"?financialEntityId={financialEntityId.Value}";
+                }
                 var response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var promotions = JsonConvert.DeserializeObject<List<object>>(responseContent);
-                    
+                    var promotions = JsonConvert.DeserializeObject<List<object>>(await response.Content.ReadAsStringAsync());
                     ConvertPromotionsToInfo(promotions ?? new List<object>());
                 }
                 else
@@ -283,7 +245,6 @@ namespace WebApp.Pages.User
         private void ConvertPromotionsToInfo(List<object> promotions)
         {
             AvailablePromotions = promotions.Select(p => {
-                // Usar reflexión para extraer propiedades dinámicamente
                 var type = p.GetType();
                 return new PromotionInfo
                 {
@@ -331,12 +292,8 @@ namespace WebApp.Pages.User
             }
         }
 
-        private string GetApiBaseUrl()
-        {
-            return "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net";
-        }
+        private string GetApiBaseUrl() => "https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net";
 
-        // Clases auxiliares para deserialización y UI
         public class PaymentRequestResponse
         {
             public int TransactionId { get; set; }
@@ -350,7 +307,6 @@ namespace WebApp.Pages.User
             public string Status { get; set; } = string.Empty;
             public string Description { get; set; } = string.Empty;
         }
-
         public class PaymentExecutionResponse
         {
             public bool Success { get; set; }
@@ -359,7 +315,6 @@ namespace WebApp.Pages.User
             public decimal DiscountApplied { get; set; }
             public string Message { get; set; } = string.Empty;
         }
-
         public class PromotionInfo
         {
             public string Id { get; set; } = string.Empty;
@@ -368,12 +323,10 @@ namespace WebApp.Pages.User
             public string Description { get; set; } = string.Empty;
             public double DiscountPercentage { get; set; }
             public double MaxRefund { get; set; }
-            
             public string TypeBadgeClass => Type == "Merchant" ? "bg-success" : "bg-primary";
             public string TypeText => Type == "Merchant" ? "Comercio" : "Banco";
             public string DiscountText => DiscountPercentage > 0 ? $"{DiscountPercentage}% desc." : "";
         }
-
         public class BankAccountInfo
         {
             public int ID { get; set; }
@@ -381,7 +334,6 @@ namespace WebApp.Pages.User
             public string BankName { get; set; } = string.Empty;
             public double Balance { get; set; }
             public string LogoUrl { get; set; } = string.Empty;
-            
             public string DisplayText => $"{IBAN} - {BankName}";
             public string BalanceText => $"₡{Balance:N2}";
             public bool HasSufficientFunds(double amount) => Balance >= amount;

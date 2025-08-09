@@ -16,14 +16,6 @@
                 <p class="text-muted">Tu pago se ha procesado correctamente</p>
             </div>
 
-            @if (!string.IsNullOrEmpty(Model.Message))
-            {
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <i class="bi bi-info-circle me-2"></i>@Model.Message
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            }
-
             <!-- Detalles de la transacción -->
             @if (Model.Transaction != null)
             {
@@ -134,58 +126,39 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Mensaje de seguridad -->
+            <div class="alert alert-light mt-4">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <i class="bi bi-shield-check text-success fs-4"></i>
+                    </div>
+                    <div class="col">
+                        <h6 class="mb-1">Pago Seguro</h6>
+                        <small class="text-muted">
+                            Tu pago ha sido procesado de forma segura. Guarda este comprobante para tus registros.
+                        </small>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/PaymentSuccess.js"></script>
     
     <script>
-        // Animación de entrada
+        // Configurar el manager con datos del servidor
         document.addEventListener('DOMContentLoaded', function() {
-            // Animar icono de éxito
-            const successIcon = document.querySelector('.success-icon i');
-            if (successIcon) {
-                successIcon.style.transform = 'scale(0)';
-                successIcon.style.transition = 'transform 0.5s ease-out';
-                
-                setTimeout(() => {
-                    successIcon.style.transform = 'scale(1)';
-                }, 200);
+            if (window.PaymentSuccessManager) {
+                window.PaymentSuccessManager.configure({
+                    message: @Html.Raw(Json.Serialize(Model.Message)),
+                    transactionId: @(Model.Transaction?.ID ?? 0)
+                });
             }
         });
-
-        // Función para compartir pago
-        function sharePayment() {
-            const shareData = {
-                title: 'Pago realizado con Yavi',
-                text: 'Acabo de realizar un pago con Yavi!',
-                url: window.location.href
-            };
-
-            if (navigator.share) {
-                navigator.share(shareData);
-            } else {
-                // Fallback para browsers que no soportan Web Share API
-                const shareText = shareData.text + ' ' + shareData.url;
-                
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(shareText).then(() => {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Copiado!',
-                            text: 'Información del pago copiada al portapapeles',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    });
-                } else {
-                    // Fallback más básico
-                    prompt('Copia este texto para compartir:', shareText);
-                }
-            }
-        }
     </script>
     
     <style>
@@ -210,6 +183,31 @@
             90% {
                 transform: translate3d(0, -4px, 0);
             }
+        }
+
+        /* Animaciones para las cards */
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        /* Estilos mejorados para botones de acción */
+        .btn {
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Animación para el mensaje de seguridad */
+        .alert-light {
+            border-left: 4px solid #28a745;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         }
     </style>
 }
