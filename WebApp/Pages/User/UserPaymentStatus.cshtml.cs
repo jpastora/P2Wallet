@@ -214,10 +214,9 @@ namespace WebApp.Pages.User
 
                 TotalSales = CompletedRequests.Sum(p => p.NetAmount);
 
-                // Usar la zona horaria de Costa Rica para ventas diarias
-                var costaRicaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
+                // Calcular ventas de hoy usando DateTime.Now
                 TodaySales = CompletedRequests
-                    .Where(p => TimeZoneInfo.ConvertTimeFromUtc(p.CreatedAt.ToUniversalTime(), costaRicaTimeZone).Date == TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, costaRicaTimeZone).Date)
+                    .Where(p => p.CreatedAt.Date == DateTime.Now.Date)
                     .Sum(p => p.NetAmount);
             }
             catch (Exception ex)
