@@ -39,25 +39,9 @@ namespace WebApp.Pages.User
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        // Zona horaria de Costa Rica (UTC-6)
-        private static readonly TimeZoneInfo CostaRicaTimeZone = 
-            TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
-
         public UserPaymentStatusModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
-        }
-
-        // Método para obtener hora actual de Costa Rica
-        private static DateTime GetCostaRicaTime()
-        {
-            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CostaRicaTimeZone);
-        }
-
-        // Método para convertir UTC a Costa Rica (si es necesario)
-        private static DateTime ConvertToCostaRicaTime(DateTime utcDateTime)
-        {
-            return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, CostaRicaTimeZone);
         }
 
         public async Task<IActionResult> OnGetAsync([FromQuery] int merchantId)
@@ -214,7 +198,7 @@ namespace WebApp.Pages.User
                     ExpiresAt = t.ExpiresAt,
                     QRCodeUrl = !string.IsNullOrEmpty(t.PaymentRequestCode) ? 
                         QRCodeHelper.GeneratePaymentQR(t.PaymentRequestCode, 150) : "",
-                    // CORRECCIÓN: Usar DateTime.Now para comparación
+                    // CORRECCIÓN: Usar DateTime.Now para comparación directa
                     IsExpired = t.ExpiresAt.HasValue && t.ExpiresAt.Value < DateTime.Now,
                     IsActive = t.TransactionStatus == "PendingUserApproval",
                     IsCompleted = t.TransactionStatus == "Completed"
@@ -349,7 +333,7 @@ namespace WebApp.Pages.User
                     if (!ExpiresAt.HasValue || IsExpired || IsCompleted)
                         return "";
 
-                    // CORRECCIÓN: Usar DateTime.Now para cálculo
+                    // Usar DateTime.Now para cálculo directo
                     var timeLeft = ExpiresAt.Value - DateTime.Now;
                     if (timeLeft.TotalSeconds <= 0)
                         return "";

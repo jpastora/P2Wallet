@@ -79,15 +79,16 @@ namespace WebAPI.Controllers
                     return BadRequest("La expiración debe estar entre 5 y 120 minutos");
                 }
 
-                // CORRECCIÓN: Usar hora local del servidor (Costa Rica)
+                // CORRECCIÓN: Calcular la fecha de expiración aquí para consistencia
                 var expiresAt = DateTime.Now.AddMinutes(request.ExpirationMinutes);
 
-                // Crear solicitud de pago
+                // Crear solicitud de pago pasando los minutos de expiración
                 var transactionManager = new TransactionManager();
                 var paymentRequest = transactionManager.CreatePaymentRequest(
                     request.MerchantId, 
                     request.SaleAmount, 
-                    request.Description ?? string.Empty
+                    request.Description ?? string.Empty,
+                    request.ExpirationMinutes
                 );
 
                 if (paymentRequest == null)
@@ -99,7 +100,7 @@ namespace WebAPI.Controllers
                 var qrCodeUrl = QRCodeHelper.GeneratePaymentQR(paymentRequest.PaymentRequestCode);
                 var qrContent = QRCodeHelper.GeneratePaymentQRContent(paymentRequest.PaymentRequestCode);
 
-                // Crear response
+                // CORRECCIÓN: Usar la fecha que calculamos aquí, no la del stored procedure
                 var response = new PaymentRequestResponse
                 {
                     TransactionId = paymentRequest.ID,
@@ -109,7 +110,7 @@ namespace WebAPI.Controllers
                     GrossAmount = (decimal)paymentRequest.GrossAmount,
                     NetAmount = (decimal)paymentRequest.NetAmount,
                     SalesTaxAmount = (decimal)paymentRequest.SalesTaxAmount,
-                    ExpiresAt = paymentRequest.ExpiresAt ?? expiresAt,
+                    ExpiresAt = expiresAt, // Usar la fecha calculada en el servidor de aplicación
                     Status = paymentRequest.TransactionStatus,
                     Description = paymentRequest.Description
                 };
@@ -155,9 +156,8 @@ namespace WebAPI.Controllers
                 var qrCodeUrl = QRCodeHelper.GeneratePaymentQR(paymentRequest.PaymentRequestCode);
                 var qrContent = QRCodeHelper.GeneratePaymentQRContent(paymentRequest.PaymentRequestCode);
 
-                // CORRECCIÓN: No hacer doble conversión de zona horaria
-                var expiresAtCR = paymentRequest.ExpiresAt ?? DateTime.Now.AddMinutes(30);
-
+                // CORRECCIÓN: Usar la fecha de expiración directamente de la base de datos
+                // Ya no necesitamos conversiones de zona horaria
                 var response = new PaymentRequestResponse
                 {
                     TransactionId = paymentRequest.ID,
@@ -167,7 +167,7 @@ namespace WebAPI.Controllers
                     GrossAmount = (decimal)paymentRequest.GrossAmount,
                     NetAmount = (decimal)paymentRequest.NetAmount,
                     SalesTaxAmount = (decimal)paymentRequest.SalesTaxAmount,
-                    ExpiresAt = expiresAtCR,
+                    ExpiresAt = paymentRequest.ExpiresAt ?? DateTime.Now.AddMinutes(30),
                     Status = paymentRequest.TransactionStatus,
                     Description = paymentRequest.Description
                 };

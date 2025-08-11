@@ -51,10 +51,10 @@
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="ExpirationMinutes" class="form-label">Tiempo de Expiración</label>
                                     <select asp-for="ExpirationMinutes" class="form-select">
-                                        <option value="5">5 minutos</option>
-                                        <option value="15">15 minutos</option>
-                                        <option value="30" selected>30 minutos</option>
-                                        <option value="60">1 hora</option>
+                                        <option value="5" selected="@(Model.ExpirationMinutes == 5)">5 minutos</option>
+                                        <option value="15" selected="@(Model.ExpirationMinutes == 15)">15 minutos</option>
+                                        <option value="30" selected="@(Model.ExpirationMinutes == 30)">30 minutos</option>
+                                        <option value="60" selected="@(Model.ExpirationMinutes == 60)">1 hora</option>
                                     </select>
                                 </div>
                             </div>
@@ -117,7 +117,7 @@
                             </div>
                             <div class="col-4">
                                 <h6 class="text-muted mb-1">Expira</h6>
-                                <span id="countdown" class="text-warning d-block"></span>
+                                <span id="countdown" class="text-warning d-block">@Model.GetTimeUntilExpiration()</span>
                             </div>
                         </div>
 
@@ -178,27 +178,7 @@
     @if (Model.PaymentRequestCreated)
     {
         <script>
-            // Countdown timer
-            const expiresAt = new Date('@Model.ExpiresAt?.ToString("yyyy-MM-ddTHH:mm:ss")');
-            
-            function updateCountdown() {
-                const now = new Date();
-                const timeLeft = expiresAt - now;
-                
-                if (timeLeft <= 0) {
-                    document.getElementById('countdown').innerHTML = '<span class="text-danger">Expirado</span>';
-                    return;
-                }
-                
-                const minutes = Math.floor(timeLeft / 60000);
-                const seconds = Math.floor((timeLeft % 60000) / 1000);
-                
-                document.getElementById('countdown').innerHTML = 
-                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            }
-            
-            setInterval(updateCountdown, 1000);
-            updateCountdown();
+            // El tiempo se actualiza solo con recarga de página para evitar confusiones de zona horaria
             
             // Funciones de utilidad
             function shareQR() {
@@ -248,6 +228,12 @@
                 printWindow.document.close();
                 printWindow.print();
             }
+            
+            // Auto-refresh cada 30 segundos para mantener el tiempo actualizado
+            setTimeout(function() {
+                location.reload();
+            }, 30000);
+            
         </script>
     }
     

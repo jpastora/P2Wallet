@@ -101,15 +101,20 @@ namespace DataAccess.CRUD
         }
 
         // Crea una solicitud de pago que genera un código QR para que el usuario pueda pagar
-        // Crea una solicitud de pago que genera un código QR para que el usuario pueda pagar
-        public Transaction CreatePaymentRequest(int merchantId, decimal saleAmount, string description = "")
+        public Transaction CreatePaymentRequest(int merchantId, decimal saleAmount, string description = "", int expirationMinutes = 30, DateTime? expiresAt = null)
         {
                 var sqlOperation = new SqlOperation() { ProcedureName = "CREATE_PAYMENT_REQUEST_PR" };
 
                 sqlOperation.AddIntParam("@P_MerchantID", merchantId);
                 sqlOperation.AddDoubleParam("@P_SaleAmount", (double)saleAmount);
                 sqlOperation.AddStringParameter("@P_Description", description);
-                sqlOperation.AddIntParam("@P_ExpirationMinutes", 30);
+                sqlOperation.AddIntParam("@P_ExpirationMinutes", expirationMinutes);
+
+                // CORRECCIÓN: Si se proporciona fecha de expiración específica, usarla
+                if (expiresAt.HasValue)
+                {
+                    sqlOperation.Parameters.Add(new SqlParameter("@P_ExpiresAt", expiresAt.Value));
+                }
 
                 // Parámetros de salida
                 sqlOperation.Parameters.Add(new SqlParameter("@P_TransactionID", SqlDbType.Int) { Direction = ParameterDirection.Output });

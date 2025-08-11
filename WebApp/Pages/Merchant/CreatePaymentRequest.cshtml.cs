@@ -42,34 +42,18 @@ namespace WebApp.Pages.Merchant
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        // Zona horaria de Costa Rica (UTC-6)
-        private static readonly TimeZoneInfo CostaRicaTimeZone = 
-            TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
-
         public CreatePaymentRequestModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
         }
 
-        // Método para obtener hora actual de Costa Rica
-        private static DateTime GetCostaRicaTime()
-        {
-            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CostaRicaTimeZone);
-        }
-
-        // Método para convertir fecha a zona horaria de Costa Rica para mostrar
-        private static DateTime ConvertToCostaRicaTime(DateTime utcDateTime)
-        {
-            return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, CostaRicaTimeZone);
-        }
-
-        // Método para calcular tiempo restante hasta expiración
+        // Método simplificado para calcular tiempo restante hasta expiración
         public string GetTimeUntilExpiration()
         {
             if (!ExpiresAt.HasValue)
                 return "";
 
-            // CORRECCIÓN: Las fechas del API ya vienen en hora de Costa Rica
+            // Usar DateTime.Now directamente para simplicidad y consistencia
             var timeLeft = ExpiresAt.Value - DateTime.Now;
             
             if (timeLeft.TotalSeconds <= 0)
@@ -190,7 +174,7 @@ namespace WebApp.Pages.Merchant
                         NetAmount = paymentResponse.NetAmount;
                         SalesTaxAmount = paymentResponse.SalesTaxAmount;
                         
-                        // Convertir la fecha de expiración a zona horaria de Costa Rica para mostrar
+                        // Usar la fecha de expiración directamente del API
                         ExpiresAt = paymentResponse.ExpiresAt;
                         
                         PaymentRequestCreated = true;
