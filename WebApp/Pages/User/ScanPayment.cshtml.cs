@@ -255,16 +255,26 @@ namespace WebApp.Pages.User
                 var response = await httpClient.GetAsync(apiUrl);
                 if (response.IsSuccessStatusCode)
                 {
-                    var promotions = JsonConvert.DeserializeObject<List<object>>(await response.Content.ReadAsStringAsync());
-                    ConvertPromotionsToInfo(promotions ?? new List<object>());
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    var promotions = JsonConvert.DeserializeObject<List<object>>(responseContent);
+                    
+                    if (promotions != null && promotions.Any())
+                    {
+                        ConvertPromotionsToInfo(promotions);
+                    }
+                    else
+                    {
+                        AvailablePromotions = new List<PromotionInfo>();
+                    }
                 }
                 else
                 {
                     AvailablePromotions = new List<PromotionInfo>();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                // En caso de error, continuar sin promociones
                 AvailablePromotions = new List<PromotionInfo>();
             }
         }
@@ -312,25 +322,69 @@ namespace WebApp.Pages.User
 
         private List<PromotionInfo> ConvertPromotionsToInfo(List<object> promotions)
         {
-            var promotionList = promotions.Select(p => {
-                var type = p.GetType();
-                return new PromotionInfo
+            var promotionList = new List<PromotionInfo>();
+            
+            foreach (var promotion in promotions)
+            {
+                try
                 {
-                    Id = type.GetProperty("ID")?.GetValue(p)?.ToString() ?? "0",
-                    Type = type.Name.Contains("Merchant") ? "Merchant" : "Financial",
-                    Name = type.GetProperty("Name")?.GetValue(p)?.ToString() ?? 
-                           type.GetProperty("MerchantPromotionName")?.GetValue(p)?.ToString() ??
-                           type.GetProperty("FinancialPromotionName")?.GetValue(p)?.ToString() ?? "Promoción",
-                    Description = type.GetProperty("Description")?.GetValue(p)?.ToString() ?? 
-                                  type.GetProperty("MerchantPromotionDescription")?.GetValue(p)?.ToString() ??
-                                  type.GetProperty("FinancialPromotionDescription")?.GetValue(p)?.ToString() ?? "",
-                    DiscountPercentage = Convert.ToDouble(type.GetProperty("DiscountPercentage")?.GetValue(p) ?? 0),
-                    MaxRefund = Convert.ToDouble(type.GetProperty("MaxRefund")?.GetValue(p) ?? 0)
-                };
-            }).ToList();
+                    // Convertir el objeto a JsonElement para manejo más robusto
+                    var json = JsonConvert.SerializeObject(promotion);
+                    var promotionData = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+                    
+                    if (promotionData != null)
+                    {
+                        // Extraer valores de manera segura
+                        var promotionId = GetValueSafely(promotionData, "PromotionID");
+                        var promotionType = GetValueSafely(promotionData, "PromotionType");
+                        var name = GetValueSafely(promotionData, "Name");
+                        var description = GetValueSafely(promotionData, "Description");
+                        var discountPercentage = GetDoubleSafely(promotionData, "DiscountPercentage");
+                        var maxRefund = GetDoubleSafely(promotionData, "MaxRefund");
+                        
+                        var promotionInfo = new PromotionInfo
+                        {
+                            Id = promotionId,
+                            Type = promotionType,
+                            Name = !string.IsNullOrEmpty(name) ? name : "Promoción",
+                            Description = description ?? "",
+                            DiscountPercentage = discountPercentage,
+                            MaxRefund = maxRefund
+                        };
+                        
+                        promotionList.Add(promotionInfo);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log del error pero continuar con las otras promociones
+                    Console.WriteLine($"Error procesando promoción: {ex.Message}");
+                }
+            }
 
             AvailablePromotions = promotionList;
             return promotionList;
+        }
+        
+        private string GetValueSafely(Dictionary<string, object> data, string key)
+        {
+            if (data.ContainsKey(key) && data[key] != null)
+            {
+                return data[key].ToString() ?? "";
+            }
+            return "";
+        }
+        
+        private double GetDoubleSafely(Dictionary<string, object> data, string key)
+        {
+            if (data.ContainsKey(key) && data[key] != null)
+            {
+                if (double.TryParse(data[key].ToString(), out double result))
+                {
+                    return result;
+                }
+            }
+            return 0.0;
         }
 
         private async Task LoadMerchantInfo()
