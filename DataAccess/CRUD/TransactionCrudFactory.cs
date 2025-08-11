@@ -190,17 +190,28 @@ namespace DataAccess.CRUD
 
             foreach (var row in results)
             {
-                promotions.Add(new
+                try
                 {
-                    PromotionID = Convert.ToInt32(row["PromotionID"]),
-                    PromotionType = row["PromotionType"].ToString(),
-                    Name = row["Name"].ToString(),
-                    Description = row["Description"].ToString(),
-                    DiscountPercentage = Convert.ToDecimal(row["DiscountPercentage"]),
-                    MaxRefund = Convert.ToDecimal(row["MaxRefund"]),
-                    AvailableQuantity = Convert.ToInt32(row["AvailableQuantity"]),
-                    SourceName = row["SourceName"].ToString()
-                });
+                    // Crear un objeto más estructurado para las promociones
+                    var promotion = new
+                    {
+                        PromotionID = Convert.ToInt32(row["PromotionID"]),
+                        PromotionType = row["PromotionType"]?.ToString() ?? "",
+                        Name = row["Name"]?.ToString() ?? "",
+                        Description = row["Description"]?.ToString() ?? "",
+                        DiscountPercentage = Convert.ToDecimal(row["DiscountPercentage"]),
+                        MaxRefund = Convert.ToDecimal(row["MaxRefund"]),
+                        AvailableQuantity = Convert.ToInt32(row["AvailableQuantity"]),
+                        SourceName = row["SourceName"]?.ToString() ?? ""
+                    };
+                    
+                    promotions.Add(promotion);
+                }
+                catch
+                {
+                    // Continuar con las otras promociones si hay error en una
+                    continue;
+                }
             }
 
             return promotions;
