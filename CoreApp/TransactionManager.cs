@@ -75,12 +75,15 @@ namespace CoreApp
 
         // Crea una solicitud de pago que genera un código QR para que el usuario pueda pagar. Utilizado por comercios para solicitar pagos.
         // Devuelve la transacción con código QR generado
-        public Transaction CreatePaymentRequest(int merchantId, decimal saleAmount, string description = "")
+        public Transaction CreatePaymentRequest(int merchantId, decimal saleAmount, string description = "", int expirationMinutes = 30)
         {
             try
             {
+                // Calcular la fecha de expiración en el servidor de aplicación para consistencia
+                var expiresAt = DateTime.Now.AddMinutes(expirationMinutes);
+                
                 var transactionCrud = new TransactionCrudFactory();
-                var paymentRequest = transactionCrud.CreatePaymentRequest(merchantId, saleAmount, description);
+                var paymentRequest = transactionCrud.CreatePaymentRequest(merchantId, saleAmount, description, expirationMinutes, expiresAt);
                 
                 if (paymentRequest == null)
                 {

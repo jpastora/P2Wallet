@@ -35,25 +35,15 @@ namespace WebApp.Pages.User
 
         private readonly IHttpClientFactory _httpClientFactory;
 
-        // Zona horaria de Costa Rica (UTC-6)
-        private static readonly TimeZoneInfo CostaRicaTimeZone = 
-            TimeZoneInfo.FindSystemTimeZoneById("Central America Standard Time");
-
         public ScanPaymentModel(IHttpClientFactory httpClientFactory)
         {
             _httpClientFactory = httpClientFactory;
         }
 
-        // Método para obtener hora actual de Costa Rica
-        private static DateTime GetCostaRicaTime()
-        {
-            return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, CostaRicaTimeZone);
-        }
-
         // Método para verificar si una solicitud está expirada
         private bool IsPaymentRequestExpired(DateTime? expiresAt)
         {
-            // CORRECCIÓN: Las fechas del API ya vienen en hora de Costa Rica
+            // CORRECCIÓN: Usar DateTime.Now directamente para simplicidad
             return expiresAt.HasValue && expiresAt.Value < DateTime.Now;
         }
 
@@ -210,7 +200,7 @@ namespace WebApp.Pages.User
             if (PaymentRequest?.ExpiresAt == null)
                 return "";
 
-            // CORRECCIÓN: Las fechas del API ya vienen en hora de Costa Rica
+            // CORRECCIÓN: Usar DateTime.Now directamente para simplicidad
             var timeLeft = PaymentRequest.ExpiresAt.Value - DateTime.Now;
             
             if (timeLeft.TotalSeconds <= 0)

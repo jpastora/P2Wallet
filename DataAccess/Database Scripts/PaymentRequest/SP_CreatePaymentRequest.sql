@@ -3,13 +3,14 @@
     @P_SaleAmount DECIMAL(18,2),
     @P_Description NVARCHAR(255) = '',
     @P_ExpirationMinutes INT = 30,
+    @P_ExpiresAt DATETIME = NULL,  -- Nuevo parámetro opcional
     @P_TransactionID INT OUTPUT,
     @P_PaymentRequestCode NVARCHAR(50) OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    BEGIN TRY -- << CORRECCIÓN: Se añade BEGIN TRY
+    BEGIN TRY
 
         BEGIN TRANSACTION;
         
@@ -18,10 +19,17 @@ BEGIN
         
         -- 2. Calcular montos preliminares (13% IVA estándar Costa Rica)
         DECLARE @TaxRate DECIMAL(5,2) = 13.0;
-        DECLARE @SalesTaxAmount DECIMAL(18,2) = @P_SaleAmount * (@TaxRate / 100.0); -- Usar 100.0 para división decimal
+        DECLARE @SalesTaxAmount DECIMAL(18,2) = @P_SaleAmount * (@TaxRate / 100.0);
         DECLARE @GrossAmount DECIMAL(18,2) = @P_SaleAmount + @SalesTaxAmount;
         
-        -- 3. Crear la transacción en estado PendingUserApproval
+        -- 3. Determinar fecha de expiración
+        DECLARE @ExpirationDate DATETIME;
+        IF @P_ExpiresAt IS NOT NULL
+            SET @ExpirationDate = @P_ExpiresAt;  -- Usar fecha proporcionada por el servidor de aplicación
+        ELSE
+            SET @ExpirationDate = DATEADD(MINUTE, @P_ExpirationMinutes, GETDATE());  -- Fallback
+        
+        -- 4. Crear la transacción en estado PendingUserApproval
         INSERT INTO Transactions (
             UserID, MerchantID, BankAccountID, GrossAmount, NetAmount, 
             CommissionApplied, SalesTaxAmount, TaxRateApplied, 
@@ -40,7 +48,7 @@ BEGIN
             'PendingUserApproval',                -- TransactionStatus
             @P_PaymentRequestCode,                -- PaymentRequestCode
             @P_Description,                       -- Description
-            DATEADD(MINUTE, @P_ExpirationMinutes, GETDATE()), -- ExpiresAt
+            @ExpirationDate,                      -- ExpiresAt (usa fecha del servidor de aplicación)
             NULL,                                 -- FinancialPromotionID
             NULL                                  -- MerchantPromotionID
         );
@@ -56,9 +64,9 @@ BEGIN
             @GrossAmount AS GrossAmount,
             @P_SaleAmount AS NetAmount,
             @SalesTaxAmount AS SalesTaxAmount,
-            DATEADD(MINUTE, @P_ExpirationMinutes, GETDATE()) AS ExpiresAt;
+            @ExpirationDate AS ExpiresAt;
             
-    END TRY -- << CORRECCIÓN: Fin del bloque TRY
+    END TRY
     BEGIN CATCH
         -- Si hay una transacción abierta, revertirla
         IF @@TRANCOUNT > 0
@@ -66,6 +74,6 @@ BEGIN
         
         -- Re-lanzar el error para que la aplicación lo reciba
         THROW;
-    END CATCH; -- << CORRECCIÓN: Se añade END CATCH
+    END CATCH;
 END;
 GO

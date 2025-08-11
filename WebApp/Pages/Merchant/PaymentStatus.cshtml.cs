@@ -261,7 +261,7 @@ namespace WebApp.Pages.Merchant
                     if (!ExpiresAt.HasValue || IsExpired || IsCompleted)
                         return "";
 
-                    // Usar DateTime.Now para zona horaria local (consistente con IsExpired)
+                    // Usar DateTime.Now directamente para simplicidad
                     var timeLeft = ExpiresAt.Value - DateTime.Now;
                     
                     // Si el tiempo es negativo o muy pequeño, considerar expirado
