@@ -399,77 +399,154 @@ class ScanPaymentManager {
      * Configurar handlers de formularios
      */
     setupFormHandlers() {
-        // Manejar selección de promoción
         document.querySelectorAll('input[name="promotionSelection"]').forEach(radio => {
             radio.addEventListener('change', (event) => {
                 const selectedId = event.target.value;
                 const selectedType = event.target.getAttribute('data-type') || '';
-                this.selectPromotion(selectedId, selectedType);
+                const pct = parseFloat(event.target.getAttribute('data-pct')) || 0;
+                this.selectPromotion(selectedId, selectedType, pct);
+                this.updatePreview();
             });
         });
-
-        // Manejar cambio de cuenta bancaria para recargar promociones
         const bankSelect = document.querySelector('select[name="SelectedBankAccountId"]');
-        if (bankSelect) {
-            bankSelect.addEventListener('change', (event) => {
-                const paymentCode = document.getElementById('paymentCodeInput')?.value;
+        if (bankSelect && !bankSelect._promoBound) {
+            bankSelect.addEventListener('change', () => {
+                const paymentCode = this.getPaymentCode();
                 const accountId = bankSelect.value;
                 if (paymentCode && accountId) {
-                    this.reloadPromotions(paymentCode, accountId);
+                    this.reloadPromotions(paymentCode, accountId, true);
                 }
+                this.updatePreview();
             });
+            bankSelect._promoBound = true;
         }
     }
 
-    reloadPromotions(paymentCode, accountId) {
-        // Llamada AJAX para recargar promociones con cuenta bancaria específica
-        fetch(`/User/ScanPayment?handler=Promotions&paymentCode=${encodeURIComponent(paymentCode)}&accountId=${encodeURIComponent(accountId)}`)
+    getPaymentCode() {
+        const el1 = document.getElementById('paymentCodeInput');
+        if (el1 && el1.value) return el1.value.trim();
+        const el2 = document.getElementById('paymentCodeInputHidden');
+        if (el2 && el2.value) return el2.value.trim();
+        const byName = document.querySelector('input[name="PaymentCode"]');
+        if (byName && byName.value) return byName.value.trim();
+        return '';
+    }
+
+    reloadPromotions(paymentCode, accountId, autoPreview = false) {
+        const container = document.getElementById('promotionContainer');
+        if (container) {
+            container.classList.add('position-relative');
+            container.innerHTML = `<div class=\"text-center text-muted py-2\"><div class=\"spinner-border spinner-border-sm me-2\"></div>Cargando promociones...</div>`;
+        }
+        const url = `/User/ScanPayment?handler=Promotions&paymentCode=${encodeURIComponent(paymentCode)}&accountId=${encodeURIComponent(accountId)}`;
+        console.debug('Fetching promotions (merged merchant+financial) ->', url);
+        fetch(url)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta del servidor');
-                }
+                if (!response.ok) throw new Error('Respuesta no válida del servidor');
                 return response.json();
             })
             .then(data => {
-                this.updatePromotionsUI(data);
+                console.debug('Promotions loaded (handler):', data);
+                this.updatePromotionsUI(Array.isArray(data) ? data : []);
+                if (autoPreview) this.updatePreview();
             })
             .catch(error => {
                 console.error('Error recargando promociones:', error);
-                // En caso de error, mostrar solo la opción sin promoción
                 this.updatePromotionsUI([]);
+                if (autoPreview) this.updatePreview();
             });
     }
 
     updatePromotionsUI(promotions) {
-        // Actualizar el DOM con las nuevas promociones
-        const promoContainer = document.querySelector('.border.rounded.p-3');
+        const promoContainer = document.getElementById('promotionContainer');
         if (!promoContainer) return;
+        const prevSelected = document.querySelector('input[name="promotionSelection"]:checked');
+        const prevId = prevSelected ? prevSelected.value : '';
         promoContainer.innerHTML = '';
-        // Sin promoción
-        promoContainer.innerHTML += `<div class="form-check">
-            <input class="form-check-input" type="radio" name="promotionSelection" id="noPromotion" value="" checked data-type="">
-            <label class="form-check-label" for="noPromotion">Sin promoción</label>
+        promoContainer.innerHTML += `<div class=\"form-check mb-1">
+            <input class=\"form-check-input\" type=\"radio\" name=\"promotionSelection\" id=\"noPromotion\" value=\"\" data-type=\"\" data-pct=\"0\" checked>
+            <label class=\"form-check-label\" for=\"noPromotion\">Sin promoción</label>
         </div>`;
-        // Promociones
-        promotions.forEach(promo => {
-            promoContainer.innerHTML += `<div class="form-check">
-                <input class="form-check-input" type="radio" name="promotionSelection" id="promo${promo.Id}" value="${promo.Id}" data-type="${promo.Type}">
-                <label class="form-check-label" for="promo${promo.Id}"><strong>${promo.Name}</strong> - ${promo.DiscountPercentage}% desc.<br><small class="text-muted">${promo.Description}</small></label>
-            </div>`;
-        });
-        // Reasignar handlers
+        if (promotions.length === 0) {
+            promoContainer.innerHTML += `<div class=\"text-muted small mt-2\">No hay promociones disponibles para esta selección.</div>`;
+        } else {
+            promotions.forEach(promo => {
+                const id = promo.Id ?? promo.id ?? '';
+                const type = (promo.Type ?? promo.type ?? '').toString();
+                const name = (promo.Name ?? promo.name ?? 'Promoción');
+                const desc = (promo.Description ?? promo.description ?? '');
+                const pct = promo.DiscountPercentage ?? promo.discountPercentage ?? 0;
+                const pctLabel = pct > 0 ? ` - ${pct}% desc.` : '';
+                const badge = type.toLowerCase().startsWith('finan') ? '<span class=\"badge bg-primary ms-1\">Banco</span>' : '<span class=\"badge bg-success ms-1\">Comercio</span>';
+                promoContainer.innerHTML += `<div class=\"form-check mb-1\">
+                    <input class=\"form-check-input\" type=\"radio\" name=\"promotionSelection\" id=\"promo${id}\" value=\"${id}\" data-type=\"${type}\" data-pct=\"${pct}\">
+                    <label class=\"form-check-label\" for=\"promo${id}\"><strong>${this.escapeHtml(name)}</strong>${badge}${pctLabel}<br><small class=\"text-muted\">${this.escapeHtml(desc)}</small></label>
+                </div>`;
+            });
+        }
+        if (prevId && prevId !== '') {
+            const toSelect = promoContainer.querySelector(`#promo${prevId}`);
+            if (toSelect) {
+                toSelect.checked = true;
+                this.selectPromotion(prevId, toSelect.getAttribute('data-type') || '', parseFloat(toSelect.getAttribute('data-pct')) || 0);
+            } else {
+                this.selectPromotion('', '', 0);
+            }
+        } else {
+            this.selectPromotion('', '', 0);
+        }
         this.setupFormHandlers();
     }
 
-    /**
-     * Seleccionar promoción
-     */
-    selectPromotion(id, type) {
+    selectPromotion(id, type, pct = 0) {
         const promotionIdInput = document.querySelector('input[name="SelectedPromotionId"]');
         const promotionTypeInput = document.querySelector('input[name="SelectedPromotionType"]');
-        
         if (promotionIdInput) promotionIdInput.value = id || '';
         if (promotionTypeInput) promotionTypeInput.value = type || '';
+    }
+
+    updatePreview() {
+        const grossInput = document.getElementById('grossAmountValue');
+        const taxInput = document.getElementById('taxAmountValue');
+        const previewCard = document.getElementById('previewCard');
+        if (!grossInput || !taxInput || !previewCard) return;
+        const gross = parseFloat(grossInput.value) || 0;
+        const tax = parseFloat(taxInput.value) || 0;
+        const base = gross - tax;
+        const selectedPromoRadio = document.querySelector('input[name="promotionSelection"]:checked');
+        const pct = selectedPromoRadio ? (parseFloat(selectedPromoRadio.getAttribute('data-pct')) || 0) : 0;
+        let discount = 0;
+        if (pct > 0) {
+            discount = base * (pct / 100.0);
+        }
+        const netAfter = Math.max(0, base - discount);
+        const total = netAfter + tax;
+        // Mostrar
+        document.getElementById('pvGross').textContent = this.formatCurrency(gross);
+        document.getElementById('pvTax').textContent = this.formatCurrency(tax);
+        document.getElementById('pvBase').textContent = this.formatCurrency(base);
+        if (pct > 0) {
+            document.getElementById('pvDiscountRow').style.display = '';
+            document.getElementById('pvPct').textContent = pct.toString();
+            document.getElementById('pvDiscount').textContent = '-' + this.formatCurrency(discount);
+        } else {
+            document.getElementById('pvDiscountRow').style.display = 'none';
+        }
+        document.getElementById('pvTotal').textContent = this.formatCurrency(total);
+        previewCard.style.display = 'block';
+    }
+
+    formatCurrency(val) {
+        return new Intl.NumberFormat('es-CR', { style: 'currency', currency: 'CRC', minimumFractionDigits: 2 }).format(val);
+    }
+
+    escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 
     /**

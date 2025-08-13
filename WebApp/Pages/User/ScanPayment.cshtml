@@ -147,17 +147,18 @@
 
                         <hr>
 
-                        <form method="post" asp-page-handler="Execute">
-                            <input type="hidden" asp-for="PaymentCode" />
-                            
-                            <!-- Selección de cuenta bancaria -->
+                        <form method="post" asp-page-handler="Execute" id="executeForm">
+                            <input type="hidden" asp-for="PaymentCode" id="paymentCodeInputHidden" />
+                            <input type="hidden" value="@Model.PaymentCode" id="paymentCodeInput" />
+                            <input type="hidden" id="grossAmountValue" value="@Model.PaymentRequest?.GrossAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                            <input type="hidden" id="taxAmountValue" value="@Model.PaymentRequest?.SalesTaxAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                             <div class="mb-3">
                                 <label asp-for="SelectedBankAccountId" class="form-label">Pagar con</label>
-                                <select asp-for="SelectedBankAccountId" class="form-select" required>
+                                <select asp-for="SelectedBankAccountId" class="form-select" id="bankAccountSelect" required>
                                     <option value="">Selecciona una cuenta</option>
                                     @foreach (var account in Model.UserAccountsInfo)
                                     {
-                                        <option value="@account.ID">@account.DisplayText - Saldo: @account.BalanceText</option>
+                                        <option value="@account.ID" data-financial="@account.FinancialEntityID">@account.DisplayText - Saldo: @account.BalanceText</option>
                                     }
                                 </select>
                                 @if (!Model.UserAccountsInfo.Any())
@@ -168,44 +169,67 @@
                                     </small>
                                 }
                             </div>
-
-                            <!-- Promociones disponibles -->
-                            @if (Model.AvailablePromotions.Any())
-                            {
-                                <div class="mb-3">
-                                    <label class="form-label">Promociones Disponibles</label>
-                                    <div class="border rounded p-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="promotionSelection" 
-                                                   id="noPromotion" value="" checked 
-                                                   data-type="">
-                                            <label class="form-check-label" for="noPromotion">
-                                                Sin promoción
-                                            </label>
-                                        </div>
-                                        @foreach (var promo in Model.AvailablePromotions)
+                            <div class="mb-3">
+                                <label class="form-label">Promociones Disponibles</label>
+                                <div id="promotionContainer" class="border rounded p-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="promotionSelection" id="noPromotion" value="" checked data-type="">
+                                        <label class="form-check-label" for="noPromotion">Sin promoción</label>
+                                    </div>
+                                    @if (Model.AvailablePromotions.Any())
+                                    {
+                                        foreach (var promo in Model.AvailablePromotions)
                                         {
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="promotionSelection" 
-                                                       id="promo@(promo.Id)" value="@promo.Id" 
-                                                       data-type="@promo.Type">
+                                            <div class="form-check mb-1">
+                                                <input class="form-check-input" type="radio" name="promotionSelection" id="promo@(promo.Id)" value="@promo.Id" data-type="@promo.Type" data-pct="@promo.DiscountPercentage" data-max="@promo.MaxRefund">
                                                 <label class="form-check-label" for="promo@(promo.Id)">
                                                     <strong>@promo.Name</strong> - @promo.DiscountPercentage% desc.<br>
                                                     <small class="text-muted">@promo.Description</small>
                                                 </label>
                                             </div>
                                         }
-                                    </div>
-                                    <input type="hidden" asp-for="SelectedPromotionId" />
-                                    <input type="hidden" asp-for="SelectedPromotionType" />
+                                    }
+                                    else
+                                    {
+                                        <div class="text-muted small mt-2" id="noPromosMsg">Selecciona una cuenta para ver promociones disponibles.</div>
+                                    }
                                 </div>
-                            }
-
+                                <input type="hidden" asp-for="SelectedPromotionId" id="SelectedPromotionId" />
+                                <input type="hidden" asp-for="SelectedPromotionType" id="SelectedPromotionType" />
+                            </div>
+                            <div class="mb-3" id="previewCard" style="display:none;">
+                                <div class="card border-info">
+                                    <div class="card-header py-2 bg-info text-white"><small class="fw-semibold">Previsualización del Pago</small></div>
+                                    <div class="card-body py-2">
+                                        <div class="row small mb-1">
+                                            <div class="col-6 text-muted">Monto bruto:</div>
+                                            <div class="col-6 text-end" id="pvGross">-</div>
+                                        </div>
+                                        <div class="row small mb-1">
+                                            <div class="col-6 text-muted">Impuesto:</div>
+                                            <div class="col-6 text-end" id="pvTax">-</div>
+                                        </div>
+                                        <div class="row small mb-1">
+                                            <div class="col-6 text-muted">Base imponible:</div>
+                                            <div class="col-6 text-end" id="pvBase">-</div>
+                                        </div>
+                                        <div class="row small mb-1" id="pvDiscountRow" style="display:none;">
+                                            <div class="col-6 text-muted">Descuento (<span id="pvPct">0</span>%):</div>
+                                            <div class="col-6 text-end text-success" id="pvDiscount">-</div>
+                                        </div>
+                                        <hr class="my-1" />
+                                        <div class="row">
+                                            <div class="col-6 fw-semibold">Total a pagar:</div>
+                                            <div class="col-6 text-end fw-bold fs-6" id="pvTotal">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="d-grid gap-2">
                                 @if (Model.UserAccountsInfo.Any())
                                 {
-                                    <button type="submit" class="btn btn-success btn-lg">
-                                        <i class="bi bi-check-circle me-1"></i>Confirmar Pago
+                                    <button type="submit" formaction="?handler=Preview" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-clipboard-check me-1"></i>Revisar Pago
                                     </button>
                                 }
                                 <button type="button" class="btn btn-outline-secondary" onclick="buscarOtro()">

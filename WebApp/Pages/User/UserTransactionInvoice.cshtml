@@ -45,9 +45,10 @@
             <div class="factura-table-responsive">
             <table class="factura-table">
                 <tbody>
+                    <!-- Monto inicial ahora corresponde al NetAmount -->
                     <tr>
-                        <td><strong>Monto Bruto</strong></td>
-                        <td class="factura-monto">&#8353;@txn.GrossAmount.ToString("N2")</td>
+                        <td><strong>Monto</strong></td>
+                        <td class="factura-monto">&#8353;@txn.NetAmount.ToString("N2")</td>
                     </tr>
                     @if (discountAmount.HasValue && discountAmount.Value > 0)
                     {
@@ -78,12 +79,13 @@
                         </tr>
                     }
                     <tr>
-                        <td>Impuestos</td>
+                        <td>Impuesto</td>
                         <td class="factura-monto factura-impuesto">&#8353;@txn.SalesTaxAmount.ToString("N2")</td>
                     </tr>
+                    <!-- Monto Final ahora corresponde al GrossAmount -->
                     <tr class="factura-total-row">
                         <td><strong>Monto Final</strong></td>
-                        <td class="factura-monto"><strong>&#8353;@txn.NetAmount.ToString("N2")</strong></td>
+                        <td class="factura-monto"><strong>&#8353;@txn.GrossAmount.ToString("N2")</strong></td>
                     </tr>
                 </tbody>
             </table>
