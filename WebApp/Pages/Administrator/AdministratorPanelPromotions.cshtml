@@ -5,6 +5,142 @@
     ViewData["Title"] = "Administración de Promociones";
 }
 
+<!-- Estilos específicos para admin mobile-friendly -->
+<style>
+    .admin-promotion-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        background: white;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admin-promotion-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+    
+    .promotion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .promotion-title {
+        font-weight: bold;
+        color: #e65100;
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+    
+    .promotion-body {
+        padding: 16px;
+    }
+    
+    .promotion-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .promotion-info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .promotion-info-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+    
+    .promotion-info-value {
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .promotion-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .promotion-description {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+    
+    .promotion-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+    
+    .view-toggle {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .table-view {
+        display: none;
+    }
+    
+    .card-view {
+        display: block;
+    }
+    
+    @@media (max-width: 768px) {
+        .promotion-info {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .promotion-actions {
+            flex-direction: column;
+        }
+        
+        .promotion-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .promotion-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .promotion-badges {
+            justify-content: flex-start;
+        }
+    }
+    
+    @@media (min-width: 992px) {
+        .table-view {
+            display: block;
+        }
+        
+        .card-view {
+            display: none;
+        }
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -60,6 +196,16 @@
                 </div>
             </div>
 
+            <!-- Toggle de vista -->
+            <div class="view-toggle d-lg-none">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleView('table')">
+                    <i class="bi bi-table me-1"></i>Tabla
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="toggleView('card')">
+                    <i class="bi bi-grid-3x3-gap me-1"></i>Cards
+                </button>
+            </div>
+
             <!-- Lista de promociones -->
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
@@ -71,97 +217,216 @@
                 <div class="card-body p-0">
                     @if (Model.AllPromotions.Count > 0)
                     {
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th>Tipo</th>
-                                        <th class="d-none d-lg-table-cell">Origen</th>
-                                        <th class="d-none d-md-table-cell">Descuento %</th>
-                                        <th class="d-none d-xl-table-cell">Vigencia</th>
-                                        <th class="d-none d-lg-table-cell">Cantidad</th>
-                                        <th>Estado</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var promotion in Model.AllPromotions)
-                                    {
-                                        var isActive = promotion.ValidationStatus == "Active";
-                                        var isExpired = promotion.EndDate < DateTime.Now;
-                                        var isNotStarted = promotion.StartDate > DateTime.Now;
-
+                        <!-- Vista en tabla (desktop) -->
+                        <div class="table-view">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>
-                                                <strong>@promotion.Name</strong>
-                                                @if (!string.IsNullOrEmpty(promotion.Description))
-                                                {
-                                                    <div class="small text-muted">@promotion.Description.Substring(0, Math.Min(30, promotion.Description.Length))@(promotion.Description.Length > 30 ? "..." : "")</div>
-                                                }
-                                                <div class="d-lg-none small">
-                                                    <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark") me-1">@promotion.Type</span>
-                                                    <span class="text-muted">@promotion.SourceName</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark")">
-                                                    @promotion.Type
-                                                </span>
-                                            </td>
-                                            <td class="d-none d-lg-table-cell">@promotion.SourceName</td>
-                                            <td class="d-none d-md-table-cell">@promotion.DiscountPercentage.ToString("0.00")%</td>
-                                            <td class="d-none d-xl-table-cell">
-                                                <small>@promotion.StartDate.ToString("dd/MM/yyyy")<br>@promotion.EndDate.ToString("dd/MM/yyyy")</small>
-                                                @if (isExpired)
-                                                {
-                                                    <br><span class="badge bg-danger">Expirada</span>
-                                                }
-                                                else if (isNotStarted)
-                                                {
-                                                    <br><span class="badge bg-warning">No iniciada</span>
-                                                }
-                                                else
-                                                {
-                                                    <br><span class="badge bg-success">Vigente</span>
-                                                }
-                                            </td>
-                                            <td class="d-none d-lg-table-cell">@promotion.AvailableQuantity</td>
-                                            <td>
-                                                <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
-                                                    @AdministratorPanelPromotionsModel.EstadoEspanol(promotion.ValidationStatus)
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
-                                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
-                                                        <input type="hidden" name="promotionId" value="@promotion.ID" />
-                                                        <input type="hidden" name="promotionType" value="@promotion.Type" />
-                                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-lg-auto">
-                                                            <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
-                                                            <span class="d-none d-sm-inline">@(isActive ? "Desactivar" : "Activar")</span>
-                                                        </button>
-                                                    </form>
-                                                    @if (promotion.Type == "Comercio")
+                                            <th>Nombre</th>
+                                            <th>Tipo</th>
+                                            <th class="d-none d-lg-table-cell">Origen</th>
+                                            <th class="d-none d-md-table-cell">Descuento %</th>
+                                            <th class="d-none d-xl-table-cell">Vigencia</th>
+                                            <th class="d-none d-lg-table-cell">Cantidad</th>
+                                            <th>Estado</th>
+                                            <th class="text-center">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var promotion in Model.AllPromotions)
+                                        {
+                                            var isActive = promotion.ValidationStatus == "Active";
+                                            var isExpired = promotion.EndDate < DateTime.Now;
+                                            var isNotStarted = promotion.StartDate > DateTime.Now;
+
+                                            <tr>
+                                                <td>
+                                                    <strong>@promotion.Name</strong>
+                                                    @if (!string.IsNullOrEmpty(promotion.Description))
                                                     {
-                                                        <a href="/Administrator/EditMerchantPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
-                                                            <i class="bi bi-pencil me-1"></i>
-                                                            <span class="d-none d-sm-inline">Editar</span>
-                                                        </a>
+                                                        <div class="small text-muted">@promotion.Description.Substring(0, Math.Min(30, promotion.Description.Length))@(promotion.Description.Length > 30 ? "..." : "")</div>
+                                                    }
+                                                    <div class="d-lg-none small">
+                                                        <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark") me-1">@promotion.Type</span>
+                                                        <span class="text-muted">@promotion.SourceName</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark")">
+                                                        @promotion.Type
+                                                    </span>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell">@promotion.SourceName</td>
+                                                <td class="d-none d-md-table-cell">@promotion.DiscountPercentage.ToString("0.00")%</td>
+                                                <td class="d-none d-xl-table-cell">
+                                                    <small>@promotion.StartDate.ToString("dd/MM/yyyy")<br>@promotion.EndDate.ToString("dd/MM/yyyy")</small>
+                                                    @if (isExpired)
+                                                    {
+                                                        <br><span class="badge bg-danger">Expirada</span>
+                                                    }
+                                                    else if (isNotStarted)
+                                                    {
+                                                        <br><span class="badge bg-warning">No iniciada</span>
                                                     }
                                                     else
                                                     {
-                                                        <a href="/Administrator/EditFinancialPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
-                                                            <i class="bi bi-pencil me-1"></i>
-                                                            <span class="d-none d-sm-inline">Editar</span>
-                                                        </a>
+                                                        <br><span class="badge bg-success">Vigente</span>
                                                     }
+                                                </td>
+                                                <td class="d-none d-lg-table-cell">@promotion.AvailableQuantity</td>
+                                                <td>
+                                                    <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                                        @AdministratorPanelPromotionsModel.EstadoEspanol(promotion.ValidationStatus)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
+                                                        <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                            <input type="hidden" name="promotionId" value="@promotion.ID" />
+                                                            <input type="hidden" name="promotionType" value="@promotion.Type" />
+                                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-lg-auto">
+                                                                <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
+                                                                <span class="d-none d-sm-inline">@(isActive ? "Desactivar" : "Activar")</span>
+                                                            </button>
+                                                        </form>
+                                                        @if (promotion.Type == "Comercio")
+                                                        {
+                                                            <a href="/Administrator/EditMerchantPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                                <i class="bi bi-pencil me-1"></i>
+                                                                <span class="d-none d-sm-inline">Editar</span>
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a href="/Administrator/EditFinancialPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                                <i class="bi bi-pencil me-1"></i>
+                                                                <span class="d-none d-sm-inline">Editar</span>
+                                                            </a>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Vista en cards (mobile) -->
+                        <div class="card-view p-3">
+                            @foreach (var promotion in Model.AllPromotions)
+                            {
+                                var isActive = promotion.ValidationStatus == "Active";
+                                var isExpired = promotion.EndDate < DateTime.Now;
+                                var isNotStarted = promotion.StartDate > DateTime.Now;
+
+                                <div class="admin-promotion-card">
+                                    <!-- Header -->
+                                    <div class="promotion-header">
+                                        <div class="flex-grow-1">
+                                            <div class="promotion-title">
+                                                <i class="bi bi-megaphone me-2"></i>@promotion.Name
+                                            </div>
+                                            <small class="text-muted">ID: @promotion.ID</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                                @AdministratorPanelPromotionsModel.EstadoEspanol(promotion.ValidationStatus)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Información -->
+                                    <div class="promotion-body">
+                                        @if (!string.IsNullOrEmpty(promotion.Description))
+                                        {
+                                            <div class="promotion-description">
+                                                @promotion.Description
+                                            </div>
+                                        }
+                                        
+                                        <div class="promotion-badges">
+                                            <span class="badge @(promotion.Type == "Comercio" ? "bg-info" : "bg-warning text-dark")">
+                                                <i class="bi bi-@(promotion.Type == "Comercio" ? "shop" : "bank") me-1"></i>@promotion.Type
+                                            </span>
+                                            @if (isExpired)
+                                            {
+                                                <span class="badge bg-danger">Expirada</span>
+                                            }
+                                            else if (isNotStarted)
+                                            {
+                                                <span class="badge bg-warning text-dark">No iniciada</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Vigente</span>
+                                            }
+                                            <span class="badge bg-secondary">@promotion.PromotionType</span>
+                                        </div>
+                                        
+                                        <div class="promotion-info">
+                                            <div class="promotion-info-item">
+                                                <div class="promotion-info-label">
+                                                    <i class="bi bi-building me-1"></i>Origen
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                                <div class="promotion-info-value">@promotion.SourceName</div>
+                                            </div>
+                                            <div class="promotion-info-item">
+                                                <div class="promotion-info-label">
+                                                    <i class="bi bi-percent me-1"></i>Descuento
+                                                </div>
+                                                <div class="promotion-info-value text-success">@promotion.DiscountPercentage.ToString("0.00")%</div>
+                                            </div>
+                                            <div class="promotion-info-item">
+                                                <div class="promotion-info-label">
+                                                    <i class="bi bi-calendar-range me-1"></i>Vigencia
+                                                </div>
+                                                <div class="promotion-info-value">
+                                                    @promotion.StartDate.ToString("dd/MM/yyyy") -<br>
+                                                    @promotion.EndDate.ToString("dd/MM/yyyy")
+                                                </div>
+                                            </div>
+                                            <div class="promotion-info-item">
+                                                <div class="promotion-info-label">
+                                                    <i class="bi bi-box me-1"></i>Disponibles
+                                                </div>
+                                                <div class="promotion-info-value">@promotion.AvailableQuantity</div>
+                                            </div>
+                                            <div class="promotion-info-item">
+                                                <div class="promotion-info-label">
+                                                    <i class="bi bi-currency-dollar me-1"></i>Reembolso Máx.
+                                                </div>
+                                                <div class="promotion-info-value">?@promotion.MaxRefund.ToString("N2")</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Acciones -->
+                                        <div class="promotion-actions">
+                                            <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                <input type="hidden" name="promotionId" value="@promotion.ID" />
+                                                <input type="hidden" name="promotionType" value="@promotion.Type" />
+                                                <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                                    <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
+                                                    @(isActive ? "Desactivar" : "Activar")
+                                                </button>
+                                            </form>
+                                            @if (promotion.Type == "Comercio")
+                                            {
+                                                <a href="/Administrator/EditMerchantPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil me-1"></i>Editar
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="/Administrator/EditFinancialPromotion?promotionId=@promotion.ID" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil me-1"></i>Editar
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
@@ -205,3 +470,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function toggleView(view) {
+            const tableView = document.querySelector('.table-view');
+            const cardView = document.querySelector('.card-view');
+            const tableBtn = document.querySelector('button[onclick*="table"]');
+            const cardBtn = document.querySelector('button[onclick*="card"]');
+            
+            if (view === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+                tableBtn.classList.remove('btn-outline-secondary');
+                tableBtn.classList.add('btn-primary');
+                cardBtn.classList.remove('btn-primary');
+                cardBtn.classList.add('btn-outline-secondary');
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'block';
+                cardBtn.classList.remove('btn-outline-secondary');
+                cardBtn.classList.add('btn-primary');
+                tableBtn.classList.remove('btn-primary');
+                tableBtn.classList.add('btn-outline-secondary');
+            }
+        }
+    </script>
+}

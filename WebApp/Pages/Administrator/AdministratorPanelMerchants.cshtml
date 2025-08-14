@@ -5,6 +5,124 @@
     ViewData["Title"] = "Administración de Comercios";
 }
 
+<!-- Estilos específicos para admin mobile-friendly -->
+<style>
+    .admin-merchant-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        background: white;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admin-merchant-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+    
+    .merchant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .merchant-title {
+        font-weight: bold;
+        color: #1976d2;
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+    
+    .merchant-body {
+        padding: 16px;
+    }
+    
+    .merchant-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .merchant-info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .merchant-info-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+    
+    .merchant-info-value {
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .merchant-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .view-toggle {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .table-view {
+        display: none;
+    }
+    
+    .card-view {
+        display: block;
+    }
+    
+    @@media (max-width: 768px) {
+        .merchant-info {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .merchant-actions {
+            flex-direction: column;
+        }
+        
+        .merchant-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .merchant-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+    }
+    
+    @@media (min-width: 992px) {
+        .table-view {
+            display: block;
+        }
+        
+        .card-view {
+            display: none;
+        }
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -50,6 +168,16 @@
                 </div>
             </div>
 
+            <!-- Toggle de vista -->
+            <div class="view-toggle d-lg-none">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleView('table')">
+                    <i class="bi bi-table me-1"></i>Tabla
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="toggleView('card')">
+                    <i class="bi bi-grid-3x3-gap me-1"></i>Cards
+                </button>
+            </div>
+
             <!-- Lista de comercios -->
             <div class="card shadow-sm">
                 <div class="card-header bg-info text-white">
@@ -61,63 +189,138 @@
                 <div class="card-body p-0">
                     @if (Model.AllMerchants.Count > 0)
                     {
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nombre</th>
-                                        <th class="d-none d-lg-table-cell">Email</th>
-                                        <th class="d-none d-md-table-cell">Teléfono</th>
-                                        <th class="d-none d-xl-table-cell">Tax ID</th>
-                                        <th class="d-none d-lg-table-cell">Comisión %</th>
-                                        <th>Estado</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var merchant in Model.AllMerchants)
-                                    {
-                                        var isActive = merchant.ValidationStatus == "Active";
-
+                        <!-- Vista en tabla (desktop) -->
+                        <div class="table-view">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>
-                                                <strong>@merchant.MerchantName</strong>
-                                                <div class="d-lg-none small text-muted">
-                                                    @(merchant.Email.Length > 25 ? merchant.Email.Substring(0, 25) + "..." : merchant.Email)
-                                                </div>
-                                            </td>
-                                            <td class="d-none d-lg-table-cell">@merchant.Email</td>
-                                            <td class="d-none d-md-table-cell">@merchant.ContactPhone</td>
-                                            <td class="d-none d-xl-table-cell">@merchant.TaxID</td>
-                                            <td class="d-none d-lg-table-cell">@merchant.CommissionPercentage.ToString("0.0")%</td>
-                                            <td>
-                                                <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
-                                                    @AdministratorPanelMerchantsModel.EstadoEspanol(merchant.ValidationStatus)
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
-                                                    <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
-                                                        <input type="hidden" name="merchantId" value="@merchant.ID" />
-                                                        <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-lg-auto">
-                                                            <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
-                                                            <span class="d-none d-sm-inline">@(isActive ? "Desactivar" : "Activar")</span>
-                                                        </button>
-                                                    </form>
-                                                    <a href="/Administrator/EditMerchant?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
-                                                        <i class="bi bi-pencil me-1"></i>
-                                                        <span class="d-none d-sm-inline">Editar</span>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-outline-info w-100 w-lg-auto" data-bs-toggle="modal" data-bs-target="#assignMerchantModal@(merchant.ID)">
-                                                        <i class="bi bi-person-plus me-1"></i>
-                                                        <span class="d-none d-sm-inline">Asignar</span>
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            <th>Nombre</th>
+                                            <th class="d-none d-lg-table-cell">Email</th>
+                                            <th class="d-none d-md-table-cell">Teléfono</th>
+                                            <th class="d-none d-xl-table-cell">Tax ID</th>
+                                            <th class="d-none d-lg-table-cell">Comisión %</th>
+                                            <th>Estado</th>
+                                            <th class="text-center">Acciones</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var merchant in Model.AllMerchants)
+                                        {
+                                            var isActive = merchant.ValidationStatus == "Active";
+
+                                            <tr>
+                                                <td>
+                                                    <strong>@merchant.MerchantName</strong>
+                                                    <div class="d-lg-none small text-muted">
+                                                        @(merchant.Email.Length > 25 ? merchant.Email.Substring(0, 25) + "..." : merchant.Email)
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell">@merchant.Email</td>
+                                                <td class="d-none d-md-table-cell">@merchant.ContactPhone</td>
+                                                <td class="d-none d-xl-table-cell">@merchant.TaxID</td>
+                                                <td class="d-none d-lg-table-cell">@merchant.CommissionPercentage.ToString("0.0")%</td>
+                                                <td>
+                                                    <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                                        @AdministratorPanelMerchantsModel.EstadoEspanol(merchant.ValidationStatus)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
+                                                        <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                            <input type="hidden" name="merchantId" value="@merchant.ID" />
+                                                            <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success") w-100 w-lg-auto">
+                                                                <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
+                                                                <span class="d-none d-sm-inline">@(isActive ? "Desactivar" : "Activar")</span>
+                                                            </button>
+                                                        </form>
+                                                        <a href="/Administrator/EditMerchant?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                            <i class="bi bi-pencil me-1"></i>
+                                                            <span class="d-none d-sm-inline">Editar</span>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-outline-info w-100 w-lg-auto" data-bs-toggle="modal" data-bs-target="#assignMerchantModal@(merchant.ID)">
+                                                            <i class="bi bi-person-plus me-1"></i>
+                                                            <span class="d-none d-sm-inline">Asignar</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Vista en cards (mobile) -->
+                        <div class="card-view p-3">
+                            @foreach (var merchant in Model.AllMerchants)
+                            {
+                                var isActive = merchant.ValidationStatus == "Active";
+
+                                <div class="admin-merchant-card">
+                                    <!-- Header -->
+                                    <div class="merchant-header">
+                                        <div class="flex-grow-1">
+                                            <div class="merchant-title">
+                                                <i class="bi bi-shop me-2"></i>@merchant.MerchantName
+                                            </div>
+                                            <small class="text-muted">ID: @merchant.ID</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                                @AdministratorPanelMerchantsModel.EstadoEspanol(merchant.ValidationStatus)
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Información -->
+                                    <div class="merchant-body">
+                                        <div class="merchant-info">
+                                            <div class="merchant-info-item">
+                                                <div class="merchant-info-label">
+                                                    <i class="bi bi-envelope me-1"></i>Email
+                                                </div>
+                                                <div class="merchant-info-value">@merchant.Email</div>
+                                            </div>
+                                            <div class="merchant-info-item">
+                                                <div class="merchant-info-label">
+                                                    <i class="bi bi-telephone me-1"></i>Teléfono
+                                                </div>
+                                                <div class="merchant-info-value">@merchant.ContactPhone</div>
+                                            </div>
+                                            <div class="merchant-info-item">
+                                                <div class="merchant-info-label">
+                                                    <i class="bi bi-card-text me-1"></i>Tax ID
+                                                </div>
+                                                <div class="merchant-info-value">@merchant.TaxID</div>
+                                            </div>
+                                            <div class="merchant-info-item">
+                                                <div class="merchant-info-label">
+                                                    <i class="bi bi-percent me-1"></i>Comisión
+                                                </div>
+                                                <div class="merchant-info-value">@merchant.CommissionPercentage.ToString("0.0")%</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Acciones -->
+                                        <div class="merchant-actions">
+                                            <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                <input type="hidden" name="merchantId" value="@merchant.ID" />
+                                                <button type="submit" class="btn btn-sm @(isActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                                    <i class="bi bi-@(isActive ? "lock" : "unlock") me-1"></i>
+                                                    @(isActive ? "Desactivar" : "Activar")
+                                                </button>
+                                            </form>
+                                            <a href="/Administrator/EditMerchant?merchantId=@merchant.ID" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil me-1"></i>Editar
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#assignMerchantModal@(merchant.ID)">
+                                                <i class="bi bi-person-plus me-1"></i>Asignar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
@@ -211,3 +414,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function toggleView(view) {
+            const tableView = document.querySelector('.table-view');
+            const cardView = document.querySelector('.card-view');
+            const tableBtn = document.querySelector('button[onclick*="table"]');
+            const cardBtn = document.querySelector('button[onclick*="card"]');
+            
+            if (view === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+                tableBtn.classList.remove('btn-outline-secondary');
+                tableBtn.classList.add('btn-primary');
+                cardBtn.classList.remove('btn-primary');
+                cardBtn.classList.add('btn-outline-secondary');
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'block';
+                cardBtn.classList.remove('btn-outline-secondary');
+                cardBtn.classList.add('btn-primary');
+                tableBtn.classList.remove('btn-primary');
+                tableBtn.classList.add('btn-outline-secondary');
+            }
+        }
+    </script>
+}
