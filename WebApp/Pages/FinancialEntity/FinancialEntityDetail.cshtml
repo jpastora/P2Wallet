@@ -1,10 +1,10 @@
-@page
+ï»¿@page
 @model WebApp.Pages.FinancialEntity.FinancialEntityDetailModel
 @{
     ViewData["Title"] = Model.EntityFound ? Model.EntityInfo.EntityName : "Entidad financiera no encontrada";
 }
 
-<!-- Estilos específicos para detalle de entidad financiera -->
+<!-- Estilos especÃ­ficos para detalle de entidad financiera -->
 <style>
     .entity-hero {
         background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
@@ -175,7 +175,7 @@ else
                 <div class="col-md-8">
                     <div class="entity-info-card card p-4 mb-4">
                         <h4 class="mb-3">
-                            <i class="bi bi-info-circle text-primary me-2"></i>Información de la Entidad
+                            <i class="bi bi-info-circle text-primary me-2"></i>InformaciÃ³n de la Entidad
                         </h4>
                         <div class="row">
                             <div class="col-md-6">
@@ -187,7 +187,7 @@ else
                                     </p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6 class="text-muted mb-1">Teléfono</h6>
+                                    <h6 class="text-muted mb-1">TelÃ©fono</h6>
                                     <p class="mb-0">
                                         <i class="bi bi-telephone me-2"></i>
                                         @(!string.IsNullOrEmpty(Model.EntityInfo.ContactPhone) ? Model.EntityInfo.ContactPhone : "No especificado")
@@ -196,17 +196,17 @@ else
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <h6 class="text-muted mb-1">Identificación Tributaria</h6>
+                                    <h6 class="text-muted mb-1">IdentificaciÃ³n Tributaria</h6>
                                     <p class="mb-0">
                                         <i class="bi bi-card-text me-2"></i>
                                         @(!string.IsNullOrEmpty(Model.EntityInfo.TaxID) ? Model.EntityInfo.TaxID : "No especificado")
                                     </p>
                                 </div>
                                 <div class="mb-3">
-                                    <h6 class="text-muted mb-1">Comisión</h6>
+                                    <h6 class="text-muted mb-1">ComisiÃ³n</h6>
                                     <p class="mb-0">
                                         <i class="bi bi-percent me-2"></i>
-                                        @Model.EntityInfo.CommissionPercentage.ToString("0.0")% por transacción
+                                        @Model.EntityInfo.CommissionPercentage.ToString("0.0")% por transacciÃ³n
                                     </p>
                                 </div>
                             </div>
@@ -258,7 +258,7 @@ else
                     <div class="service-feature">
                         <i class="bi bi-arrow-left-right fs-1 text-primary mb-3"></i>
                         <h6>Transferencias</h6>
-                        <p class="small text-muted">Envía y recibe dinero al instante</p>
+                        <p class="small text-muted">EnvÃ­a y recibe dinero al instante</p>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -327,7 +327,7 @@ else
                                         @if (promotion.MaxRefund > 0)
                                         {
                                             <span class="badge bg-success">
-                                                Max: ?@promotion.MaxRefund.ToString("N0")
+                                                Max: â‚¡@promotion.MaxRefund.ToString("N0")
                                             </span>
                                         }
                                     </div>
@@ -367,7 +367,7 @@ else
     <!-- CTA Section -->
     <section class="py-5 bg-light">
         <div class="container text-center">
-            <h3 class="mb-3">¿Quieres aprovechar estos beneficios?</h3>
+            <h3 class="mb-3">Â¿Quieres aprovechar estos beneficios?</h3>
             <p class="lead mb-4">Conecta tu cuenta de @Model.EntityInfo.EntityName con Yavi</p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="/Register/UserRegister" class="btn btn-primary btn-lg">
@@ -383,14 +383,14 @@ else
 
 @section Scripts {
     <script>
-        // Función para contactar entidad
+        // FunciÃ³n para contactar entidad
         function contactarEntidad(nombreEntidad) {
-            alert(`Contactando a ${nombreEntidad}...\n\nEsta funcionalidad estará disponible próximamente.`);
+            alert(`Contactando a ${nombreEntidad}...\n\nEsta funcionalidad estarÃ¡ disponible prÃ³ximamente.`);
         }
 
-        // Función para mostrar detalles de promoción
+        // FunciÃ³n para mostrar detalles de promociÃ³n
         function mostrarDetallesPromocion(tituloPromocion) {
-            alert(`Mostrando detalles de: ${tituloPromocion}\n\nEsta funcionalidad estará disponible próximamente.`);
+            alert(`Mostrando detalles de: ${tituloPromocion}\n\nEsta funcionalidad estarÃ¡ disponible prÃ³ximamente.`);
         }
 
         // Smooth scrolling
