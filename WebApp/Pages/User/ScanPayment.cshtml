@@ -251,12 +251,27 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="module" src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js"></script>
+    <!-- Cargar QrScanner de forma más compatible -->
+    <script src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
     <script>
-        // Importar QrScanner de forma compatible
-        window.QrScanner = QrScanner || null;
-        if (!window.QrScanner && typeof QrScanner !== 'undefined') {
-            window.QrScanner = QrScanner;
+        // Asegurar que QrScanner esté disponible globalmente
+        window.QrScanner = window.QrScanner || QrScanner;
+        
+        // Verificar disponibilidad antes de cargar el script principal
+        if (typeof QrScanner === 'undefined') {
+            console.error('QrScanner no se pudo cargar. Intentando cargar versión alternativa...');
+            
+            // Fallback: cargar desde CDN alternativo
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js';
+            script.onload = function() {
+                window.QrScanner = QrScanner;
+                console.log('QrScanner cargado exitosamente desde CDN alternativo');
+            };
+            script.onerror = function() {
+                console.error('Error cargando QrScanner desde CDN alternativo');
+            };
+            document.head.appendChild(script);
         }
     </script>
     <script src="~/js/ScanPayment.js" charset="UTF-8"></script>
