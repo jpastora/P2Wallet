@@ -1,4 +1,4 @@
-@page
+﻿@page
 @model WebApp.Pages.User.ConfirmPaymentModel
 @{
     ViewData["Title"] = "Confirmar Pago";
@@ -22,15 +22,15 @@
                         <dd class="col-7 col-md-8">@Model.MerchantInfo?.MerchantName</dd>
                         <dt class="col-5 col-md-4">Cuenta:</dt>
                         <dd class="col-7 col-md-8">@Model.BankAccount?.IBAN (@Model.FinancialEntity?.EntityName)</dd>
-                        <dt class="col-5 col-md-4">Descripci�n:</dt>
+                        <dt class="col-5 col-md-4">Descripción:</dt>
                         <dd class="col-7 col-md-8">@Model.PaymentRequest?.Description</dd>
                         <dt class="col-5 col-md-4">Monto Bruto:</dt>
-                        <dd class="col-7 col-md-8">?@Model.GrossAmount.ToString("N2")</dd>
+                        <dd class="col-7 col-md-8">₡@Model.GrossAmount.ToString("N2")</dd>
                         <dt class="col-5 col-md-4">Impuesto (incluido):</dt>
-                        <dd class="col-7 col-md-8">?@Model.SalesTaxAmount.ToString("N2")</dd>
-                        <dt class="col-5 col-md-4">Base imponible:</dt>
-                        <dd class="col-7 col-md-8">?@Model.OriginalNetAmount.ToString("N2")</dd>
-                        <dt class="col-5 col-md-4">Promoci�n:</dt>
+                        <dd class="col-7 col-md-8">₡@Model.SalesTaxAmount.ToString("N2")</dd>
+                        <dt class="col-5 col-md-4">Monto sin impuestos:</dt>
+                        <dd class="col-7 col-md-8">₡@Model.OriginalNetAmount.ToString("N2")</dd>
+                        <dt class="col-5 col-md-4">Promoción:</dt>
                         <dd class="col-7 col-md-8">
                             @if (Model.PromotionId.HasValue && Model.DiscountPercentage > 0)
                             {
@@ -57,13 +57,13 @@
                             }
                             else
                             {
-                                <span class="text-muted">?0.00</span>
+                                <span class="text-muted">₡0.00</span>
                             }
                         </dd>
                         <dt class="col-5 col-md-4">Subtotal tras desc.:</dt>
-                        <dd class="col-7 col-md-8">?@Model.NetAfterDiscount.ToString("N2")</dd>
+                        <dd class="col-7 col-md-8">₡@Model.NetAfterDiscount.ToString("N2")</dd>
                         <dt class="col-5 col-md-4">Total a pagar:</dt>
-                        <dd class="col-7 col-md-8 fs-5 text-primary">?@Model.FinalPayable.ToString("N2")</dd>
+                        <dd class="col-7 col-md-8 fs-5 text-primary">₡@Model.FinalPayable.ToString("N2")</dd>
                     </dl>
                     <hr />
                     <form method="post" asp-page-handler="Confirm">
@@ -77,9 +77,6 @@
                         </div>
                     </form>
                 </div>
-            </div>
-            <div class="alert alert-light mt-3 small mb-0">
-                <i class="bi bi-info-circle me-1"></i>El impuesto no se reduce por promociones. El descuento aplica sobre la base imponible.
             </div>
         </div>
     </div>
