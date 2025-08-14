@@ -314,21 +314,37 @@ namespace WebApp.Pages.User
             catch { AvailablePromotions = new(); }
         }
 
-        public async Task<IActionResult> OnGetPromotionsAsync(string paymentCode, int accountId)
+        // =============================
+        // FIX: Permitir pasar directamente financialEntityId desde el cliente si la cuenta aún no se pudo resolver en servidor.
+        // =============================
+        public async Task<IActionResult> OnGetPromotionsAsync(string paymentCode, int accountId, int? financialEntityId = null)
         {
             try
             {
-                if (string.IsNullOrEmpty(paymentCode) || accountId <= 0)
+                if (string.IsNullOrEmpty(paymentCode))
                     return new JsonResult(new List<object>());
 
-                var accountManager = new BankAccountManager();
-                var account = accountManager.RetrieveBankAccountById(accountId);
-                if (account == null)
-                    return new JsonResult(new List<object>());
+                int? finId = null;
 
-                // Reusar lógica central
+                // Priorizar id financiero enviado explícitamente (nuevo)
+                if (financialEntityId.HasValue && financialEntityId.Value > 0)
+                {
+                    finId = financialEntityId.Value;
+                }
+                else if (accountId > 0)
+                {
+                    // Fallback: resolver por cuenta (lógica anterior)
+                    var accountManager = new BankAccountManager();
+                    var account = accountManager.RetrieveBankAccountById(accountId);
+                    if (account != null)
+                    {
+                        finId = account.FinancialEntityID;
+                    }
+                }
+
+                // Construir URL con/ sin entidad financiera
                 var httpClient = _httpClientFactory.CreateClient();
-                var url = GetApiBaseUrl() + $"/api/PaymentRequest/GetPromotions/{paymentCode}?financialEntityId={account.FinancialEntityID}";
+                var url = GetApiBaseUrl() + $"/api/PaymentRequest/GetPromotions/{paymentCode}" + (finId.HasValue ? $"?financialEntityId={finId.Value}" : string.Empty);
                 var response = await httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                     return new JsonResult(new List<object>());

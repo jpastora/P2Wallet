@@ -148,8 +148,7 @@
                         <hr>
 
                         <form method="post" asp-page-handler="Execute" id="executeForm">
-                            <input type="hidden" asp-for="PaymentCode" id="paymentCodeInputHidden" />
-                            <input type="hidden" value="@Model.PaymentCode" id="paymentCodeInput" />
+                            <input type="hidden" asp-for="PaymentCode" id="paymentCodeInput" />
                             <input type="hidden" id="grossAmountValue" value="@Model.PaymentRequest?.GrossAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                             <input type="hidden" id="taxAmountValue" value="@Model.PaymentRequest?.SalesTaxAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                             <div class="mb-3">
@@ -210,7 +209,7 @@
                                             <div class="col-6 text-end" id="pvTax">-</div>
                                         </div>
                                         <div class="row small mb-1">
-                                            <div class="col-6 text-muted">Base imponible:</div>
+                                            <div class="col-6 text-muted">Monto sin impuestos:</div>
                                             <div class="col-6 text-end" id="pvBase">-</div>
                                         </div>
                                         <div class="row small mb-1" id="pvDiscountRow" style="display:none;">
@@ -252,15 +251,22 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://unpkg.com/qr-scanner/qr-scanner.min.js"></script>
-    <script src="~/js/ScanPayment.js"></script>
-    
+    <script type="module" src="https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js"></script>
+    <script>
+        // Importar QrScanner de forma compatible
+        window.QrScanner = QrScanner || null;
+        if (!window.QrScanner && typeof QrScanner !== 'undefined') {
+            window.QrScanner = QrScanner;
+        }
+    </script>
+    <script src="~/js/ScanPayment.js" charset="UTF-8"></script>
+
     <script>
         // Configurar el manager con datos del servidor
         document.addEventListener('DOMContentLoaded', function() {
             if (window.ScanPaymentManager) {
                 window.ScanPaymentManager.configure({
-                    message: @Html.Raw(Json.Serialize(Model.Message))
+                    message: @Html.Raw(Json.Serialize(Model.Message ?? ""))
                 });
             }
         });

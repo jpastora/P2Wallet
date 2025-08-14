@@ -1,15 +1,12 @@
-@page "{id:int}"
+﻿@page "{id:int}"
 @model WebApp.Pages.User.UserTransactionInvoiceModel
 @{
     var txn = Model.Transaction;
     var user = Model.CurrentUser;
     var merchant = Model.MerchantName;
-    var iban = Model.IBAN;
-    var bank = Model.BankName;
-    var discountName = Model.DiscountName;
-    var discountPercentage = Model.DiscountPercentage;
-    var discountAmount = Model.DiscountAmount;
-    var discountSource = Model.DiscountSource;
+    var account = Model.IBAN;
+    var promotion = Model.PromotionApplied;
+    var discountApplied = Model.DiscountAmount;
     string EstadoEspanol(string status) => status switch
     {
         "Completed" => "Completada",
@@ -25,17 +22,16 @@
 <div class="container py-4 mb-5">
     <div class="factura-box">
         <div class="factura-header">
-            Factura de Transacci�n
+            Comprobante de Pago
         </div>
         @if (txn != null)
         {
             <div class="factura-info-row">
                 <div class="factura-info-list">
-                    <div><span>ID Transacci�n:</span> @txn.ID</div>
+                    <div><span>ID Transacción:</span> #@txn.ID</div>
                     <div><span>Usuario:</span> @user?.FirstName @user?.LastName</div>
                     <div><span>Comercio:</span> @merchant</div>
-                    <div><span>Cuenta:</span> @iban</div>
-                    <div><span>Banco:</span> @bank</div>
+                    <div><span>Cuenta:</span> @account</div>
                     <div><span>Estado:</span> @EstadoEspanol(txn.TransactionStatus)</div>
                 </div>
                 <div class="factura-fecha">
@@ -43,52 +39,57 @@
                 </div>
             </div>
             <div class="factura-table-responsive">
-            <table class="factura-table">
-                <tbody>
-                    <!-- Monto inicial ahora corresponde al NetAmount -->
-                    <tr>
-                        <td><strong>Monto</strong></td>
-                        <td class="factura-monto">&#8353;@txn.NetAmount.ToString("N2")</td>
-                    </tr>
-                    @if (discountAmount.HasValue && discountAmount.Value > 0)
-                    {
+                <table class="factura-table">
+                    <tbody>
+                        @{
+                            var originalNetAmountCalculated = discountApplied > 0 ? txn.NetAmount + discountApplied : txn.NetAmount;
+                        }
+                        @if (discountApplied > 0)
+                        {
+                            <tr>
+                                <td><strong>Monto de Venta Original</strong></td>
+                                <td class="factura-monto">₡@originalNetAmountCalculated.ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <td>Descuento Aplicado</td>
+                                <td class="factura-monto factura-descuento">-₡@discountApplied.ToString("N2")</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Subtotal (después descuento)</strong></td>
+                                <td class="factura-monto">₡@txn.NetAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td><strong>Monto de Venta</strong></td>
+                                <td class="factura-monto">₡@txn.NetAmount.ToString("N2")</td>
+                            </tr>
+                        }
+                        @if (promotion != null)
+                        {
+                            <tr>
+                                <td>Promoción Aplicada</td>
+                                <td>@promotion.Name (@promotion.TypeText)</td>
+                            </tr>
+                            @if (promotion.DiscountPercentage > 0)
+                            {
+                                <tr>
+                                    <td>Porcentaje de descuento</td>
+                                    <td>@promotion.DiscountPercentage.ToString("N2")%</td>
+                                </tr>
+                            }
+                        }
                         <tr>
-                            <td>Descuento en colones</td>
-                            <td class="factura-monto factura-descuento">-&#8353;@discountAmount.Value.ToString("N2")</td>
+                            <td>Impuesto Aplicado (@txn.TaxRateApplied.ToString("N1")%)</td>
+                            <td class="factura-monto factura-impuesto">₡@txn.SalesTaxAmount.ToString("N2")</td>
                         </tr>
-                    }
-                    @if (discountPercentage.HasValue && discountPercentage.Value > 0)
-                    {
-                        <tr>
-                            <td>Porcentaje de descuento</td>
-                            <td>@discountPercentage.Value.ToString("N2")%</td>
+                        <tr class="factura-total-row">
+                            <td><strong>Total Pagado</strong></td>
+                            <td class="factura-monto"><strong>₡@txn.GrossAmount.ToString("N2")</strong></td>
                         </tr>
-                    }
-                    @if (!string.IsNullOrEmpty(discountName))
-                    {
-                        <tr>
-                            <td>Nombre del descuento</td>
-                            <td>@discountName</td>
-                        </tr>
-                    }
-                    @if (!string.IsNullOrEmpty(discountSource))
-                    {
-                        <tr>
-                            <td>Comercio/Entidad del descuento</td>
-                            <td>@discountSource</td>
-                        </tr>
-                    }
-                    <tr>
-                        <td>Impuesto</td>
-                        <td class="factura-monto factura-impuesto">&#8353;@txn.SalesTaxAmount.ToString("N2")</td>
-                    </tr>
-                    <!-- Monto Final ahora corresponde al GrossAmount -->
-                    <tr class="factura-total-row">
-                        <td><strong>Monto Final</strong></td>
-                        <td class="factura-monto"><strong>&#8353;@txn.GrossAmount.ToString("N2")</strong></td>
-                    </tr>
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             </div>
             <div class="factura-btn-row">
                 <a asp-page="/User/UserTransactionID" class="factura-btn">Volver al historial</a>
@@ -96,7 +97,7 @@
         }
         else
         {
-            <div class="alert alert-danger">No se encontr� la transacci�n.</div>
+            <div class="alert alert-danger">No se encontró la transacción.</div>
         }
     </div>
 </div>

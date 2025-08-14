@@ -14,10 +14,8 @@ namespace WebApp.Pages.User
         public string MerchantName { get; set; }
         public string IBAN { get; set; }
         public string BankName { get; set; }
-        public string DiscountName { get; set; }
-        public double? DiscountPercentage { get; set; }
-        public double? DiscountAmount { get; set; }
-        public string DiscountSource { get; set; }
+        public PromotionDto PromotionApplied { get; set; }
+        public double DiscountAmount { get; set; }
 
         public IActionResult OnGet(int id)
         {
@@ -52,20 +50,22 @@ namespace WebApp.Pages.User
                     }
                     BankName = bankName;
 
-                    // Lógica de descuento
-                    DiscountName = null;
-                    DiscountPercentage = null;
-                    DiscountAmount = null;
-                    DiscountSource = null;
+                    // Lógica de promoción y descuento
+                    PromotionApplied = null;
+                    DiscountAmount = 0;
                     if (Transaction.MerchantPromotionID.HasValue)
                     {
                         var promoManager = new MerchantPromotionManager();
                         var promo = promoManager.RetrievePromotionById(Transaction.MerchantPromotionID.Value);
                         if (promo != null)
                         {
-                            DiscountName = promo.MerchantPromotionName;
-                            DiscountPercentage = promo.DiscountPercentage;
-                            DiscountSource = merchant?.MerchantName ?? "Comercio";
+                            PromotionApplied = new PromotionDto
+                            {
+                                Name = promo.MerchantPromotionName,
+                                DiscountPercentage = promo.DiscountPercentage,
+                                TypeText = "Promoción del Comercio"
+                            };
+                            DiscountAmount = Transaction.GrossAmount * (promo.DiscountPercentage / 100.0);
                         }
                     }
                     else if (Transaction.FinancialPromotionID.HasValue)
@@ -74,19 +74,25 @@ namespace WebApp.Pages.User
                         var promo = promoManager.RetrievePromotionById(Transaction.FinancialPromotionID.Value);
                         if (promo != null)
                         {
-                            DiscountName = promo.FinancialPromotionName;
-                            DiscountPercentage = promo.DiscountPercentage;
-                            DiscountSource = bankName;
+                            PromotionApplied = new PromotionDto
+                            {
+                                Name = promo.FinancialPromotionName,
+                                DiscountPercentage = promo.DiscountPercentage,
+                                TypeText = "Promoción del Banco"
+                            };
+                            DiscountAmount = Transaction.GrossAmount * (promo.DiscountPercentage / 100.0);
                         }
-                    }
-                    // Calcular descuento en colones si aplica
-                    if (DiscountPercentage.HasValue && DiscountPercentage.Value > 0)
-                    {
-                        DiscountAmount = Transaction.GrossAmount * (DiscountPercentage.Value / 100.0);
                     }
                 }
             }
             return Page();
         }
+    }
+
+    public class PromotionDto
+    {
+        public string Name { get; set; }
+        public double DiscountPercentage { get; set; }
+        public string TypeText { get; set; }
     }
 }
