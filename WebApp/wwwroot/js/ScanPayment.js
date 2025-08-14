@@ -138,10 +138,23 @@ class ScanPaymentManager {
             if (btnDetener) btnDetener.classList.remove('d-none');
             if (scanStatus) scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Iniciando escáner QR...</small>';
             
-            // Verificar QrScanner con mejor detección
-            const QrScannerClass = window.QrScanner || QrScanner;
+            // Verificar QrScanner con mejor detección y espera
+            let QrScannerClass = window.QrScanner || QrScanner;
+            
+            // Si no está disponible, esperar un poco más
             if (typeof QrScannerClass === 'undefined') {
-                throw new Error('Librería QR Scanner no está disponible. Recarga la página e intenta nuevamente.');
+                if (scanStatus) scanStatus.innerHTML = '<small class="text-info"><i class="spinner-border spinner-border-sm me-1"></i>Cargando librería QR...</small>';
+                
+                // Intentar varias veces con delay
+                for (let i = 0; i < 5; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    QrScannerClass = window.QrScanner || QrScanner;
+                    if (typeof QrScannerClass !== 'undefined') break;
+                }
+            }
+            
+            if (typeof QrScannerClass === 'undefined') {
+                throw new Error('Librería QR Scanner no disponible. Recarga la página e intenta nuevamente.');
             }
             
             this.qrScanner = new QrScannerClass(this.videoElement, r => { console.log('QR detectado:', r.data); this.handleQRDetected(r.data); }, {
