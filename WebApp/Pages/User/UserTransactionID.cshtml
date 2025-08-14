@@ -18,248 +18,288 @@
 
 <link rel="stylesheet" href="~/css/UserTransactionID.css" />
 
-<!-- Estilos específicos para esta página -->
+<!-- Estilos específicos para mobile -->
 <style>
-    /* Estilos para los encabezados ordenables */
-    .table th a {
-        display: block;
-        padding: 0.5rem;
-        margin: -0.5rem;
-        border-radius: 0.25rem;
-        transition: background-color 0.15s ease-in-out;
+    .transaction-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        background: white;
     }
-
-    .table th a:hover {
-        background-color: rgba(0, 0, 0, 0.05);
+    
+    .transaction-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
     }
-
-    .table th.table-active {
-        background-color: var(--bs-primary-bg-subtle);
-        border-color: var(--bs-primary-border-subtle);
+    
+    .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px 12px 0 0;
     }
-
-    .table th.table-active a {
-        color: var(--bs-primary) !important;
-        font-weight: 600;
+    
+    .transaction-id {
+        font-weight: bold;
+        color: #495057;
+        font-size: 1.1rem;
     }
-
-    /* Mejorar el aspecto de los iconos de ordenamiento */
-    .bi-arrow-up-down {
-        opacity: 0.4;
-        transition: opacity 0.15s ease-in-out;
+    
+    .transaction-amount {
+        font-weight: bold;
+        color: #28a745;
+        font-size: 1.2rem;
     }
-
-    .table th:hover .bi-arrow-up-down {
-        opacity: 0.8;
+    
+    .transaction-body {
+        padding: 16px;
     }
-
-    .bi-arrow-up, .bi-arrow-down {
-        color: var(--bs-primary);
+    
+    .transaction-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
     }
-
-    /* Estilos para códigos IBAN */
-    code.small {
-        background-color: var(--bs-light);
-        color: var(--bs-dark);
-        padding: 0.2rem 0.4rem;
-        border-radius: 0.25rem;
-        font-size: 0.8rem;
+    
+    .info-item {
+        display: flex;
+        flex-direction: column;
     }
-
-    /* Resaltar filas al hacer hover */
-    .table tbody tr:hover {
-        background-color: var(--bs-light);
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+    
+    .info-value {
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .transaction-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .sort-controls {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .sort-dropdown {
+        background: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .iban-code {
+        background: #e9ecef;
+        color: #495057;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+        word-break: break-all;
+    }
+    
+    /* Media queries para responsive design */
+    @@media (max-width: 576px) {
+        .transaction-info {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
     }
 </style>
 
 <div class="container py-4 mb-5">
+    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Mis Transacciones</h2>
+        <h2><i class="bi bi-list-check me-2"></i>Mis Transacciones</h2>
         @if (transacciones != null && transacciones.Count > 0)
         {
             <div class="text-muted">
-                <small>Total: @transacciones.Count transacciones</small>
+                <small><i class="bi bi-receipt me-1"></i>@transacciones.Count transacciones</small>
             </div>
         }
     </div>
 
     @if (transacciones != null && transacciones.Count > 0)
     {
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th class="@Model.GetSortHeaderClass("ID")">
-                            <a asp-page="/User/UserTransactionID" 
-                               asp-route-sortBy="ID" 
-                               asp-route-sortDirection="@Model.IdSort" 
-                               class="text-decoration-none text-dark">
-                                ID
-                                <i class="bi @Model.GetSortIcon("ID") ms-1"></i>
-                            </a>
-                        </th>
-                        <th class="@Model.GetSortHeaderClass("Merchant")">
-                            <a asp-page="/User/UserTransactionID" 
-                               asp-route-sortBy="Merchant" 
-                               asp-route-sortDirection="@Model.MerchantSort" 
-                               class="text-decoration-none text-dark">
-                                Comercio
-                                <i class="bi @Model.GetSortIcon("Merchant") ms-1"></i>
-                            </a>
-                        </th>
-                        <th>Cuenta</th>
-                        <th>Banco</th>
-                        <th class="@Model.GetSortHeaderClass("Amount")">
-                            <a asp-page="/User/UserTransactionID" 
-                               asp-route-sortBy="Amount" 
-                               asp-route-sortDirection="@Model.AmountSort" 
-                               class="text-decoration-none text-dark">
-                                Monto Pagado
-                                <i class="bi @Model.GetSortIcon("Amount") ms-1"></i>
-                            </a>
-                        </th>
-                        <th>Impuesto de Venta</th>
-                        <th class="@Model.GetSortHeaderClass("Date")">
-                            <a asp-page="/User/UserTransactionID" 
-                               asp-route-sortBy="Date" 
-                               asp-route-sortDirection="@Model.DateSort" 
-                               class="text-decoration-none text-dark">
-                                Fecha
-                                <i class="bi @Model.GetSortIcon("Date") ms-1"></i>
-                            </a>
-                        </th>
-                        <th class="@Model.GetSortHeaderClass("Status")">
-                            <a asp-page="/User/UserTransactionID" 
-                               asp-route-sortBy="Status" 
-                               asp-route-sortDirection="@Model.StatusSort" 
-                               class="text-decoration-none text-dark">
-                                Estado
-                                <i class="bi @Model.GetSortIcon("Status") ms-1"></i>
-                            </a>
-                        </th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @foreach (var txn in transacciones)
-                {
-                    var merchant = merchantNames.ContainsKey(txn.MerchantID) ? merchantNames[txn.MerchantID] : "-";
-                    var iban = accountIBANs.ContainsKey(txn.BankAccountID) ? accountIBANs[txn.BankAccountID] : "-";
-                    var bank = "-";
-                    if (accountIBANs.ContainsKey(txn.BankAccountID))
-                    {
-                        var account = txn.BankAccountID;
-                        var allAccounts = Model.AccountIBANs;
-                        var allBanks = Model.BankNames;
-                        var accountManager = new CoreApp.BankAccountManager();
-                        var acc = accountManager.RetrieveBankAccountById(account);
-                        if (acc != null && allBanks.ContainsKey(acc.FinancialEntityID))
-                        {
-                            bank = allBanks[acc.FinancialEntityID];
-                        }
-                    }
-                    
-                    // Clase CSS para el estado
-                    var statusClass = txn.TransactionStatus switch
-                    {
-                        "Completed" => "bg-success",
-                        "Pending" => "bg-warning text-dark",
-                        "Failed" => "bg-danger",
-                        "Cancelled" => "bg-secondary",
-                        _ => "bg-secondary"
-                    };
+        <!-- Controles de ordenamiento mobile-friendly -->
+        <div class="sort-controls">
+            <div class="row g-3">
+                <div class="col-6">
+                    <label class="form-label small fw-semibold">Ordenar por:</label>
+                    <select class="form-select sort-dropdown" id="sortBySelect" onchange="changeSorting()">
+                        <option value="ID" selected="@(Model.SortBy == "ID")">ID</option>
+                        <option value="Date" selected="@(Model.SortBy == "Date")">Fecha</option>
+                        <option value="Merchant" selected="@(Model.SortBy == "Merchant")">Comercio</option>
+                        <option value="Amount" selected="@(Model.SortBy == "Amount")">Monto</option>
+                        <option value="Status" selected="@(Model.SortBy == "Status")">Estado</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-semibold">Dirección:</label>
+                    <select class="form-select sort-dropdown" id="directionSelect" onchange="changeSorting()">
+                        <option value="desc" selected="@(Model.SortDirection == "desc")">Descendente</option>
+                        <option value="asc" selected="@(Model.SortDirection == "asc")">Ascendente</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-                    <tr>
-                        <td>
-                            <strong>#@txn.ID</strong>
-                        </td>
-                        <td>@merchant</td>
-                        <td>
-                            @if (iban != "-")
-                            {
-                                <code class="small">@iban</code>
-                            }
-                            else
-                            {
-                                <span class="text-muted">-</span>
-                            }
-                        </td>
-                        <td>@bank</td>
-                        <td class="text-end">
-                            <strong>₡@txn.GrossAmount.ToString("N2")</strong>
-                        </td>
-                        <td class="text-end">
-                            ₡@txn.SalesTaxAmount.ToString("N2")
-                        </td>
-                        <td>
-                            @txn.Timestamp.ToString("dd/MM/yyyy")
-                            <br>
-                            <small class="text-muted">@txn.Timestamp.ToString("HH:mm")</small>
-                        </td>
-                        <td>
-                            <span class="badge @statusClass">
-                                @EstadoEspanol(txn.TransactionStatus)
-                            </span>
-                        </td>
-                        <td>
+        <!-- Lista de transacciones como cards -->
+        <div class="transactions-list">
+            @foreach (var txn in transacciones)
+            {
+                var merchant = merchantNames.ContainsKey(txn.MerchantID) ? merchantNames[txn.MerchantID] : "Comercio desconocido";
+                var iban = accountIBANs.ContainsKey(txn.BankAccountID) ? accountIBANs[txn.BankAccountID] : "-";
+                var bank = "-";
+                if (accountIBANs.ContainsKey(txn.BankAccountID))
+                {
+                    var account = txn.BankAccountID;
+                    var accountManager = new CoreApp.BankAccountManager();
+                    var acc = accountManager.RetrieveBankAccountById(account);
+                    if (acc != null && bankNames.ContainsKey(acc.FinancialEntityID))
+                    {
+                        bank = bankNames[acc.FinancialEntityID];
+                    }
+                }
+                
+                var statusClass = txn.TransactionStatus switch
+                {
+                    "Completed" => "bg-success",
+                    "Pending" => "bg-warning text-dark",
+                    "Failed" => "bg-danger",
+                    "Cancelled" => "bg-secondary",
+                    _ => "bg-secondary"
+                };
+
+                <div class="transaction-card">
+                    <!-- Header con ID y monto -->
+                    <div class="transaction-header">
+                        <div>
+                            <div class="transaction-id">#@txn.ID</div>
+                            <small class="text-muted">@txn.Timestamp.ToString("dd/MM/yyyy HH:mm")</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="transaction-amount">₡@txn.GrossAmount.ToString("N2")</div>
+                            <span class="badge @statusClass small">@EstadoEspanol(txn.TransactionStatus)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Información detallada -->
+                    <div class="transaction-body">
+                        <div class="transaction-info">
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-shop me-1"></i>Comercio</div>
+                                <div class="info-value">@merchant</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-bank me-1"></i>Banco</div>
+                                <div class="info-value">@bank</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-credit-card me-1"></i>Cuenta</div>
+                                <div class="info-value">
+                                    @if (iban != "-")
+                                    {
+                                        <span class="iban-code">@iban</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No disponible</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-receipt me-1"></i>Impuesto</div>
+                                <div class="info-value">₡@txn.SalesTaxAmount.ToString("N2")</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Footer con acciones -->
+                        <div class="transaction-footer">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>@txn.Timestamp.ToString("dd/MM/yyyy")
+                            </small>
                             <a asp-page="/User/UserTransactionInvoice" 
                                asp-route-id="@txn.ID" 
-                               class="btn btn-sm btn-outline-info">
-                                <i class="bi bi-receipt me-1"></i>Ver Transacción
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i>Ver Detalle
                             </a>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
 
         <!-- Información de ordenamiento actual -->
-        <div class="mt-3">
+        <div class="mt-3 text-center">
             <small class="text-muted">
                 <i class="bi bi-sort-alpha-down me-1"></i>
-                Ordenado por: <strong>@Model.CurrentSort</strong> 
+                Mostrando @transacciones.Count transacciones ordenadas por <strong>@Model.CurrentSort</strong> 
                 (@(Model.SortDirection == "asc" ? "Ascendente" : "Descendente"))
             </small>
         </div>
     }
     else
     {
-        <div class="alert alert-info text-center">
-            <h5><i class="bi bi-info-circle me-2"></i>No tienes transacciones registradas</h5>
-            <p class="mb-0">Cuando realices pagos, aparecerán aquí organizados y fáciles de consultar.</p>
+        <!-- Estado vacío con mejor diseño -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-receipt-cutoff text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+            </div>
+            <h4 class="text-muted mb-3">No tienes transacciones registradas</h4>
+            <p class="text-muted mb-4">Cuando realices pagos, aparecerán aquí organizados y fáciles de consultar.</p>
+            <a href="/User/ScanPayment" class="btn btn-primary">
+                <i class="bi bi-qr-code-scan me-2"></i>Realizar un Pago
+            </a>
         </div>
     }
 </div>
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Agregar tooltips para explicar el ordenamiento
-            const sortHeaders = document.querySelectorAll('th a[asp-route-sortBy]');
-            sortHeaders.forEach(header => {
-                const sortBy = header.getAttribute('asp-route-sortBy');
-                const currentDirection = '@Model.SortDirection';
-                const isCurrentSort = sortBy === '@Model.CurrentSort';
-                
-                let tooltipText = `Ordenar por ${sortBy}`;
-                if (isCurrentSort) {
-                    tooltipText += ` (${currentDirection === 'asc' ? 'Descendente' : 'Ascendente'})`;
-                }
-                
-                header.setAttribute('title', tooltipText);
-            });
+        function changeSorting() {
+            const sortBy = document.getElementById('sortBySelect').value;
+            const direction = document.getElementById('directionSelect').value;
+            
+            const url = new URL(window.location);
+            url.searchParams.set('sortBy', sortBy);
+            url.searchParams.set('sortDirection', direction);
+            
+            window.location.href = url.toString();
+        }
 
-            // Inicializar tooltips de Bootstrap si están disponibles
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-                tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl, {
-                        placement: 'top',
-                        trigger: 'hover'
-                    });
-                });
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animación de entrada para las cards
+            const cards = document.querySelectorAll('.transaction-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
         });
     </script>
 }

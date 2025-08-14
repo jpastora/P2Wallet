@@ -1,0 +1,485 @@
+﻿@page
+@model WebApp.Pages.User.EditFinancialPromotionModel
+@{
+    ViewData["Title"] = "Editar Promoción Financiera";
+}
+
+<!-- Estilos específicos para mobile -->
+<style>
+    .edit-form-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        background: white;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 24px;
+    }
+    
+    .form-section {
+        padding: 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #155724;
+    }
+    
+    .form-floating {
+        margin-bottom: 16px;
+    }
+    
+    .form-floating label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .info-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 24px;
+    }
+    
+    .info-header {
+        padding: 16px 24px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #f0f0f0;
+        font-weight: 600;
+        color: #155724;
+    }
+    
+    .info-body {
+        padding: 20px 24px;
+    }
+    
+    .status-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 16px;
+    }
+    
+    .image-upload-area {
+        border: 2px dashed #28a745;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        background: #f8fff9;
+        transition: all 0.2s ease;
+        margin-bottom: 16px;
+    }
+    
+    .image-upload-area:hover {
+        border-color: #1e7e34;
+        background: #e8f5e8;
+    }
+    
+    .image-preview {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-bottom: 16px;
+        border: 2px solid #28a745;
+    }
+    
+    .btn-group-mobile {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    @@media (min-width: 768px) {
+        .btn-group-mobile {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+    }
+    
+    .alert-custom {
+        border: none;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .financial-accent {
+        color: #28a745 !important;
+    }
+    
+    .financial-border {
+        border-left: 4px solid #28a745;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            // Funcionalidad de subida de imagen
+            document.getElementById('btnUploadImage').addEventListener('click', function () {
+                var fileInput = document.getElementById('imageFile');
+                var file = fileInput.files[0];
+                
+                if (!file) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Selecciona una imagen',
+                        text: 'Por favor selecciona una imagen primero.',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#28a745'
+                    });
+                    return;
+                }
+                
+                var formData = new FormData();
+                formData.append('photo', file);
+                
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Subiendo imagen...',
+                    html: 'Por favor espera mientras se procesa la imagen.',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                fetch('https://p2wallet-api-eyefddgeeda9c2fk.eastus-01.azurewebsites.net/api/cloudinary/Save', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var url = data.secure_url || data.url;
+                    if (url) {
+                        document.getElementById('hiddenPromotionImage').value = url;
+                        document.getElementById('imagePreview').src = url;
+                        document.getElementById('imagePreview').style.display = 'block';
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: 'Imagen subida correctamente.',
+                            confirmButtonText: 'Aceptar',
+                            confirmButtonColor: '#28a745'
+                        });
+                    } else {
+                        throw new Error('No se pudo obtener la URL de la imagen');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al subir la imagen: ' + error.message,
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                });
+            });
+            
+            // Validación de fechas
+            document.getElementById('editForm').addEventListener('submit', function(e) {
+                var startDate = new Date(document.getElementById('startDate').value);
+                var endDate = new Date(document.getElementById('endDate').value);
+                
+                if (endDate <= startDate) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en las fechas',
+                        text: 'La fecha de fin debe ser posterior a la fecha de inicio.',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
+            });
+        });
+    </script>
+}
+
+<div class="container py-4 mb-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-bank me-2 financial-accent"></i>Editar Promoción Financiera</h2>
+            @if (!string.IsNullOrEmpty(Model.FinancialEntityName))
+            {
+                <p class="text-muted mb-0">Entidad: <strong>@Model.FinancialEntityName</strong></p>
+            }
+        </div>
+        <div class="text-muted">
+            <small><i class="bi bi-hash me-1"></i>ID: @Model.PromotionToEdit.ID</small>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-warning alert-custom">
+            <i class="bi bi-exclamation-triangle me-2"></i>@Model.Message
+        </div>
+    }
+
+    <div class="row">
+        <!-- Formulario Principal -->
+        <div class="col-lg-8 mb-4">
+            <form method="post" id="editForm">
+                <input type="hidden" asp-for="PromotionToEdit.ID" />
+                <input type="hidden" asp-for="PromotionToEdit.FinancialEntityID" />
+                <input type="hidden" asp-for="PromotionToEdit.CreatedAt" />
+                <input type="hidden" asp-for="PromotionToEdit.FinancialPromotionImage" id="hiddenPromotionImage" />
+
+                <!-- Información Básica -->
+                <div class="edit-form-card">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-info-circle me-2"></i>Información Básica
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PromotionToEdit.FinancialPromotionName" class="form-control" placeholder="Nombre de la promoción" required>
+                                    <label asp-for="PromotionToEdit.FinancialPromotionName">
+                                        <i class="bi bi-tag me-1"></i>Nombre de la Promoción
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="PromotionToEdit.PromotionType" class="form-select">
+                                        <option value="Percentage">Porcentaje</option>
+                                        <option value="FixedAmount">Monto Fijo</option>
+                                        <option value="Cashback">Cashback</option>
+                                        <option value="BOGO">2x1</option>
+                                    </select>
+                                    <label asp-for="PromotionToEdit.PromotionType">
+                                        <i class="bi bi-card-list me-1"></i>Tipo de Promoción
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating">
+                            <textarea asp-for="PromotionToEdit.FinancialPromotionDescription" class="form-control" placeholder="Descripción" style="height: 100px"></textarea>
+                            <label asp-for="PromotionToEdit.FinancialPromotionDescription">
+                                <i class="bi bi-card-text me-1"></i>Descripción
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración de Descuento -->
+                <div class="edit-form-card">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-percent me-2"></i>Configuración de Descuento
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PromotionToEdit.DiscountPercentage" type="number" step="0.01" min="0" max="100" class="form-control" placeholder="Porcentaje">
+                                    <label asp-for="PromotionToEdit.DiscountPercentage">
+                                        <i class="bi bi-percent me-1"></i>Porcentaje de Descuento
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PromotionToEdit.MaxRefund" type="number" step="0.01" min="0" class="form-control" placeholder="Reembolso máximo">
+                                    <label asp-for="PromotionToEdit.MaxRefund">
+                                        <i class="bi bi-currency-dollar me-1"></i>Reembolso Máximo (₡)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PromotionToEdit.AvailableQuantity" type="number" min="0" class="form-control" placeholder="Cantidad">
+                                    <label asp-for="PromotionToEdit.AvailableQuantity">
+                                        <i class="bi bi-box me-1"></i>Cantidad Disponible
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="PromotionToEdit.ValidationStatus" class="form-select">
+                                        <option value="Active">Activa</option>
+                                        <option value="Inactive">Inactiva</option>
+                                    </select>
+                                    <label asp-for="PromotionToEdit.ValidationStatus">
+                                        <i class="bi bi-check-circle me-1"></i>Estado
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fechas de Vigencia -->
+                <div class="edit-form-card">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-calendar-range me-2"></i>Fechas de Vigencia
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PromotionToEdit.StartDate" type="datetime-local" class="form-control" id="startDate">
+                                    <label asp-for="PromotionToEdit.StartDate">
+                                        <i class="bi bi-calendar-plus me-1"></i>Fecha de Inicio
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PromotionToEdit.EndDate" type="datetime-local" class="form-control" id="endDate">
+                                    <label asp-for="PromotionToEdit.EndDate">
+                                        <i class="bi bi-calendar-x me-1"></i>Fecha de Fin
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Imagen y Términos -->
+                <div class="edit-form-card">
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-image me-2"></i>Imagen de la Promoción
+                        </div>
+                        
+                        <div class="image-upload-area">
+                            @if (!string.IsNullOrEmpty(Model.PromotionToEdit.FinancialPromotionImage))
+                            {
+                                <img id="imagePreview" src="@Model.PromotionToEdit.FinancialPromotionImage" alt="Vista previa" class="image-preview">
+                            }
+                            else
+                            {
+                                <img id="imagePreview" style="display: none;" alt="Vista previa" class="image-preview">
+                                <div class="mb-3">
+                                    <i class="bi bi-cloud-upload fs-1 financial-accent"></i>
+                                    <p class="text-muted mb-0">Sube una imagen para la promoción financiera</p>
+                                </div>
+                            }
+                            
+                            <input type="file" class="form-control mb-3" id="imageFile" accept="image/*">
+                            <button type="button" class="btn btn-outline-success" id="btnUploadImage">
+                                <i class="bi bi-cloud-upload me-1"></i>Subir Imagen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">
+                            <i class="bi bi-file-text me-2"></i>Términos y Condiciones
+                        </div>
+                        
+                        <div class="form-floating">
+                            <textarea asp-for="PromotionToEdit.FinancialPromotionTerms" class="form-control" placeholder="Términos y condiciones" style="height: 120px"></textarea>
+                            <label asp-for="PromotionToEdit.FinancialPromotionTerms">
+                                <i class="bi bi-file-text me-1"></i>Términos y Condiciones
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="btn-group-mobile">
+                    <a href="/User/FinancialPromotions?financialEntityId=@Model.PromotionToEdit.FinancialEntityID" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-lg me-1"></i>Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Panel Lateral de Información -->
+        <div class="col-lg-4">
+            <!-- Estado de la Promoción -->
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="bi bi-info-circle me-2"></i>Estado de la Promoción
+                </div>
+                <div class="info-body">
+                    <div class="status-indicator @Model.GetPromotionStatusBadgeClass()">
+                        <i class="bi bi-circle-fill me-2"></i>@Model.GetPromotionStatusText()
+                    </div>
+
+                    @if (Model.PromotionToEdit.StartDate <= DateTime.Now && Model.PromotionToEdit.EndDate >= DateTime.Now)
+                    {
+                        <div class="alert alert-success py-2 mb-3">
+                            <i class="bi bi-check-circle me-1"></i>Promoción vigente
+                        </div>
+                    }
+                    else if (Model.PromotionToEdit.EndDate < DateTime.Now)
+                    {
+                        <div class="alert alert-danger py-2 mb-3">
+                            <i class="bi bi-x-circle me-1"></i>Promoción expirada
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning py-2 mb-3">
+                            <i class="bi bi-clock me-1"></i>Promoción programada
+                        </div>
+                    }
+
+                    <small class="text-muted">
+                        <strong>Creada:</strong> @Model.PromotionToEdit.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                    </small>
+                </div>
+            </div>
+
+            <!-- Consejos de Edición -->
+            <div class="info-card">
+                <div class="info-header">
+                    <i class="bi bi-lightbulb me-2"></i>Consejos Financieros
+                </div>
+                <div class="info-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check text-success me-2"></i>
+                            <small>Ofrece promociones competitivas en el mercado financiero</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check text-success me-2"></i>
+                            <small>Define límites claros de reembolso</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check text-success me-2"></i>
+                            <small>Especifica términos bancarios aplicables</small>
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-check text-success me-2"></i>
+                            <small>Mantén coherencia con políticas institucionales</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
