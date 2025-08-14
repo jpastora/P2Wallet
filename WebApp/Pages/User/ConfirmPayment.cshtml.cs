@@ -27,13 +27,18 @@ namespace WebApp.Pages.User
         public BankAccountDto? BankAccount { get; set; }
         public FinancialEntityDto? FinancialEntity { get; set; }
 
-        public double GrossAmount => PaymentRequest?.GrossAmount ?? 0;
-        public double SalesTaxAmount => PaymentRequest?.SalesTaxAmount ?? 0;
-        public double OriginalNetAmount => PaymentRequest != null ? PaymentRequest.GrossAmount - PaymentRequest.SalesTaxAmount : 0;
+        // Propiedades para el cálculo comercial correcto
+        public double OriginalNetAmount => PaymentRequest?.NetAmount ?? 0;      // Monto de venta original
+        public double OriginalSalesTaxAmount => PaymentRequest?.SalesTaxAmount ?? 0;  // Impuesto original
+        public double OriginalGrossAmount => PaymentRequest?.GrossAmount ?? 0;   // Total original
+        public double TaxRateApplied => PaymentRequest?.TaxRateApplied ?? 0;
+        
         public double DiscountPercentage { get; set; }
         public double DiscountAmount { get; set; }
-        public double NetAfterDiscount { get; set; }
-        public double FinalPayable => NetAfterDiscount + SalesTaxAmount; // Impuesto no se descuenta
+        public double FinalNetAmount { get; set; }              // Monto de venta con descuento
+        public double RecalculatedSalesTaxAmount { get; set; }  // Impuesto recalculado
+        public double FinalGrossAmount { get; set; }            // Total final a pagar
+        public double CommissionApplied { get; set; }
 
         public string Message { get; set; } = string.Empty;
 
@@ -48,7 +53,7 @@ namespace WebApp.Pages.User
             }
             await LoadBaseData();
             if (PaymentRequest == null) return RedirectToPage("/User/ScanPayment", new { code = PaymentCode });
-            CalculateDiscount();
+            CalculatePaymentPreview();
             return Page();
         }
 
@@ -56,7 +61,7 @@ namespace WebApp.Pages.User
         {
             await LoadBaseData();
             if (PaymentRequest == null) return RedirectToPage("/User/ScanPayment", new { code = PaymentCode });
-            CalculateDiscount();
+            CalculatePaymentPreview();
 
             try
             {
@@ -122,6 +127,14 @@ namespace WebApp.Pages.User
                     TransactionStatus = pr.Status,
                     MerchantID = GetMerchantIdFromTransaction(pr.TransactionId)
                 };
+
+                // Obtener TaxRateApplied de la transacción original
+                var originalTransaction = tm.RetrieveTransactionById(PaymentRequest.ID);
+                if (originalTransaction != null)
+                {
+                    PaymentRequest.TaxRateApplied = originalTransaction.TaxRateApplied;
+                }
+
                 var merchantManager = new MerchantManager();
                 MerchantInfo = merchantManager.RetrieveMerchantById(PaymentRequest.MerchantID);
                 var bam = new BankAccountManager();
@@ -152,19 +165,62 @@ namespace WebApp.Pages.User
             catch { }
         }
 
-        private void CalculateDiscount()
+        /// <summary>
+        /// Calcula la previsualización del pago con la lógica comercial correcta
+        /// </summary>
+        private void CalculatePaymentPreview()
         {
-            // Calcular descuento sobre el monto bruto (GrossAmount), no sobre la base imponible
+            // 1. NetAmount_Original (monto de venta original)
+            var netAmountOriginal = OriginalNetAmount;
+
+            // 2. Descuento = NetAmount_Original * (PromotionPercentage / 100)
             DiscountAmount = 0;
             if (DiscountPercentage > 0)
             {
-                DiscountAmount = GrossAmount * (DiscountPercentage / 100.0);
+                DiscountAmount = netAmountOriginal * (DiscountPercentage / 100.0);
             }
-            
-            // El monto después del descuento debe ser calculado correctamente
-            // NetAfterDiscount es el GrossAmount menos el descuento menos el impuesto
-            var netAmountAfterDiscount = GrossAmount - DiscountAmount - SalesTaxAmount;
-            NetAfterDiscount = Math.Max(0, netAmountAfterDiscount);
+
+            // 3. NetAmount_Final = NetAmount_Original - Descuento (subtotal después descuento)
+            FinalNetAmount = netAmountOriginal - DiscountAmount;
+
+            // 4. SalesTaxAmount_Recalculado = NetAmount_Final * (TaxRate / 100)
+            RecalculatedSalesTaxAmount = 0;
+            if (TaxRateApplied > 0)
+            {
+                RecalculatedSalesTaxAmount = FinalNetAmount * (TaxRateApplied / 100.0);
+            }
+
+            // 5. GrossAmount_Final = NetAmount_Final + SalesTaxAmount_Recalculado (total a pagar)
+            FinalGrossAmount = FinalNetAmount + RecalculatedSalesTaxAmount;
+
+            // 6. CommissionApplied = NetAmount_Final * ((MerchantRate + EntityRate) / 100)
+            CalculateCommission();
+        }
+
+        /// <summary>
+        /// Calcula la comisión total de la plataforma sobre el monto de venta final
+        /// </summary>
+        private void CalculateCommission()
+        {
+            CommissionApplied = 0;
+
+            try
+            {
+                if (MerchantInfo != null && FinancialEntity != null)
+                {
+                    var merchantCommissionRate = MerchantInfo.CommissionPercentage;
+                    var entityCommissionRate = FinancialEntity.CommissionPercentage;
+                    var totalCommissionRate = merchantCommissionRate + entityCommissionRate;
+
+                    // Comisión sobre el monto de venta final (después del descuento)
+                    CommissionApplied = FinalNetAmount * (totalCommissionRate / 100.0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calculating commission: {ex.Message}");
+                CommissionApplied = 0;
+            }
         }
 
         private int GetMerchantIdFromTransaction(int transactionId)

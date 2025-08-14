@@ -158,15 +158,50 @@ namespace WebApp.Pages.User
             {
                 try
                 {
-                    // El descuento es la diferencia entre el monto bruto y neto
-                    // (sin contar impuestos ya que esos no son descuentos)
-                    var grossAmount = Transaction.GrossAmount;
-                    var netAmount = Transaction.NetAmount;
-                    var taxAmount = Transaction.SalesTaxAmount;
-
-                    // Si hay diferencia entre bruto y neto (más allá de los impuestos), es descuento
-                    var expectedNetWithoutDiscount = grossAmount - taxAmount;
-                    DiscountApplied = Math.Max(0, expectedNetWithoutDiscount - netAmount);
+                    // CORREGIDO: Lógica comercial correcta
+                    // En la nueva lógica:
+                    // - NetAmount contiene el monto de venta FINAL (después del descuento)
+                    // - GrossAmount contiene el total FINAL que pagó el cliente
+                    // - SalesTaxAmount contiene el impuesto FINAL (calculado sobre NetAmount final)
+                    
+                    // Si hay promoción aplicada, calcular el descuento
+                    double discountPercentage = 0;
+                    
+                    if (Transaction.MerchantPromotionID.HasValue)
+                    {
+                        var merchantPromotionManager = new MerchantPromotionManager();
+                        var promotion = merchantPromotionManager.RetrievePromotionById(Transaction.MerchantPromotionID.Value);
+                        if (promotion != null)
+                        {
+                            discountPercentage = promotion.DiscountPercentage;
+                        }
+                    }
+                    else if (Transaction.FinancialPromotionID.HasValue)
+                    {
+                        var financialPromotionManager = new FinancialPromotionManager();
+                        var promotion = financialPromotionManager.RetrievePromotionById(Transaction.FinancialPromotionID.Value);
+                        if (promotion != null)
+                        {
+                            discountPercentage = promotion.DiscountPercentage;
+                        }
+                    }
+                    
+                    if (discountPercentage > 0)
+                    {
+                        // Calcular el monto de venta original antes del descuento
+                        // FinalNetAmount = OriginalNetAmount * (1 - discountPercentage/100)
+                        // Por lo tanto: OriginalNetAmount = FinalNetAmount / (1 - discountPercentage/100)
+                        var discountFactor = 1 - (discountPercentage / 100.0);
+                        var originalNetAmount = Transaction.NetAmount / discountFactor;
+                        
+                        // El descuento aplicado es la diferencia
+                        DiscountApplied = originalNetAmount - Transaction.NetAmount;
+                    }
+                    else
+                    {
+                        // No hay descuento aplicado
+                        DiscountApplied = 0;
+                    }
                 }
                 catch (Exception ex)
                 {

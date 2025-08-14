@@ -264,7 +264,7 @@ namespace WebAPI.Controllers
                     return NotFound("Solicitud de pago no encontrada");
                 }
 
-                // Ejecutar el pago
+                // Ejecutar el pago con la lógica comercial correcta
                 bool success = transactionManager.ExecutePaymentWithPromotion(
                     request.PaymentRequestCode, 
                     request.UserId, 
@@ -275,8 +275,23 @@ namespace WebAPI.Controllers
 
                 if (success)
                 {
+                    // Obtener la transacción actualizada para confirmar los valores finales
                     var updatedTransaction = transactionManager.GetPaymentRequestByCode(request.PaymentRequestCode);
-                    // CORRECCIÓN: No hacer conversión de zona horaria adicional
+                    if (updatedTransaction == null)
+                    {
+                        // Si no se puede obtener por código, intentar por ID
+                        updatedTransaction = transactionManager.RetrieveTransactionById(originalRequest.ID);
+                    }
+
+                    // Calcular descuento aplicado si hubo promoción
+                    decimal discountApplied = 0;
+                    if (request.PromotionId.HasValue && updatedTransaction != null)
+                    {
+                        // Si hay promoción, calcular el descuento basándose en la diferencia
+                        // entre el NetAmount original y el NetAmount final
+                        discountApplied = (decimal)(originalRequest.NetAmount - updatedTransaction.NetAmount);
+                    }
+
                     var timestampCR = updatedTransaction?.Timestamp ?? DateTime.Now;
 
                     var response = new PaymentExecutionResponse
@@ -284,8 +299,8 @@ namespace WebAPI.Controllers
                         Success = true,
                         TransactionId = originalRequest.ID,
                         FinalAmount = updatedTransaction != null ? (decimal)updatedTransaction.GrossAmount : (decimal)originalRequest.GrossAmount,
-                        DiscountApplied = 0, // Se calculará en el SP
-                        Message = $"Pago ejecutado exitosamente a las {timestampCR:dd/MM/yyyy HH:mm:ss}"
+                        DiscountApplied = Math.Max(0, discountApplied), // Asegurar que no sea negativo
+                        Message = $"Pago ejecutado exitosamente con lógica comercial correcta a las {timestampCR:dd/MM/yyyy HH:mm:ss}"
                     };
 
                     return Ok(response);
