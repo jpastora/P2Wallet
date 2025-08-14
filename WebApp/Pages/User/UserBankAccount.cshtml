@@ -11,6 +11,120 @@
     string GetBadgeClass(string status) => status == "Active" ? "badge bg-success" : "badge bg-secondary";
 }
 
+<!-- Estilos específicos para mobile -->
+<style>
+    .account-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        background: white;
+        overflow: hidden;
+    }
+    
+    .account-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .account-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .account-iban {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        color: #495057;
+        font-size: 1rem;
+        word-break: break-all;
+    }
+    
+    .account-body {
+        padding: 16px;
+    }
+    
+    .account-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+    
+    .info-value {
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .account-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .add-account-card {
+        background: white;
+        border: 2px dashed #007bff;
+        border-radius: 12px;
+        padding: 24px;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+    }
+    
+    .add-account-card:hover {
+        background: #f8f9fa;
+        border-color: #0056b3;
+    }
+    
+    .form-floating {
+        margin-bottom: 16px;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 48px 16px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+    
+    /* Media queries para responsive design */
+    @@media (max-width: 576px) {
+        .account-info {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .account-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .account-iban {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -33,18 +147,22 @@
                     confirmButtonText: 'Aceptar'
                 });
             }
-            // Confirmación antes de eliminar
-            document.querySelectorAll('form[asp-page-handler="Delete"]').forEach(function(form) {
+            
+            // Confirmación antes de cambiar estado
+            document.querySelectorAll('form[asp-page-handler="ToggleStatus"]').forEach(function(form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    var button = form.querySelector('button');
+                    var action = button.textContent.trim();
+                    
                     Swal.fire({
-                        title: '¿Seguro que desea eliminar esta cuenta?',
-                        text: 'Esta acción no se puede deshacer.',
-                        icon: 'warning',
+                        title: `¿Seguro que desea ${action.toLowerCase()} esta cuenta?`,
+                        text: action === 'Desactivar' ? 'La cuenta dejará de estar disponible para pagos.' : 'La cuenta estará disponible para pagos nuevamente.',
+                        icon: 'question',
                         showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Sí, eliminar',
+                        confirmButtonColor: action === 'Desactivar' ? '#f0ad4e' : '#5cb85c',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: `Sí, ${action.toLowerCase()}`,
                         cancelButtonText: 'Cancelar'
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -53,74 +171,146 @@
                     });
                 });
             });
+            
+            // Animación de entrada para las cards
+            const cards = document.querySelectorAll('.account-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
         });
     </script>
 }
 
 <div class="container py-4 mb-5">
-    <h2 class="mb-4">Mis Cuentas Bancarias</h2>
-    @if (!string.IsNullOrEmpty(mensaje))
-    {
-        <div class="alert alert-info">@mensaje</div>
-    }
-    <table class="table table-bordered table-hover">
-        <thead class="table-light">
-            <tr>
-                <th>IBAN</th>
-                <th>Entidad Financiera</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-credit-card me-2"></i>Mis Cuentas Bancarias</h2>
         @if (cuentas != null && cuentas.Count > 0)
         {
-            foreach (var cuenta in cuentas)
+            <div class="text-muted">
+                <small><i class="bi bi-bank me-1"></i>@cuentas.Count cuentas</small>
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>@mensaje
+        </div>
+    }
+
+    @if (cuentas != null && cuentas.Count > 0)
+    {
+        <!-- Lista de cuentas como cards -->
+        <div class="accounts-list">
+            @foreach (var cuenta in cuentas)
             {
                 var entidad = entidades.FirstOrDefault(e => e.ID == cuenta.FinancialEntityID);
-                <tr>
-                    <td>@cuenta.IBAN</td>
-                    <td>@(entidad?.EntityName ?? "-")</td>
-                    <td>
-                        <span class="@GetBadgeClass(cuenta.ValidationStatus)">@GetEstadoEspanol(cuenta.ValidationStatus)</span>
-                    </td>
-                    <td>
-                        <form method="post" asp-page-handler="ToggleStatus" asp-route-id="@cuenta.ID" style="display:inline">
-                            <button type="submit" class="btn btn-sm btn-outline-warning me-1">
-                                @GetBotonEspanol(cuenta.ValidationStatus)
-                            </button>
-                        </form>
-                    </td>
-                </tr>
+                var statusIcon = cuenta.ValidationStatus == "Active" ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-secondary";
+                
+                <div class="account-card">
+                    <!-- Header con IBAN y estado -->
+                    <div class="account-header">
+                        <div class="flex-grow-1">
+                            <div class="account-iban">@cuenta.IBAN</div>
+                        </div>
+                        <div class="text-end">
+                            <span class="@GetBadgeClass(cuenta.ValidationStatus)">
+                                <i class="@statusIcon me-1"></i>@GetEstadoEspanol(cuenta.ValidationStatus)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Información detallada -->
+                    <div class="account-body">
+                        <div class="account-info">
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bi bi-bank2 me-1"></i>Entidad Financiera
+                                </div>
+                                <div class="info-value">@(entidad?.EntityName ?? "Entidad no disponible")</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">
+                                    <i class="bi bi-shield-check me-1"></i>Estado de Validación
+                                </div>
+                                <div class="info-value">@GetEstadoEspanol(cuenta.ValidationStatus)</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Footer con acciones -->
+                        <div class="account-footer">
+                            <form method="post" asp-page-handler="ToggleStatus" asp-route-id="@cuenta.ID" style="display:inline">
+                                <button type="submit" class="btn btn-sm @(cuenta.ValidationStatus == "Active" ? "btn-outline-warning" : "btn-outline-success")">
+                                    <i class="bi @(cuenta.ValidationStatus == "Active" ? "bi-pause-circle" : "bi-play-circle") me-1"></i>
+                                    @GetBotonEspanol(cuenta.ValidationStatus)
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             }
-        }
-        else
-        {
-            <tr><td colspan="4" class="text-center">No tienes cuentas bancarias registradas.</td></tr>
-        }
-        </tbody>
-    </table>
-    <hr />
-    <h4>Agregar Nueva Cuenta</h4>
-    <form method="post" asp-page-handler="Add" class="row g-3">
-        <div class="col-md-6">
-            <label asp-for="NewAccount.IBAN" class="form-label">IBAN</label>
-            <input asp-for="NewAccount.IBAN" class="form-control" required />
         </div>
-        <div class="col-md-6">
-            <label asp-for="NewAccount.FinancialEntityID" class="form-label">Entidad Financiera</label>
-            <select asp-for="NewAccount.FinancialEntityID" class="form-select" required>
-                <option value="">Seleccione...</option>
-                @foreach (var entidad in entidades)
-                {
-                    <option value="@entidad.ID">@entidad.EntityName</option>
-                }
-            </select>
+    }
+    else
+    {
+        <!-- Estado vacío -->
+        <div class="empty-state">
+            <div class="mb-4">
+                <i class="bi bi-credit-card-2-back text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+            </div>
+            <h4 class="text-muted mb-3">No tienes cuentas bancarias registradas</h4>
+            <p class="text-muted mb-4">Agrega tu primera cuenta bancaria para comenzar a realizar pagos.</p>
         </div>
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Agregar Cuenta</button>
+    }
+
+    <!-- Formulario para agregar nueva cuenta -->
+    <div class="add-account-card">
+        <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-plus-circle-fill text-primary fs-4 me-2"></i>
+            <h4 class="mb-0 text-primary">Agregar Nueva Cuenta</h4>
         </div>
-    </form>
+        
+        <form method="post" asp-page-handler="Add">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <input asp-for="NewAccount.IBAN" class="form-control" placeholder="IBAN" required />
+                        <label asp-for="NewAccount.IBAN">
+                            <i class="bi bi-credit-card me-1"></i>IBAN
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-floating">
+                        <select asp-for="NewAccount.FinancialEntityID" class="form-select" required>
+                            <option value="">Seleccione una entidad...</option>
+                            @foreach (var entidad in entidades)
+                            {
+                                <option value="@entidad.ID">@entidad.EntityName</option>
+                            }
+                        </select>
+                        <label asp-for="NewAccount.FinancialEntityID">
+                            <i class="bi bi-bank me-1"></i>Entidad Financiera
+                        </label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-lg me-1"></i>Agregar Cuenta
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
 

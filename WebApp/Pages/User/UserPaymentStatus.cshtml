@@ -4,6 +4,148 @@
     ViewData["Title"] = "Estado de Solicitudes de Pago";
 }
 
+<!-- Estilos específicos para mobile -->
+<style>
+    .payment-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        background: white;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 10px;
+    }
+    
+    .payment-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .payment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        background: #f8f9fa;
+    }
+    
+    .payment-title {
+        font-weight: bold;
+        color: #495057;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+    
+    .payment-body {
+        padding: 16px;
+    }
+    
+    .payment-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    
+    .info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+    
+    .info-value {
+        color: #495057;
+        font-weight: 500;
+    }
+    
+    .payment-footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+        flex-wrap: wrap;
+    }
+    
+    .stats-card {
+        border: none;
+        border-radius: 12px;
+        background: white;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 48px 16px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .qr-container {
+        text-align: center;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .time-remaining {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 0.8rem;
+        color: #856404;
+        display: inline-block;
+    }
+    
+    /* Media queries para responsive design */
+    @@media (max-width: 768px) {
+        .payment-info {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        
+        .payment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .payment-footer {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .payment-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .stats-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
+
 <div class="container py-4 mb-5">
     <h2 class="mb-4">Estado de Solicitudes de Pago</h2>
     
@@ -15,7 +157,7 @@
     <!-- Resumen de estadísticas -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card">
+            <div class="card stats-card">
                 <div class="card-body text-center">
                     <h4 class="mb-1">@Model.TotalRequests</h4>
                     <small class="text-muted">Total Solicitudes</small>
@@ -23,7 +165,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card">
+            <div class="card stats-card">
                 <div class="card-body text-center">
                     <h4 class="mb-1 text-warning">@Model.ActiveCount</h4>
                     <small class="text-muted">Pendientes</small>
@@ -31,7 +173,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card">
+            <div class="card stats-card">
                 <div class="card-body text-center">
                     <h4 class="mb-1 text-success">@Model.CompletedCount</h4>
                     <small class="text-muted">Completadas</small>
@@ -39,7 +181,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card">
+            <div class="card stats-card">
                 <div class="card-body text-center">
                     <h4 class="mb-1 text-danger">@Model.CancelledCount</h4>
                     <small class="text-muted">Canceladas</small>
@@ -97,52 +239,69 @@
                     @foreach (var request in Model.ActiveRequests.OrderByDescending(r => r.CreatedAt))
                     {
                         <div class="col-lg-4 col-md-6 mb-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <h6 class="card-title mb-0">@request.Description</h6>
+                            <div class="card payment-card">
+                                <div class="payment-header">
+                                    <div>
+                                        <h6 class="payment-title mb-0">@request.Description</h6>
                                         <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
                                     </div>
-                                    
-                                    @if (!string.IsNullOrEmpty(request.QRCodeUrl))
-                                    {
-                                        <div class="text-center mb-3">
-                                            <img src="@request.QRCodeUrl" alt="QR Code" class="img-fluid" style="max-width: 120px;" />
-                                        </div>
-                                    }
-                                    
-                                    <div class="mb-3">
-                                        <small class="text-muted">Monto:</small> <strong>₡@request.GrossAmount.ToString("N2")</strong><br>
-                                        @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
-                                        {
-                                            <small class="text-muted">Código:</small> <code>@request.PaymentRequestCode</code><br>
-                                        }
-                                        <small class="text-muted">Fecha:</small> @request.CreatedAt.ToString("dd/MM/yyyy HH:mm")<br>
+                                    <div>
                                         @if (!string.IsNullOrEmpty(request.TimeRemaining))
                                         {
-                                            <small class="text-muted">Tiempo restante:</small> <span class="text-warning">@request.TimeRemaining</span>
+                                            <span class="time-remaining">@request.TimeRemaining</span>
                                         }
                                     </div>
-                                    
-                                    <div class="d-grid gap-2">
-                                        @if (!string.IsNullOrEmpty(request.QRCodeUrl))
-                                        {
-                                            <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                    onclick="showQR('@request.PaymentRequestCode', '@request.QRCodeUrl')">
-                                                Ver QR Grande
-                                            </button>
-                                        }
-                                        @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
-                                        {
-                                            <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                    data-payment-code="@request.PaymentRequestCode"
-                                                    data-description="@request.Description"
-                                                    data-amount="@request.GrossAmount.ToString("N2")"
-                                                    onclick="handleCancelClick(this)">
-                                                Cancelar Solicitud
-                                            </button>
-                                        }
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(request.QRCodeUrl))
+                                {
+                                    <div class="qr-container">
+                                        <img src="@request.QRCodeUrl" alt="QR Code" class="img-fluid" style="max-width: 120px;" />
                                     </div>
+                                }
+                                
+                                <div class="payment-body">
+                                    <div class="payment-info">
+                                        <div class="info-item">
+                                            <span class="info-label">Monto</span>
+                                            <span class="info-value">₡@request.GrossAmount.ToString("N2")</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Código</span>
+                                            @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
+                                            {
+                                                <code class="info-value">@request.PaymentRequestCode</code>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted info-value">Sin código</span>
+                                            }
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Fecha</span>
+                                            <span class="info-value">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="payment-footer">
+                                    @if (!string.IsNullOrEmpty(request.QRCodeUrl))
+                                    {
+                                        <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                onclick="showQR('@request.PaymentRequestCode', '@request.QRCodeUrl')">
+                                            Ver QR Grande
+                                        </button>
+                                    }
+                                    @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
+                                    {
+                                        <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                data-payment-code="@request.PaymentRequestCode"
+                                                data-description="@request.Description"
+                                                data-amount="@request.GrossAmount.ToString("N2")"
+                                                onclick="handleCancelClick(this)">
+                                            Cancelar Solicitud
+                                        </button>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -151,7 +310,7 @@
             }
             else
             {
-                <div class="alert alert-info text-center">
+                <div class="alert alert-info text-center empty-state">
                     <h5>No hay solicitudes pendientes</h5>
                     <p class="mb-3">Las solicitudes de pago pendientes de aprobación aparecerán aquí</p>
                     <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
@@ -165,64 +324,86 @@
         <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
             @if (Model.CompletedRequests.Any())
             {
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">Solicitudes Completadas - Total: ₡@Model.TotalSales.ToString("N2")</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Descripción</th>
-                                        <th>Código</th>
-                                        <th class="text-end">Monto Bruto</th>
-                                        <th class="text-end">Monto Neto</th>
-                                        <th class="text-center">Estado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var request in Model.CompletedRequests.OrderByDescending(r => r.CreatedAt).Take(50))
-                                    {
-                                        <tr>
-                                            <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>@request.Description</td>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
-                                                {
-                                                    <code>@request.PaymentRequestCode</code>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Sin código</span>
-                                                }
-                                            </td>
-                                            <td class="text-end">₡@request.GrossAmount.ToString("N2")</td>
-                                            <td class="text-end">₡@request.NetAmount.ToString("N2")</td>
-                                            <td class="text-center">
-                                                <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        @if (Model.CompletedRequests.Count > 50)
-                        {
-                            <div class="text-center mt-3">
-                                <small class="text-muted">Mostrando las 50 transacciones más recientes de @Model.CompletedRequests.Count total</small>
-                            </div>
-                        }
-                    </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="mb-0">Solicitudes Completadas</h6>
+                    <span class="badge bg-success">Total: ₡@Model.TotalSales.ToString("N2")</span>
                 </div>
+                
+                <div class="payments-list">
+                    @foreach (var request in Model.CompletedRequests.OrderByDescending(r => r.CreatedAt).Take(20))
+                    {
+                        <div class="payment-card">
+                            <!-- Header -->
+                            <div class="payment-header">
+                                <div class="flex-grow-1">
+                                    <div class="payment-title">@request.Description</div>
+                                    <small class="text-muted">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Información -->
+                            <div class="payment-body">
+                                <div class="payment-info">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-hash me-1"></i>Código
+                                        </div>
+                                        <div class="info-value">
+                                            @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
+                                            {
+                                                <code>@request.PaymentRequestCode</code>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin código</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-currency-dollar me-1"></i>Monto Bruto
+                                        </div>
+                                        <div class="info-value text-success">₡@request.GrossAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-wallet2 me-1"></i>Monto Neto
+                                        </div>
+                                        <div class="info-value text-primary">₡@request.NetAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-receipt me-1"></i>Impuesto
+                                        </div>
+                                        <div class="info-value">₡@request.SalesTaxAmount.ToString("N2")</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                @if (Model.CompletedRequests.Count > 20)
+                {
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Mostrando las 20 transacciones más recientes de @Model.CompletedRequests.Count total</small>
+                    </div>
+                }
             }
             else
             {
-                <div class="alert alert-info text-center">
-                    <h5>No hay solicitudes completadas</h5>
-                    <p>Los pagos completados aparecerán aquí cuando los clientes paguen las solicitudes</p>
+                <div class="empty-state">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No hay solicitudes completadas</h4>
+                    <p class="text-muted mb-4">Los pagos completados aparecerán aquí cuando los clientes paguen las solicitudes</p>
+                    <a href="/Merchant/CreatePaymentRequest?merchantId=@Model.MerchantID" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-2"></i>Crear Cobro
+                    </a>
                 </div>
             }
         </div>
@@ -231,73 +412,86 @@
         <div class="tab-pane fade" id="expired" role="tabpanel" aria-labelledby="expired-tab">
             @if (Model.ExpiredRequests.Any())
             {
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">Solicitudes Expiradas</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Descripción</th>
-                                        <th>Código</th>
-                                        <th class="text-end">Monto</th>
-                                        <th class="text-center">Estado</th>
-                                        <th>Fecha Expiración</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var request in Model.ExpiredRequests.OrderByDescending(r => r.CreatedAt).Take(30))
-                                    {
-                                        <tr>
-                                            <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>@request.Description</td>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
-                                                {
-                                                    <code>@request.PaymentRequestCode</code>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Sin código</span>
-                                                }
-                                            </td>
-                                            <td class="text-end">₡@request.GrossAmount.ToString("N2")</td>
-                                            <td class="text-center">
-                                                <span class="badge bg-danger">Expirada</span>
-                                            </td>
-                                            <td>
-                                                @if (request.ExpiresAt.HasValue)
-                                                {
-                                                    @request.ExpiresAt.Value.ToString("dd/MM/yyyy HH:mm")
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Sin fecha</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        @if (Model.ExpiredRequests.Count > 30)
-                        {
-                            <div class="text-center mt-3">
-                                <small class="text-muted">Mostrando las 30 más recientes de @Model.ExpiredRequests.Count total</small>
-                            </div>
-                        }
-                    </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="mb-0">Solicitudes Expiradas</h6>
+                    <span class="badge bg-danger">@Model.ExpiredRequests.Count total</span>
                 </div>
+                
+                <div class="payments-list">
+                    @foreach (var request in Model.ExpiredRequests.OrderByDescending(r => r.CreatedAt).Take(30))
+                    {
+                        <div class="payment-card">
+                            <!-- Header -->
+                            <div class="payment-header">
+                                <div class="flex-grow-1">
+                                    <div class="payment-title">@request.Description</div>
+                                    <small class="text-muted">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-danger">Expirada</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Información -->
+                            <div class="payment-body">
+                                <div class="payment-info">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-hash me-1"></i>Código
+                                        </div>
+                                        <div class="info-value">
+                                            @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
+                                            {
+                                                <code>@request.PaymentRequestCode</code>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin código</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-currency-dollar me-1"></i>Monto
+                                        </div>
+                                        <div class="info-value">₡@request.GrossAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-calendar-x me-1"></i>Expiró
+                                        </div>
+                                        <div class="info-value text-danger">
+                                            @if (request.ExpiresAt.HasValue)
+                                            {
+                                                @request.ExpiresAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin fecha</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                @if (Model.ExpiredRequests.Count > 30)
+                {
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Mostrando las 30 más recientes de @Model.ExpiredRequests.Count total</small>
+                    </div>
+                }
             }
             else
             {
-                <div class="alert alert-info text-center">
-                    <h5>No hay solicitudes expiradas</h5>
-                    <p>Las solicitudes que expiren aparecerán aquí</p>
+                <div class="empty-state">
+                    <div class="mb-4">
+                        <i class="bi bi-clock-history text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No hay solicitudes expiradas</h4>
+                    <p class="text-muted">Las solicitudes que expiren aparecerán aquí</p>
                 </div>
             }
         </div>
@@ -306,73 +500,90 @@
         <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
             @if (Model.CancelledRequests.Any())
             {
-                <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">Solicitudes Canceladas</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Fecha</th>
-                                        <th>Descripción</th>
-                                        <th>Código</th>
-                                        <th class="text-end">Monto</th>
-                                        <th class="text-center">Estado</th>
-                                        <th>Motivo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var request in Model.CancelledRequests.OrderByDescending(r => r.CreatedAt).Take(30))
-                                    {
-                                        <tr>
-                                            <td>@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>@request.Description</td>
-                                            <td>
-                                                @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
-                                                {
-                                                    <code>@request.PaymentRequestCode</code>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Sin código</span>
-                                                }
-                                            </td>
-                                            <td class="text-end">₡@request.GrossAmount.ToString("N2")</td>
-                                            <td class="text-center">
-                                                <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
-                                            </td>
-                                            <td>
-                                                @if (request.Status == "Cancelled" || request.Status == "Canceled")
-                                                {
-                                                    <span class="text-muted">Cancelada por usuario</span>
-                                                }
-                                                else if (request.Status == "Failed")
-                                                {
-                                                    <span class="text-muted">Falló el procesamiento</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        @if (Model.CancelledRequests.Count > 30)
-                        {
-                            <div class="text-center mt-3">
-                                <small class="text-muted">Mostrando las 30 más recientes de @Model.CancelledRequests.Count total</small>
-                            </div>
-                        }
-                    </div>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="mb-0">Solicitudes Canceladas</h6>
+                    <span class="badge bg-secondary">@Model.CancelledRequests.Count total</span>
                 </div>
+                
+                <div class="payments-list">
+                    @foreach (var request in Model.CancelledRequests.OrderByDescending(r => r.CreatedAt).Take(30))
+                    {
+                        <div class="payment-card">
+                            <!-- Header -->
+                            <div class="payment-header">
+                                <div class="flex-grow-1">
+                                    <div class="payment-title">@request.Description</div>
+                                    <small class="text-muted">@request.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge @request.StatusBadgeClass">@request.StatusText</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Información -->
+                            <div class="payment-body">
+                                <div class="payment-info">
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-hash me-1"></i>Código
+                                        </div>
+                                        <div class="info-value">
+                                            @if (!string.IsNullOrEmpty(request.PaymentRequestCode))
+                                            {
+                                                <code>@request.PaymentRequestCode</code>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Sin código</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-currency-dollar me-1"></i>Monto
+                                        </div>
+                                        <div class="info-value">₡@request.GrossAmount.ToString("N2")</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <div class="info-label">
+                                            <i class="bi bi-info-circle me-1"></i>Motivo
+                                        </div>
+                                        <div class="info-value">
+                                            @if (request.Status == "Cancelled" || request.Status == "Canceled")
+                                            {
+                                                <span class="text-muted">Cancelada por usuario</span>
+                                            }
+                                            else if (request.Status == "Failed")
+                                            {
+                                                <span class="text-muted">Falló el procesamiento</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">Cancelada</span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                @if (Model.CancelledRequests.Count > 30)
+                {
+                    <div class="text-center mt-3">
+                        <small class="text-muted">Mostrando las 30 más recientes de @Model.CancelledRequests.Count total</small>
+                    </div>
+                }
             }
             else
             {
-                <div class="alert alert-info text-center">
-                    <h5>No hay solicitudes canceladas</h5>
-                    <p>Las solicitudes canceladas o fallidas aparecerán aquí</p>
+                <div class="empty-state">
+                    <div class="mb-4">
+                        <i class="bi bi-x-circle text-muted" style="font-size: 4rem; opacity: 0.5;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">No hay solicitudes canceladas</h4>
+                    <p class="text-muted">Las solicitudes canceladas o fallidas aparecerán aquí</p>
                 </div>
             }
         </div>
