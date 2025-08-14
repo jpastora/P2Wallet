@@ -1,0 +1,365 @@
+@page
+@model WebApp.Pages.Merchant.MerchantDetailModel
+@{
+    ViewData["Title"] = Model.MerchantFound ? Model.MerchantInfo.MerchantName : "Comercio no encontrado";
+}
+
+<!-- Estilos específicos para detalle de comercio -->
+<style>
+    .merchant-hero {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 4rem 0 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .merchant-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .merchant-info-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .promotion-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .promotion-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .promotion-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 2;
+    }
+    
+    .section-title {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--bs-primary);
+        border-radius: 2px;
+    }
+    
+    .merchant-stats {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .back-button {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+    
+    @@media (max-width: 768px) {
+        .merchant-hero {
+            padding: 2rem 0 1rem;
+        }
+        
+        .merchant-avatar {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .section-title:after {
+            left: 0;
+            transform: none;
+        }
+    }
+</style>
+
+@if (!Model.MerchantFound)
+{
+    <!-- Merchant Not Found -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <i class="bi bi-shop text-muted" style="font-size: 5rem;"></i>
+                <h2 class="mt-4 text-muted">Comercio no encontrado</h2>
+                <p class="text-muted mb-4">@Model.Message</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Volver al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Back Button -->
+    <div class="container-fluid">
+        <div class="back-button mt-3">
+            <a href="/" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Merchant Hero Section -->
+    <section class="merchant-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <img src="@(!string.IsNullOrEmpty(Model.MerchantInfo.LogoImage) ? Model.MerchantInfo.LogoImage : "https://picsum.photos/seed/" + Model.MerchantInfo.ID + "/300")" 
+                         alt="@Model.MerchantInfo.MerchantName" 
+                         class="merchant-avatar">
+                </div>
+                <div class="col-md-9">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="mb-2">@Model.MerchantInfo.MerchantName</h1>
+                            <div class="mb-3">
+                                <span class="badge bg-secondary me-2">@Model.GetMerchantCategory()</span>
+                                <span class="badge @Model.GetStatusBadgeClass()">@Model.GetStatusText()</span>
+                            </div>
+                            <p class="lead mb-3">
+                                Comercio afiliado a Yavi que ofrece experiencias digitales seguras y promociones exclusivas.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="contactarComercio('@Model.MerchantInfo.MerchantName')">
+                                    <i class="bi bi-telephone me-2"></i>Contactar
+                                </button>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>Ver ubicación
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Merchant Information -->
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="merchant-info-card card p-4 mb-4">
+                        <h4 class="mb-3">
+                            <i class="bi bi-info-circle text-primary me-2"></i>Información del Comercio
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Email de Contacto</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-envelope me-2"></i>
+                                        @(!string.IsNullOrEmpty(Model.MerchantInfo.Email) ? Model.MerchantInfo.Email : "No especificado")
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Teléfono</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-telephone me-2"></i>
+                                        @(!string.IsNullOrEmpty(Model.MerchantInfo.ContactPhone) ? Model.MerchantInfo.ContactPhone : "No especificado")
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Identificación Tributaria</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-card-text me-2"></i>
+                                        @(!string.IsNullOrEmpty(Model.MerchantInfo.TaxID) ? Model.MerchantInfo.TaxID : "No especificado")
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Comisión</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-percent me-2"></i>
+                                        @Model.MerchantInfo.CommissionPercentage.ToString("0.0")% por transacción
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="merchant-info-card card p-4">
+                        <h5 class="mb-3">
+                            <i class="bi bi-shield-check text-success me-2"></i>Seguridad Verificada
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Comercio verificado por Yavi
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Transacciones seguras
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Soporte 24/7
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Reembolsos garantizados
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section>
+        <div class="container">
+            <div class="merchant-stats text-center">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h3 class="mb-1">@Model.ActivePromotions.Count</h3>
+                        <p class="mb-0">Promociones Activas</p>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h3 class="mb-1">100%</h3>
+                        <p class="mb-0">Seguro</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="mb-1">24/7</h3>
+                        <p class="mb-0">Disponibilidad</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">Promociones Activas</h2>
+            @if (Model.ActivePromotions.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var promotion in Model.ActivePromotions)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="promotion-card card h-100">
+                                <div class="position-relative">
+                                    <img src="@promotion.ImageUrl" class="card-img-top" alt="@promotion.Name" style="height: 200px; object-fit: cover;">
+                                    <span class="promotion-badge badge bg-success">
+                                        @promotion.DiscountPercentage.ToString("0")% OFF
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">@promotion.Name</h5>
+                                    <p class="card-text">@promotion.Description</p>
+                                    
+                                    <div class="mb-3">
+                                        <span class="badge bg-info me-1">@promotion.PromotionType</span>
+                                        @if (promotion.MaxRefund > 0)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Max: ?@promotion.MaxRefund.ToString("N0")
+                                            </span>
+                                        }
+                                    </div>
+                                    
+                                    <div class="row small text-muted">
+                                        <div class="col-6">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            Hasta: @promotion.EndDate.ToString("dd/MM/yyyy")
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <i class="bi bi-box me-1"></i>
+                                            Disponibles: @promotion.AvailableQuantity
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <button class="btn btn-outline-primary w-100" onclick="mostrarDetallesPromocion('@promotion.Name')">
+                                        <i class="bi bi-eye me-2"></i>Ver Detalles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-gift fs-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">Sin promociones activas</h4>
+                    <p class="text-muted">Este comercio no tiene promociones disponibles en este momento.</p>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-light">
+        <div class="container text-center">
+            <h3 class="mb-3">¿Listo para disfrutar de estas promociones?</h3>
+            <p class="lead mb-4">Descarga Yavi y comienza a ahorrar con @Model.MerchantInfo.MerchantName</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/Register/UserRegister" class="btn btn-primary btn-lg">
+                    <i class="bi bi-download me-2"></i>Descargar Yavi
+                </a>
+                <button class="btn btn-outline-primary btn-lg" onclick="contactarComercio('@Model.MerchantInfo.MerchantName')">
+                    <i class="bi bi-telephone me-2"></i>Contactar Comercio
+                </button>
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script>
+        // Función para contactar comercio
+        function contactarComercio(nombreComercio) {
+            alert(`Contactando a ${nombreComercio}...\n\nEsta funcionalidad estará disponible próximamente.`);
+        }
+
+        // Función para mostrar detalles de promoción
+        function mostrarDetallesPromocion(tituloPromocion) {
+            alert(`Mostrando detalles de: ${tituloPromocion}\n\nEsta funcionalidad estará disponible próximamente.`);
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+}
