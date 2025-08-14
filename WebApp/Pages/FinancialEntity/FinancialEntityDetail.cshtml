@@ -1,0 +1,410 @@
+@page
+@model WebApp.Pages.FinancialEntity.FinancialEntityDetailModel
+@{
+    ViewData["Title"] = Model.EntityFound ? Model.EntityInfo.EntityName : "Entidad financiera no encontrada";
+}
+
+<!-- Estilos específicos para detalle de entidad financiera -->
+<style>
+    .entity-hero {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        padding: 4rem 0 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .entity-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .entity-info-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .promotion-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .promotion-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .promotion-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 2;
+    }
+    
+    .section-title {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-bottom: 0.5rem;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--bs-primary);
+        border-radius: 2px;
+    }
+    
+    .entity-stats {
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+    }
+    
+    .back-button {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+    }
+    
+    .service-feature {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+        height: 100%;
+    }
+    
+    @@media (max-width: 768px) {
+        .entity-hero {
+            padding: 2rem 0 1rem;
+        }
+        
+        .entity-avatar {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .section-title:after {
+            left: 0;
+            transform: none;
+        }
+    }
+</style>
+
+@if (!Model.EntityFound)
+{
+    <!-- Entity Not Found -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <i class="bi bi-bank text-muted" style="font-size: 5rem;"></i>
+                <h2 class="mt-4 text-muted">Entidad financiera no encontrada</h2>
+                <p class="text-muted mb-4">@Model.Message</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Volver al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Back Button -->
+    <div class="container-fluid">
+        <div class="back-button mt-3">
+            <a href="/" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Volver
+            </a>
+        </div>
+    </div>
+
+    <!-- Entity Hero Section -->
+    <section class="entity-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <img src="@(!string.IsNullOrEmpty(Model.EntityInfo.LogoImage) ? Model.EntityInfo.LogoImage : "https://picsum.photos/seed/bank" + Model.EntityInfo.ID + "/300")" 
+                         alt="@Model.EntityInfo.EntityName" 
+                         class="entity-avatar">
+                </div>
+                <div class="col-md-9">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="mb-2">@Model.EntityInfo.EntityName</h1>
+                            <div class="mb-3">
+                                <span class="badge bg-primary me-2">@Model.GetEntityType()</span>
+                                <span class="badge @Model.GetStatusBadgeClass()">@Model.GetStatusText()</span>
+                            </div>
+                            <p class="lead mb-3">
+                                Entidad financiera aliada a Yavi que ofrece servicios digitales seguros y promociones exclusivas para sus clientes.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary" onclick="contactarEntidad('@Model.EntityInfo.EntityName')">
+                                    <i class="bi bi-telephone me-2"></i>Contactar
+                                </button>
+                                <small class="text-muted">
+                                    <i class="bi bi-geo-alt me-1"></i>Ver sucursales
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Entity Information -->
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="entity-info-card card p-4 mb-4">
+                        <h4 class="mb-3">
+                            <i class="bi bi-info-circle text-primary me-2"></i>Información de la Entidad
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Email de Contacto</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-envelope me-2"></i>
+                                        @(!string.IsNullOrEmpty(Model.EntityInfo.Email) ? Model.EntityInfo.Email : "No especificado")
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Teléfono</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-telephone me-2"></i>
+                                        @(!string.IsNullOrEmpty(Model.EntityInfo.ContactPhone) ? Model.EntityInfo.ContactPhone : "No especificado")
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Identificación Tributaria</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-card-text me-2"></i>
+                                        @(!string.IsNullOrEmpty(Model.EntityInfo.TaxID) ? Model.EntityInfo.TaxID : "No especificado")
+                                    </p>
+                                </div>
+                                <div class="mb-3">
+                                    <h6 class="text-muted mb-1">Comisión</h6>
+                                    <p class="mb-0">
+                                        <i class="bi bi-percent me-2"></i>
+                                        @Model.EntityInfo.CommissionPercentage.ToString("0.0")% por transacción
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="entity-info-card card p-4">
+                        <h5 class="mb-3">
+                            <i class="bi bi-shield-check text-success me-2"></i>Respaldo Financiero
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Entidad regulada y supervisada
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Operaciones seguras
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Soporte especializado
+                            </li>
+                            <li class="mb-0">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Fondos protegidos
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-4">
+        <div class="container">
+            <h3 class="mb-4 text-center">Servicios Disponibles</h3>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="service-feature">
+                        <i class="bi bi-credit-card fs-1 text-primary mb-3"></i>
+                        <h6>Pagos Digitales</h6>
+                        <p class="small text-muted">Realiza pagos seguros usando tu cuenta</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="service-feature">
+                        <i class="bi bi-arrow-left-right fs-1 text-primary mb-3"></i>
+                        <h6>Transferencias</h6>
+                        <p class="small text-muted">Envía y recibe dinero al instante</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="service-feature">
+                        <i class="bi bi-gift fs-1 text-primary mb-3"></i>
+                        <h6>Promociones</h6>
+                        <p class="small text-muted">Accede a descuentos exclusivos</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="service-feature">
+                        <i class="bi bi-headset fs-1 text-primary mb-3"></i>
+                        <h6>Soporte 24/7</h6>
+                        <p class="small text-muted">Asistencia especializada siempre</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section>
+        <div class="container">
+            <div class="entity-stats text-center">
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h3 class="mb-1">@Model.ActivePromotions.Count</h3>
+                        <p class="mb-0">Promociones Activas</p>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <h3 class="mb-1">100%</h3>
+                        <p class="mb-0">Seguro</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h3 class="mb-1">24/7</h3>
+                        <p class="mb-0">Disponibilidad</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title text-center">Promociones Financieras</h2>
+            @if (Model.ActivePromotions.Any())
+            {
+                <div class="row g-4">
+                    @foreach (var promotion in Model.ActivePromotions)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="promotion-card card h-100">
+                                <div class="position-relative">
+                                    <img src="@promotion.ImageUrl" class="card-img-top" alt="@promotion.Name" style="height: 200px; object-fit: cover;">
+                                    <span class="promotion-badge badge bg-warning text-dark">
+                                        @promotion.DiscountPercentage.ToString("0")% OFF
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">@promotion.Name</h5>
+                                    <p class="card-text">@promotion.Description</p>
+                                    
+                                    <div class="mb-3">
+                                        <span class="badge bg-primary me-1">@promotion.PromotionType</span>
+                                        @if (promotion.MaxRefund > 0)
+                                        {
+                                            <span class="badge bg-success">
+                                                Max: ?@promotion.MaxRefund.ToString("N0")
+                                            </span>
+                                        }
+                                    </div>
+                                    
+                                    <div class="row small text-muted">
+                                        <div class="col-6">
+                                            <i class="bi bi-calendar me-1"></i>
+                                            Hasta: @promotion.EndDate.ToString("dd/MM/yyyy")
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <i class="bi bi-box me-1"></i>
+                                            Disponibles: @promotion.AvailableQuantity
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-0">
+                                    <button class="btn btn-outline-primary w-100" onclick="mostrarDetallesPromocion('@promotion.Name')">
+                                        <i class="bi bi-eye me-2"></i>Ver Detalles
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-gift fs-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">Sin promociones activas</h4>
+                    <p class="text-muted">Esta entidad financiera no tiene promociones disponibles en este momento.</p>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-light">
+        <div class="container text-center">
+            <h3 class="mb-3">¿Quieres aprovechar estos beneficios?</h3>
+            <p class="lead mb-4">Conecta tu cuenta de @Model.EntityInfo.EntityName con Yavi</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/Register/UserRegister" class="btn btn-primary btn-lg">
+                    <i class="bi bi-download me-2"></i>Descargar Yavi
+                </a>
+                <button class="btn btn-outline-primary btn-lg" onclick="contactarEntidad('@Model.EntityInfo.EntityName')">
+                    <i class="bi bi-bank me-2"></i>Contactar Entidad
+                </button>
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script>
+        // Función para contactar entidad
+        function contactarEntidad(nombreEntidad) {
+            alert(`Contactando a ${nombreEntidad}...\n\nEsta funcionalidad estará disponible próximamente.`);
+        }
+
+        // Función para mostrar detalles de promoción
+        function mostrarDetallesPromocion(tituloPromocion) {
+            alert(`Mostrando detalles de: ${tituloPromocion}\n\nEsta funcionalidad estará disponible próximamente.`);
+        }
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+}

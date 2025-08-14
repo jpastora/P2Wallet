@@ -128,41 +128,80 @@
         <h2 class="section-title text-center">Promociones Destacadas</h2>
         @if (Model.Promociones.Any())
         {
-            <div class="row g-4">
-                @foreach (var promocion in Model.Promociones)
-                {
-                    <div class="col-md-4">
-                        <div class="card h-100">
-                            <img src="@promocion.ImagenUrl" class="card-img-top" alt="@promocion.Titulo">
-                            <div class="card-body">
-                                <h5 class="card-title">@promocion.Titulo</h5>
-                                <p class="card-text">@promocion.Descripcion</p>
-                                
-                                @if (!string.IsNullOrEmpty(promocion.ComercioNombre) && promocion.ComercioNombre != "Yavi")
+            <!-- Carrusel de Promociones -->
+            <div id="promocionesCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @{
+                        var promocionesChunks = Model.Promociones.Select((x, i) => new { Index = i, Value = x })
+                                                                .GroupBy(x => x.Index / 3)
+                                                                .Select(x => x.Select(v => v.Value).ToList())
+                                                                .ToList();
+                    }
+                    
+                    @for (int i = 0; i < promocionesChunks.Count; i++)
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="row g-4">
+                                @foreach (var promocion in promocionesChunks[i])
                                 {
-                                    <p class="small text-muted mb-2">
-                                        <i class="bi bi-shop"></i> @promocion.ComercioNombre
-                                    </p>
-                                }
-                                
-                                @if (promocion.PorcentajeDescuento > 0)
-                                {
-                                    <div class="mb-2">
-                                        <span class="badge bg-success">
-                                            @promocion.PorcentajeDescuento% de descuento
-                                        </span>
-                                        @if (!string.IsNullOrEmpty(promocion.TipoDescuento))
-                                        {
-                                            <span class="badge bg-info">@promocion.TipoDescuento</span>
-                                        }
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <img src="@promocion.ImagenUrl" class="card-img-top" alt="@promocion.Titulo" style="height: 200px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">@promocion.Titulo</h5>
+                                                <p class="card-text">@promocion.Descripcion</p>
+                                                
+                                                @if (!string.IsNullOrEmpty(promocion.ComercioNombre) && promocion.ComercioNombre != "Yavi")
+                                                {
+                                                    <p class="small text-muted mb-2">
+                                                        <i class="bi bi-shop"></i> @promocion.ComercioNombre
+                                                    </p>
+                                                }
+                                                
+                                                @if (promocion.PorcentajeDescuento > 0)
+                                                {
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-success">
+                                                            @promocion.PorcentajeDescuento% de descuento
+                                                        </span>
+                                                        @if (!string.IsNullOrEmpty(promocion.TipoDescuento))
+                                                        {
+                                                            <span class="badge bg-info">@promocion.TipoDescuento</span>
+                                                        }
+                                                    </div>
+                                                }
+                                                
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar"></i> Válida hasta: @promocion.FechaVencimiento.ToString("dd/MM/yyyy")
+                                                </small>
+                                            </div>
+                                        </div>
                                     </div>
                                 }
-                                
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> Válida hasta: @promocion.FechaVencimiento.ToString("dd/MM/yyyy")
-                                </small>
                             </div>
                         </div>
+                    }
+                </div>
+                
+                @if (promocionesChunks.Count > 1)
+                {
+                    <!-- Controles del carrusel -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#promocionesCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#promocionesCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
+                    
+                    <!-- Indicadores -->
+                    <div class="carousel-indicators">
+                        @for (int i = 0; i < promocionesChunks.Count; i++)
+                        {
+                            <button type="button" data-bs-target="#promocionesCarousel" data-bs-slide-to="@i" 
+                                    class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                        }
                     </div>
                 }
             </div>
@@ -184,32 +223,78 @@
         <h2 class="section-title text-center">Comercios Afiliados</h2>
         @if (Model.ComerciosAfiliados.Any())
         {
-            <div class="row g-4">
-                @foreach (var comercio in Model.ComerciosAfiliados)
-                {
-                    <div class="col-md-4">
-                        <div class="card h-100 text-center p-3">
-                            <img src="@comercio.ImagenUrl" class="card-img-top" alt="@comercio.Nombre">
-                            <div class="card-body">
-                                <h5 class="card-title">@comercio.Nombre</h5>
-                                <span class="badge bg-secondary mb-2">@comercio.Categoria</span>
-                                <p class="card-text">@comercio.Descripcion</p>
-                                
-                                @if (!string.IsNullOrEmpty(comercio.Telefono) || !string.IsNullOrEmpty(comercio.Email))
+            <!-- Carrusel de Comercios -->
+            <div id="comerciosCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @{
+                        var comerciosChunks = Model.ComerciosAfiliados.Select((x, i) => new { Index = i, Value = x })
+                                                                     .GroupBy(x => x.Index / 3)
+                                                                     .Select(x => x.Select(v => v.Value).ToList())
+                                                                     .ToList();
+                    }
+                    
+                    @for (int i = 0; i < comerciosChunks.Count; i++)
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="row g-4">
+                                @foreach (var comercio in comerciosChunks[i])
                                 {
-                                    <div class="mt-3 small text-muted">
-                                        @if (!string.IsNullOrEmpty(comercio.Telefono))
-                                        {
-                                            <div><i class="bi bi-telephone"></i> @comercio.Telefono</div>
-                                        }
-                                        @if (!string.IsNullOrEmpty(comercio.Email))
-                                        {
-                                            <div><i class="bi bi-envelope"></i> @comercio.Email</div>
-                                        }
+                                    <div class="col-md-4">
+                                        <div class="card h-100 text-center p-3">
+                                            <img src="@comercio.ImagenUrl" class="card-img-top" alt="@comercio.Nombre" style="height: 200px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">@comercio.Nombre</h5>
+                                                <span class="badge bg-secondary mb-2">@comercio.Categoria</span>
+                                                <p class="card-text">@comercio.Descripcion</p>
+                                                
+                                                @if (!string.IsNullOrEmpty(comercio.Telefono) || !string.IsNullOrEmpty(comercio.Email))
+                                                {
+                                                    <div class="mt-3 small text-muted">
+                                                        @if (!string.IsNullOrEmpty(comercio.Telefono))
+                                                        {
+                                                            <div><i class="bi bi-telephone"></i> @comercio.Telefono</div>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(comercio.Email))
+                                                        {
+                                                            <div><i class="bi bi-envelope"></i> @comercio.Email</div>
+                                                        }
+                                                    </div>
+                                                }
+                                                
+                                                <!-- Botón para ver detalles -->
+                                                <div class="mt-3">
+                                                    <a href="/Merchant/MerchantDetail?merchantId=@comercio.ID" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-eye me-1"></i>Ver Detalles
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 }
                             </div>
                         </div>
+                    }
+                </div>
+                
+                @if (comerciosChunks.Count > 1)
+                {
+                    <!-- Controles del carrusel -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#comerciosCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#comerciosCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
+                    
+                    <!-- Indicadores -->
+                    <div class="carousel-indicators">
+                        @for (int i = 0; i < comerciosChunks.Count; i++)
+                        {
+                            <button type="button" data-bs-target="#comerciosCarousel" data-bs-slide-to="@i" 
+                                    class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                        }
                     </div>
                 }
             </div>
@@ -222,6 +307,13 @@
                 <p class="text-muted">Estamos incorporando más comercios aliados para brindarte mejores beneficios.</p>
             </div>
         }
+        
+        <!-- Enlace al directorio completo -->
+        <div class="text-center mt-4">
+            <a href="/Directory/BusinessDirectory" class="btn btn-primary">
+                <i class="bi bi-building me-2"></i>Ver Directorio Completo
+            </a>
+        </div>
     </div>
 </section>
 
@@ -231,31 +323,77 @@
         <h2 class="section-title text-center">Entidades Financieras</h2>
         @if (Model.EntidadesFinancieras.Any())
         {
-            <div class="row g-4">
-                @foreach (var entidad in Model.EntidadesFinancieras)
-                {
-                    <div class="col-md-4">
-                        <div class="card h-100 text-center p-3">
-                            <img src="@entidad.ImagenUrl" class="card-img-top" alt="@entidad.Nombre">
-                            <div class="card-body">
-                                <h5 class="card-title">@entidad.Nombre</h5>
-                                <p class="card-text">@entidad.Descripcion</p>
-                                
-                                @if (!string.IsNullOrEmpty(entidad.Telefono) || !string.IsNullOrEmpty(entidad.Email))
+            <!-- Carrusel de Entidades Financieras -->
+            <div id="entidadesCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    @{
+                        var entidadesChunks = Model.EntidadesFinancieras.Select((x, i) => new { Index = i, Value = x })
+                                                                       .GroupBy(x => x.Index / 3)
+                                                                       .Select(x => x.Select(v => v.Value).ToList())
+                                                                       .ToList();
+                    }
+                    
+                    @for (int i = 0; i < entidadesChunks.Count; i++)
+                    {
+                        <div class="carousel-item @(i == 0 ? "active" : "")">
+                            <div class="row g-4">
+                                @foreach (var entidad in entidadesChunks[i])
                                 {
-                                    <div class="mt-3 small text-muted">
-                                        @if (!string.IsNullOrEmpty(entidad.Telefono))
-                                        {
-                                            <div><i class="bi bi-telephone"></i> @entidad.Telefono</div>
-                                        }
-                                        @if (!string.IsNullOrEmpty(entidad.Email))
-                                        {
-                                            <div><i class="bi bi-envelope"></i> @entidad.Email</div>
-                                        }
+                                    <div class="col-md-4">
+                                        <div class="card h-100 text-center p-3">
+                                            <img src="@entidad.ImagenUrl" class="card-img-top" alt="@entidad.Nombre" style="height: 200px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">@entidad.Nombre</h5>
+                                                <p class="card-text">@entidad.Descripcion</p>
+                                                
+                                                @if (!string.IsNullOrEmpty(entidad.Telefono) || !string.IsNullOrEmpty(entidad.Email))
+                                                {
+                                                    <div class="mt-3 small text-muted">
+                                                        @if (!string.IsNullOrEmpty(entidad.Telefono))
+                                                        {
+                                                            <div><i class="bi bi-telephone"></i> @entidad.Telefono</div>
+                                                        }
+                                                        @if (!string.IsNullOrEmpty(entidad.Email))
+                                                        {
+                                                            <div><i class="bi bi-envelope"></i> @entidad.Email</div>
+                                                        }
+                                                    </div>
+                                                }
+                                                
+                                                <!-- Botón para ver detalles -->
+                                                <div class="mt-3">
+                                                    <a href="/FinancialEntity/FinancialEntityDetail?entityId=@entidad.ID" class="btn btn-outline-primary btn-sm">
+                                                        <i class="bi bi-eye me-1"></i>Ver Detalles
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 }
                             </div>
                         </div>
+                    }
+                </div>
+                
+                @if (entidadesChunks.Count > 1)
+                {
+                    <!-- Controles del carrusel -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#entidadesCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#entidadesCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
+                    
+                    <!-- Indicadores -->
+                    <div class="carousel-indicators">
+                        @for (int i = 0; i < entidadesChunks.Count; i++)
+                        {
+                            <button type="button" data-bs-target="#entidadesCarousel" data-bs-slide-to="@i" 
+                                    class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                        }
                     </div>
                 }
             </div>
@@ -268,6 +406,13 @@
                 <p class="text-muted">Estamos estableciendo alianzas con más entidades financieras para mejorar tu experiencia.</p>
             </div>
         }
+        
+        <!-- Enlace al directorio completo -->
+        <div class="text-center mt-4">
+            <a href="/Directory/BusinessDirectory?typeFilter=financial" class="btn btn-primary">
+                <i class="bi bi-bank me-2"></i>Ver Todas las Entidades
+            </a>
+        </div>
     </div>
 </section>
 
@@ -377,10 +522,40 @@
 
         // Auto-inicializar carousel
         document.addEventListener('DOMContentLoaded', function() {
-            const carousel = new bootstrap.Carousel(document.querySelector('#heroCarousel'), {
+            // Hero carousel
+            const heroCarousel = new bootstrap.Carousel(document.querySelector('#heroCarousel'), {
                 interval: 5000,
                 ride: 'carousel'
             });
+            
+            // Función para inicializar carruseles de contenido
+            function initializeCarousel(selector, interval = 8000) {
+                const carouselElement = document.querySelector(selector);
+                if (carouselElement) {
+                    const carousel = new bootstrap.Carousel(carouselElement, {
+                        interval: interval,
+                        ride: 'carousel',
+                        pause: 'hover'
+                    });
+                    
+                    // Pausar cuando el usuario hace hover en las cards
+                    carouselElement.addEventListener('mouseenter', function() {
+                        carousel.pause();
+                    });
+                    
+                    carouselElement.addEventListener('mouseleave', function() {
+                        carousel.cycle();
+                    });
+                    
+                    return carousel;
+                }
+                return null;
+            }
+            
+            // Inicializar carruseles de contenido
+            initializeCarousel('#promocionesCarousel', 10000);
+            initializeCarousel('#comerciosCarousel', 12000);
+            initializeCarousel('#entidadesCarousel', 14000);
         });
 
         // Función para contactar comercio
@@ -398,3 +573,78 @@
         }
     </script>
 }
+
+<!-- Estilos específicos para carruseles -->
+<style>
+    .carousel-control-prev,
+    .carousel-control-next {
+        width: 5%;
+        color: #007bff;
+    }
+    
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(0, 123, 255, 0.8);
+        border-radius: 50%;
+        width: 2rem;
+        height: 2rem;
+    }
+    
+    .carousel-indicators {
+        margin-bottom: -2rem;
+    }
+    
+    .carousel-indicators [data-bs-target] {
+        background-color: #007bff;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin: 0 5px;
+    }
+    
+    /* Espaciado para los carruseles */
+    #promocionesCarousel,
+    #comerciosCarousel,
+    #entidadesCarousel {
+        margin-bottom: 3rem;
+    }
+    
+    /* Mejoras para cards en carruseles */
+    .carousel .card {
+        transition: transform 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .carousel .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .carousel .card-img-top {
+        border-radius: 0.375rem 0.375rem 0 0;
+    }
+    
+    /* Responsive para carruseles */
+    @@media (max-width: 768px) {
+        .carousel-item .row > div {
+            margin-bottom: 1rem;
+        }
+        
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 8%;
+        }
+        
+        .carousel-indicators {
+            margin-bottom: -1rem;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .carousel-item .col-md-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+    }
+</style>

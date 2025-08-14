@@ -167,20 +167,18 @@ namespace WebApp.Pages
                 var merchantManager = new MerchantManager();
                 var comercios = merchantManager.RetrieveAllMerchants()
                     .Where(m => m.ValidationStatus == "Active")
-                    .OrderBy(m => m.MerchantName)
-                    .Take(6) // Mostrar solo 6 comercios destacados
+                    .Take(6)
                     .ToList();
 
-                ComerciosAfiliados = comercios.Select(comercio => new ComercioInfo
+                ComerciosAfiliados = comercios.Select(m => new ComercioInfo
                 {
-                    Nombre = comercio.MerchantName,
-                    Descripcion = $"Disfruta de beneficios exclusivos pagando con Yavi en {comercio.MerchantName}.",
-                    ImagenUrl = !string.IsNullOrEmpty(comercio.LogoImage) 
-                        ? comercio.LogoImage 
-                        : $"https://picsum.photos/seed/merchant{comercio.ID}/400/200",
-                    Categoria = DeterminarCategoriaComercio(comercio.MerchantName),
-                    Telefono = comercio.ContactPhone,
-                    Email = comercio.Email
+                    ID = m.ID,
+                    Nombre = m.MerchantName ?? "Comercio sin nombre",
+                    Descripcion = "Este comercio acepta pagos con Yavi y te ofrece una experiencia digital segura.",
+                    ImagenUrl = !string.IsNullOrEmpty(m.LogoImage) ? m.LogoImage : $"https://picsum.photos/seed/{m.ID}/400/200",
+                    Categoria = DeterminarCategoriaComercio(m.MerchantName ?? ""),
+                    Telefono = m.ContactPhone ?? "",
+                    Email = m.Email ?? ""
                 }).ToList();
 
                 // Si no hay comercios activos, mostrar mensaje por defecto
@@ -210,19 +208,17 @@ namespace WebApp.Pages
                 var financialEntityManager = new FinancialEntityManager();
                 var entidades = financialEntityManager.RetrieveAllFinancialEntities()
                     .Where(e => e.ValidationStatus == "Active")
-                    .OrderBy(e => e.EntityName)
                     .Take(6) // Mostrar solo 6 entidades destacadas
                     .ToList();
 
-                EntidadesFinancieras = entidades.Select(entidad => new EntidadFinancieraInfo
+                EntidadesFinancieras = entidades.Select(e => new EntidadFinancieraInfo
                 {
-                    Nombre = entidad.EntityName,
-                    Descripcion = $"Conecta tu cuenta de {entidad.EntityName} con Yavi para transacciones rápidas y seguras.",
-                    ImagenUrl = !string.IsNullOrEmpty(entidad.LogoImage) 
-                        ? entidad.LogoImage 
-                        : $"https://picsum.photos/seed/bank{entidad.ID}/400/200",
-                    Telefono = entidad.ContactPhone,
-                    Email = entidad.Email
+                    ID = e.ID,
+                    Nombre = e.EntityName ?? "Entidad sin nombre",
+                    Descripcion = "Entidad financiera aliada que ofrece servicios seguros con Yavi.",
+                    ImagenUrl = !string.IsNullOrEmpty(e.LogoImage) ? e.LogoImage : $"https://picsum.photos/seed/bank{e.ID}/400/200",
+                    Telefono = e.ContactPhone ?? "",
+                    Email = e.Email ?? ""
                 }).ToList();
 
                 // Si no hay entidades activas, mostrar mensaje por defecto
@@ -365,6 +361,7 @@ namespace WebApp.Pages
 
     public class ComercioInfo
     {
+        public int ID { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public string ImagenUrl { get; set; } = string.Empty;
@@ -375,6 +372,7 @@ namespace WebApp.Pages
 
     public class EntidadFinancieraInfo
     {
+        public int ID { get; set; }
         public string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public string ImagenUrl { get; set; } = string.Empty;

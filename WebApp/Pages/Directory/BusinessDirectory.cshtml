@@ -1,0 +1,414 @@
+@page
+@model WebApp.Pages.Directory.BusinessDirectoryModel
+@{
+    ViewData["Title"] = "Directorio de Negocios";
+}
+
+<!-- Estilos específicos para directorio -->
+<style>
+    .directory-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .filter-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .business-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        height: 100%;
+        background: white;
+    }
+    
+    .business-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .business-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .category-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 2;
+        backdrop-filter: blur(4px);
+        background: rgba(108, 117, 125, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .business-image {
+        height: 200px;
+        object-fit: cover;
+        object-position: center;
+        width: 100%;
+        border-radius: 0;
+        transition: transform 0.3s ease;
+    }
+    
+    .business-card:hover .business-image {
+        transform: scale(1.05);
+    }
+    
+    .business-card .card-img-top {
+        height: 200px;
+        object-fit: cover;
+        object-position: center;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        transition: transform 0.3s ease;
+    }
+    
+    .business-card:hover .card-img-top {
+        transform: scale(1.05);
+    }
+    
+    /* Mejora para imágenes con diferentes relaciones de aspecto */
+    .image-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .stats-section {
+        background: #f8f9fa;
+        padding: 2rem 0;
+        margin: 3rem 0;
+        border-radius: 12px;
+    }
+    
+    .filter-toggle {
+        display: none;
+    }
+    
+    @@media (max-width: 768px) {
+        .directory-hero {
+            padding: 2rem 0 1rem;
+        }
+        
+        .filter-toggle {
+            display: block;
+            margin-bottom: 1rem;
+        }
+        
+        .filter-content {
+            display: none;
+        }
+        
+        .filter-content.show {
+            display: block;
+        }
+        
+        .business-image,
+        .business-card .card-img-top {
+            height: 180px;
+        }
+        
+        .image-container {
+            height: 180px;
+        }
+    }
+    
+    @@media (max-width: 576px) {
+        .business-image,
+        .business-card .card-img-top {
+            height: 160px;
+        }
+        
+        .image-container {
+            height: 160px;
+        }
+        
+        .business-badge,
+        .category-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="directory-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-3">Directorio de Negocios</h1>
+                <p class="lead mb-4">
+                    Explora todos los comercios y entidades financieras que forman parte de la red Yavi. 
+                    Descubre promociones exclusivas y servicios especiales.
+                </p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="bi bi-buildings" style="font-size: 5rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filtros -->
+<div class="container">
+    <div class="filter-card card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                </h5>
+                <button class="btn btn-outline-light btn-sm filter-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#filterContent">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="filterContent" class="filter-content collapse show">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold">Buscar</label>
+                        <input type="text" class="form-control" name="searchTerm" 
+                               value="@Model.SearchTerm" placeholder="Nombre o categoría...">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Tipo</label>
+                        <select name="typeFilter" class="form-select">
+                            <option value="all" selected="@(Model.TypeFilter == "all" || string.IsNullOrEmpty(Model.TypeFilter))">Todos</option>
+                            <option value="merchant" selected="@(Model.TypeFilter == "merchant")">Comercios</option>
+                            <option value="financial" selected="@(Model.TypeFilter == "financial")">Entidades Financieras</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold">Categoría</label>
+                        <select name="categoryFilter" class="form-select">
+                            <option value="all" selected="@(Model.CategoryFilter == "all" || string.IsNullOrEmpty(Model.CategoryFilter))">Todas</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category" selected="@(Model.CategoryFilter == category)">@category</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small d-none d-md-block">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i>Buscar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+@if (Model.AllBusinesses.Any())
+{
+    <div class="container">
+        <div class="stats-section">
+            <div class="row text-center">
+                <div class="col-md-4">
+                    <h3 class="text-primary">@Model.AllBusinesses.Count(b => b.Type == "Comercio")</h3>
+                    <p class="text-muted mb-0">Comercios Afiliados</p>
+                </div>
+                <div class="col-md-4">
+                    <h3 class="text-primary">@Model.AllBusinesses.Count(b => b.Type == "Entidad Financiera")</h3>
+                    <p class="text-muted mb-0">Entidades Financieras</p>
+                </div>
+                <div class="col-md-4">
+                    <h3 class="text-primary">@Model.FilteredBusinesses.Count</h3>
+                    <p class="text-muted mb-0">Resultados Encontrados</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Resultados -->
+<div class="container">
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@Model.Message
+        </div>
+    }
+
+    @if (Model.FilteredBusinesses.Any())
+    {
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Resultados (@Model.FilteredBusinesses.Count)</h3>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.TypeFilter != "all" || Model.CategoryFilter != "all")
+            {
+                <a href="/Directory/BusinessDirectory" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-1"></i>Limpiar Filtros
+                </a>
+            }
+        </div>
+
+        <div class="row g-4">
+            @foreach (var business in Model.FilteredBusinesses)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="business-card card">
+                        <div class="image-container position-relative">
+                            <img src="@business.ImageUrl" class="card-img-top" alt="@business.Name" loading="lazy">
+                            <span class="business-badge badge @(business.Type == "Comercio" ? "bg-success" : "bg-primary")">
+                                @business.Type
+                            </span>
+                            <span class="category-badge badge bg-secondary">
+                                @business.Category
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@business.Name</h5>
+                            <div class="row small text-muted mb-3">
+                                @if (!string.IsNullOrEmpty(business.Phone))
+                                {
+                                    <div class="col-12 mb-1">
+                                        <i class="bi bi-telephone me-1"></i>@business.Phone
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(business.Email))
+                                {
+                                    <div class="col-12 mb-1">
+                                        <i class="bi bi-envelope me-1"></i>
+                                        @(business.Email.Length > 25 ? business.Email.Substring(0, 25) + "..." : business.Email)
+                                    </div>
+                                }
+                                <div class="col-12">
+                                    <i class="bi bi-percent me-1"></i>Comisión: @business.Commission.ToString("0.0")%
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <a href="@business.DetailUrl" class="btn btn-primary">
+                                    <i class="bi bi-eye me-2"></i>Ver Detalles
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-center">
+                            <small class="text-muted">
+                                <i class="bi bi-shield-check text-success me-1"></i>
+                                Verificado por Yavi
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-search fs-1 text-muted mb-3"></i>
+            <h4 class="text-muted">No se encontraron resultados</h4>
+            <p class="text-muted mb-4">
+                Intenta ajustar los filtros de búsqueda o 
+                @if (!string.IsNullOrEmpty(Model.SearchTerm) || Model.TypeFilter != "all" || Model.CategoryFilter != "all")
+                {
+                    <a href="/Directory/BusinessDirectory" class="text-decoration-none">limpiar todos los filtros</a>
+                }
+                else
+                {
+                    <span>verifica que haya negocios disponibles</span>
+                }
+            </p>
+            <a href="/" class="btn btn-primary">
+                <i class="bi bi-house me-2"></i>Volver al Inicio
+            </a>
+        </div>
+    }
+</div>
+
+<!-- CTA Section -->
+@if (Model.FilteredBusinesses.Any())
+{
+    <section class="py-5 bg-light mt-5">
+        <div class="container text-center">
+            <h3 class="mb-3">¿Tu negocio no está aquí?</h3>
+            <p class="lead mb-4">Únete a la red Yavi y llega a más clientes</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/Register/MerchantRegister" class="btn btn-success btn-lg">
+                    <i class="bi bi-shop me-2"></i>Registrar Comercio
+                </a>
+                <a href="mailto:info@yavi.com" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-envelope me-2"></i>Contactar
+                </a>
+            </div>
+        </div>
+    </section>
+}
+
+@section Scripts {
+    <script>
+        // Función para toggle de filtros en mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterToggle = document.querySelector('.filter-toggle');
+            const filterContent = document.querySelector('.filter-content');
+            
+            if (filterToggle && filterContent) {
+                filterToggle.addEventListener('click', function() {
+                    filterContent.classList.toggle('show');
+                    const icon = this.querySelector('i');
+                    icon.classList.toggle('bi-chevron-down');
+                    icon.classList.toggle('bi-chevron-up');
+                });
+            }
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Manejo de errores en imágenes
+        document.querySelectorAll('.business-card img').forEach(img => {
+            img.addEventListener('error', function() {
+                // Crear un placeholder SVG cuando la imagen no carga
+                const businessType = this.closest('.business-card').querySelector('.business-badge').textContent.trim();
+                const icon = businessType === 'Comercio' ? 'shop' : 'bank';
+                
+                this.style.display = 'none';
+                
+                const placeholder = document.createElement('div');
+                placeholder.className = 'image-placeholder d-flex align-items-center justify-content-center';
+                placeholder.style.cssText = `
+                    height: 200px;
+                    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                    color: #6c757d;
+                    font-size: 3rem;
+                `;
+                placeholder.innerHTML = `<i class="bi bi-${icon}"></i>`;
+                
+                this.parentNode.appendChild(placeholder);
+            });
+        });
+    </script>
+}
