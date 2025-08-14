@@ -21,7 +21,7 @@ namespace CoreApp
                 }
 
                 // Crear el contenido del QR con formato específico de Yavi
-                string qrContent = $"yavi://payment/{paymentRequestCode}";
+                string qrContent = $"{paymentRequestCode}";
 
                 return GenerateQRCodeUrl(qrContent, size);
             }
