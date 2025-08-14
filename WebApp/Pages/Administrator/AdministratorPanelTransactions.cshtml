@@ -5,6 +5,140 @@
     ViewData["Title"] = "Administración de Transacciones";
 }
 
+<!-- Estilos específicos para admin mobile-friendly -->
+<style>
+    .admin-transaction-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 16px;
+        transition: all 0.2s ease;
+        background: white;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admin-transaction-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-1px);
+    }
+    
+    .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .transaction-title {
+        font-weight: bold;
+        color: #0277bd;
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+    
+    .transaction-body {
+        padding: 16px;
+    }
+    
+    .transaction-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .transaction-info-item {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .transaction-info-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+    
+    .transaction-info-value {
+        color: #495057;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+    
+    .transaction-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        padding-top: 12px;
+        border-top: 1px solid #f0f0f0;
+    }
+    
+    .monetary-value {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .view-toggle {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    
+    .table-view {
+        display: none;
+    }
+    
+    .card-view {
+        display: block;
+    }
+    
+    @@media (max-width: 768px) {
+        .transaction-info {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .transaction-actions {
+            flex-direction: column;
+        }
+        
+        .transaction-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .transaction-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .stats-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @@media (min-width: 992px) {
+        .table-view {
+            display: block;
+        }
+        
+        .card-view {
+            display: none;
+        }
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -75,33 +209,35 @@
                     </h7>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
-                            <div class="text-center p-3 bg-light rounded">
-                                <h6 class="text-muted mb-1">Total Transacciones</h6>
-                                <h4 class="text-primary mb-0">@Model.TotalTransactions.ToString("N0")</h4>
-                            </div>
+                    <div class="stats-cards">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h6 class="text-muted mb-1">Total Transacciones</h6>
+                            <h4 class="text-primary mb-0">@Model.TotalTransactions.ToString("N0")</h4>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
-                            <div class="text-center p-3 bg-light rounded">
-                                <h6 class="text-muted mb-1">Volumen Total</h6>
-                                <h4 class="text-success mb-0">₡@Model.TotalVolume.ToString("N0")</h4>
-                            </div>
+                        <div class="text-center p-3 bg-light rounded">
+                            <h6 class="text-muted mb-1">Volumen Total</h6>
+                            <h4 class="text-success mb-0 monetary-value">₡@Model.TotalVolume.ToString("N0")</h4>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg-0">
-                            <div class="text-center p-3 bg-light rounded">
-                                <h6 class="text-muted mb-1">Comisiones</h6>
-                                <h4 class="text-warning mb-0">₡@Model.TotalCommissions.ToString("N0")</h4>
-                            </div>
+                        <div class="text-center p-3 bg-light rounded">
+                            <h6 class="text-muted mb-1">Comisiones</h6>
+                            <h4 class="text-warning mb-0 monetary-value">₡@Model.TotalCommissions.ToString("N0")</h4>
                         </div>
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <div class="text-center p-3 bg-light rounded">
-                                <h6 class="text-muted mb-1">Promedio</h6>
-                                <h4 class="text-info mb-0">₡@Model.AverageTransaction.ToString("N0")</h4>
-                            </div>
+                        <div class="text-center p-3 bg-light rounded">
+                            <h6 class="text-muted mb-1">Promedio</h6>
+                            <h4 class="text-info mb-0 monetary-value">₡@Model.AverageTransaction.ToString("N0")</h4>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Toggle de vista -->
+            <div class="view-toggle d-lg-none">
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleView('table')">
+                    <i class="bi bi-table me-1"></i>Tabla
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="toggleView('card')">
+                    <i class="bi bi-grid-3x3-gap me-1"></i>Cards
+                </button>
             </div>
 
             <!-- Lista de transacciones -->
@@ -115,94 +251,197 @@
                 <div class="card-body p-0">
                     @if (Model.AllTransactions.Count > 0)
                     {
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th class="d-none d-md-table-cell">Usuario</th>
-                                        <th>Comercio</th>
-                                        <th class="d-none d-lg-table-cell text-end">Monto Bruto</th>
-                                        <th class="text-end">Monto Neto</th>
-                                        <th class="d-none d-xl-table-cell text-end">Comisión</th>
-                                        <th class="d-none d-lg-table-cell">Fecha</th>
-                                        <th>Estado</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var transaction in Model.AllTransactions)
-                                    {
-                                        var statusClass = transaction.TransactionStatus switch
-                                        {
-                                            "Completed" => "bg-success",
-                                            "Pending" => "bg-warning text-dark",
-                                            "Failed" => "bg-danger",
-                                            "Cancelled" => "bg-secondary",
-                                            _ => "bg-secondary"
-                                        };
-                                        
-                                        var statusText = AdministratorPanelTransactionsModel.EstadoEspanol(transaction.TransactionStatus);
-
+                        <!-- Vista en tabla (desktop) -->
+                        <div class="table-view">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
                                         <tr>
-                                            <td>
-                                                <strong>#@transaction.ID</strong>
-                                                <div class="d-md-none small text-muted">
-                                                    @Model.GetUserName(transaction.UserID)
-                                                </div>
-                                            </td>
-                                            <td class="d-none d-md-table-cell">@Model.GetUserName(transaction.UserID)</td>
-                                            <td>
-                                                @Model.GetMerchantName(transaction.MerchantID)
-                                                <div class="d-lg-none small text-muted">
-                                                    ₡@transaction.NetAmount.ToString("N0")
-                                                </div>
-                                            </td>
-                                            <td class="d-none d-lg-table-cell text-end">₡@transaction.GrossAmount.ToString("N0")</td>
-                                            <td class="text-end">₡@transaction.NetAmount.ToString("N0")</td>
-                                            <td class="d-none d-xl-table-cell text-end">₡@transaction.CommissionApplied.ToString("N0")</td>
-                                            <td class="d-none d-lg-table-cell">@transaction.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
-                                            <td>
-                                                <span class="badge @statusClass">
-                                                    @statusText
-                                                </span>
-                                                <div class="d-lg-none small text-muted mt-1">
-                                                    @transaction.Timestamp.ToString("dd/MM")
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
-                                                    @if (transaction.TransactionStatus != "Completed")
-                                                    {
-                                                        <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
-                                                            <input type="hidden" name="transactionId" value="@transaction.ID" />
-                                                            <input type="hidden" name="newStatus" value="Completed" />
-                                                            <button type="submit" class="btn btn-sm btn-outline-success w-100 w-lg-auto" title="Marcar como completada">
-                                                                <i class="bi bi-check-circle me-1"></i>
-                                                                <span class="d-none d-sm-inline">Completar</span>
-                                                            </button>
-                                                        </form>
-                                                        
-                                                        <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
-                                                            <input type="hidden" name="transactionId" value="@transaction.ID" />
-                                                            <input type="hidden" name="newStatus" value="Failed" />
-                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100 w-lg-auto" title="Marcar como fallida">
-                                                                <i class="bi bi-x-circle me-1"></i>
-                                                                <span class="d-none d-sm-inline">Fallar</span>
-                                                            </button>
-                                                        </form>
-                                                    }
-                                                    
-                                                    <a href="/Administrator/EditTransaction?transactionId=@transaction.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
-                                                        <i class="bi bi-pencil me-1"></i>
-                                                        <span class="d-none d-sm-inline">Editar</span>
-                                                    </a>
-                                                </div>
-                                            </td>
+                                            <th>ID</th>
+                                            <th class="d-none d-md-table-cell">Usuario</th>
+                                            <th>Comercio</th>
+                                            <th class="d-none d-lg-table-cell text-end">Monto Bruto</th>
+                                            <th class="text-end">Monto Neto</th>
+                                            <th class="d-none d-xl-table-cell text-end">Comisión</th>
+                                            <th class="d-none d-lg-table-cell">Fecha</th>
+                                            <th>Estado</th>
+                                            <th class="text-center">Acciones</th>
                                         </tr>
-                                    }
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var transaction in Model.AllTransactions)
+                                        {
+                                            var statusClass = transaction.TransactionStatus switch
+                                            {
+                                                "Completed" => "bg-success",
+                                                "Pending" => "bg-warning text-dark",
+                                                "Failed" => "bg-danger",
+                                                "Cancelled" => "bg-secondary",
+                                                _ => "bg-secondary"
+                                            };
+                                            
+                                            var statusText = AdministratorPanelTransactionsModel.EstadoEspanol(transaction.TransactionStatus);
+
+                                            <tr>
+                                                <td>
+                                                    <strong>#@transaction.ID</strong>
+                                                    <div class="d-md-none small text-muted">
+                                                        @Model.GetUserName(transaction.UserID)
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-md-table-cell">@Model.GetUserName(transaction.UserID)</td>
+                                                <td>
+                                                    @Model.GetMerchantName(transaction.MerchantID)
+                                                    <div class="d-lg-none small text-muted">
+                                                        ₡@transaction.NetAmount.ToString("N0")
+                                                    </div>
+                                                </td>
+                                                <td class="d-none d-lg-table-cell text-end">₡@transaction.GrossAmount.ToString("N0")</td>
+                                                <td class="text-end">₡@transaction.NetAmount.ToString("N0")</td>
+                                                <td class="d-none d-xl-table-cell text-end">₡@transaction.CommissionApplied.ToString("N0")</td>
+                                                <td class="d-none d-lg-table-cell">@transaction.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td>
+                                                    <span class="badge @statusClass">
+                                                        @statusText
+                                                    </span>
+                                                    <div class="d-lg-none small text-muted mt-1">
+                                                        @transaction.Timestamp.ToString("dd/MM")
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex flex-column flex-lg-row gap-1 justify-content-center">
+                                                        @if (transaction.TransactionStatus != "Completed")
+                                                        {
+                                                            <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
+                                                                <input type="hidden" name="transactionId" value="@transaction.ID" />
+                                                                <input type="hidden" name="newStatus" value="Completed" />
+                                                                <button type="submit" class="btn btn-sm btn-outline-success w-100 w-lg-auto" title="Marcar como completada">
+                                                                    <i class="bi bi-check-circle me-1"></i>
+                                                                    <span class="d-none d-sm-inline">Completar</span>
+                                                                </button>
+                                                            </form>
+                                                            
+                                                            <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
+                                                                <input type="hidden" name="transactionId" value="@transaction.ID" />
+                                                                <input type="hidden" name="newStatus" value="Failed" />
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger w-100 w-lg-auto" title="Marcar como fallida">
+                                                                    <i class="bi bi-x-circle me-1"></i>
+                                                                    <span class="d-none d-sm-inline">Cancelar</span>
+                                                                </button>
+                                                            </form>
+                                                        }
+                                                        
+                                                        <a href="/Administrator/EditTransaction?transactionId=@transaction.ID" class="btn btn-sm btn-outline-primary w-100 w-lg-auto">
+                                                            <i class="bi bi-pencil me-1"></i>
+                                                            <span class="d-none d-sm-inline">Editar</span>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Vista en cards (mobile) -->
+                        <div class="card-view p-3">
+                            @foreach (var transaction in Model.AllTransactions)
+                            {
+                                var statusClass = transaction.TransactionStatus switch
+                                {
+                                    "Completed" => "bg-success",
+                                    "Pending" => "bg-warning text-dark",
+                                    "Failed" => "bg-danger",
+                                    "Cancelled" => "bg-secondary",
+                                    _ => "bg-secondary"
+                                };
+                                
+                                var statusText = AdministratorPanelTransactionsModel.EstadoEspanol(transaction.TransactionStatus);
+
+                                <div class="admin-transaction-card">
+                                    <!-- Header -->
+                                    <div class="transaction-header">
+                                        <div class="flex-grow-1">
+                                            <div class="transaction-title">
+                                                <i class="bi bi-receipt me-2"></i>Transacción #@transaction.ID
+                                            </div>
+                                            <small class="text-muted">@transaction.Timestamp.ToString("dd/MM/yyyy HH:mm")</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge @statusClass">@statusText</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Información -->
+                                    <div class="transaction-body">
+                                        <div class="transaction-info">
+                                            <div class="transaction-info-item">
+                                                <div class="transaction-info-label">
+                                                    <i class="bi bi-person me-1"></i>Usuario
+                                                </div>
+                                                <div class="transaction-info-value">@Model.GetUserName(transaction.UserID)</div>
+                                            </div>
+                                            <div class="transaction-info-item">
+                                                <div class="transaction-info-label">
+                                                    <i class="bi bi-shop me-1"></i>Comercio
+                                                </div>
+                                                <div class="transaction-info-value">@Model.GetMerchantName(transaction.MerchantID)</div>
+                                            </div>
+                                            <div class="transaction-info-item">
+                                                <div class="transaction-info-label">
+                                                    <i class="bi bi-cash me-1"></i>Monto Bruto
+                                                </div>
+                                                <div class="transaction-info-value monetary-value">₡@transaction.GrossAmount.ToString("N2")</div>
+                                            </div>
+                                            <div class="transaction-info-item">
+                                                <div class="transaction-info-label">
+                                                    <i class="bi bi-wallet2 me-1"></i>Monto Neto
+                                                </div>
+                                                <div class="transaction-info-value monetary-value text-success">₡@transaction.NetAmount.ToString("N2")</div>
+                                            </div>
+                                            <div class="transaction-info-item">
+                                                <div class="transaction-info-label">
+                                                    <i class="bi bi-percent me-1"></i>Comisión
+                                                </div>
+                                                <div class="transaction-info-value monetary-value text-warning">₡@transaction.CommissionApplied.ToString("N2")</div>
+                                            </div>
+                                            <div class="transaction-info-item">
+                                                <div class="transaction-info-label">
+                                                    <i class="bi bi-receipt-cutoff me-1"></i>Impuestos
+                                                </div>
+                                                <div class="transaction-info-value monetary-value">₡@transaction.SalesTaxAmount.ToString("N2")</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Acciones -->
+                                        <div class="transaction-actions">
+                                            @if (transaction.TransactionStatus != "Completed")
+                                            {
+                                                <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
+                                                    <input type="hidden" name="transactionId" value="@transaction.ID" />
+                                                    <input type="hidden" name="newStatus" value="Completed" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Marcar como completada">
+                                                        <i class="bi bi-check-circle me-1"></i>Completar
+                                                    </button>
+                                                </form>
+                                                
+                                                <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
+                                                    <input type="hidden" name="transactionId" value="@transaction.ID" />
+                                                    <input type="hidden" name="newStatus" value="Failed" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Marcar como fallida">
+                                                        <i class="bi bi-x-circle me-1"></i>Fallar
+                                                    </button>
+                                                </form>
+                                            }
+                                            
+                                            <a href="/Administrator/EditTransaction?transactionId=@transaction.ID" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil me-1"></i>Editar
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </div>
                     }
                     else
@@ -246,3 +485,30 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function toggleView(view) {
+            const tableView = document.querySelector('.table-view');
+            const cardView = document.querySelector('.card-view');
+            const tableBtn = document.querySelector('button[onclick*="table"]');
+            const cardBtn = document.querySelector('button[onclick*="card"]');
+            
+            if (view === 'table') {
+                tableView.style.display = 'block';
+                cardView.style.display = 'none';
+                tableBtn.classList.remove('btn-outline-secondary');
+                tableBtn.classList.add('btn-primary');
+                cardBtn.classList.remove('btn-primary');
+                cardBtn.classList.add('btn-outline-secondary');
+            } else {
+                tableView.style.display = 'none';
+                cardView.style.display = 'block';
+                cardBtn.classList.remove('btn-outline-secondary');
+                cardBtn.classList.add('btn-primary');
+                tableBtn.classList.remove('btn-primary');
+                tableBtn.classList.add('btn-outline-secondary');
+            }
+        }
+    </script>
+}
