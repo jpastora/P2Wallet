@@ -1,10 +1,10 @@
-@page
+ï»¿@page
 @model WebApp.Pages.User.MerchantPromotionsModel
 @{
     ViewData["Title"] = "Promociones del Comercio";
 }
 
-<!-- Estilos específicos para mobile -->
+<!-- Estilos especÃ­ficos para mobile -->
 <style>
     .promotion-card {
         border: 1px solid #e0e0e0;
@@ -154,13 +154,13 @@
             if (successMsg && successMsg !== '') {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Éxito',
+                    title: 'Ã‰xito',
                     html: successMsg,
                     confirmButtonText: 'Aceptar'
                 });
             }
             
-            // Confirmación antes de cambiar estado
+            // ConfirmaciÃ³n antes de cambiar estado
             document.querySelectorAll('form[data-action="toggle"]').forEach(function(form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
@@ -169,13 +169,13 @@
                     var promotionName = form.getAttribute('data-promotion-name');
                     
                     Swal.fire({
-                        title: `¿${action} promoción?`,
-                        text: `Promoción: ${promotionName}`,
+                        title: `Â¿${action} promociÃ³n?`,
+                        text: `PromociÃ³n: ${promotionName}`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: action.includes('Activar') ? '#28a745' : '#ffc107',
                         cancelButtonColor: '#6c757d',
-                        confirmButtonText: `Sí, ${action.toLowerCase()}`,
+                        confirmButtonText: `SÃ­, ${action.toLowerCase()}`,
                         cancelButtonText: 'Cancelar'
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -185,20 +185,20 @@
                 });
             });
             
-            // Confirmación antes de eliminar
+            // ConfirmaciÃ³n antes de eliminar
             document.querySelectorAll('form[data-action="delete"]').forEach(function(form) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     var promotionName = form.getAttribute('data-promotion-name');
                     
                     Swal.fire({
-                        title: '¿Eliminar promoción?',
-                        text: `Promoción: ${promotionName}. Esta acción no se puede deshacer.`,
+                        title: 'Â¿Eliminar promociÃ³n?',
+                        text: `PromociÃ³n: ${promotionName}. Esta acciÃ³n no se puede deshacer.`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#dc3545',
                         cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Sí, eliminar',
+                        confirmButtonText: 'SÃ­, eliminar',
                         cancelButtonText: 'Cancelar'
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -208,7 +208,7 @@
                 });
             });
             
-            // Animación de entrada para las cards
+            // AnimaciÃ³n de entrada para las cards
             const cards = document.querySelectorAll('.promotion-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
@@ -242,7 +242,7 @@
         }
     </div>
 
-    <!-- Resumen de estadísticas -->
+    <!-- Resumen de estadÃ­sticas -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
             <div class="card stats-card">
@@ -278,11 +278,11 @@
         </div>
     </div>
 
-    <!-- Navegación -->
+    <!-- NavegaciÃ³n -->
     <div class="mb-4">
         <div class="d-flex flex-wrap gap-2">
             <a href="/Merchant/CreateMerchantPromotion?merchantId=@Model.MerchantID" class="btn btn-primary">
-                <i class="bi bi-plus-lg me-1"></i>Nueva Promoción
+                <i class="bi bi-plus-lg me-1"></i>Nueva PromociÃ³n
             </a>
             <button type="button" class="btn btn-outline-primary" onclick="window.location.reload()">
                 <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
@@ -293,7 +293,7 @@
         </div>
     </div>
 
-    <!-- Pestañas separadas -->
+    <!-- PestaÃ±as separadas -->
     <ul class="nav nav-tabs mb-4" id="promotionTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
@@ -312,7 +312,7 @@
         </li>
     </ul>
 
-    <!-- Contenido de las pestañas -->
+    <!-- Contenido de las pestaÃ±as -->
     <div class="tab-content" id="promotionTabsContent">
         <!-- Promociones Activas -->
         <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
@@ -340,7 +340,7 @@
                                 @if (!string.IsNullOrEmpty(promotion.MerchantPromotionDescription))
                                 {
                                     <div class="promotion-description">
-                                        <small class="text-muted">Descripción:</small><br>
+                                        <small class="text-muted">DescripciÃ³n:</small><br>
                                         @promotion.MerchantPromotionDescription
                                     </div>
                                 }
@@ -354,9 +354,9 @@
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">
-                                            <i class="bi bi-currency-dollar me-1"></i>Máximo Reembolso
+                                            <i class="bi bi-currency-dollar me-1"></i>MÃ¡ximo Reembolso
                                         </div>
-                                        <div class="info-value">?@promotion.MaxRefund.ToString("N2")</div>
+                                        <div class="info-value">â‚¡@promotion.MaxRefund.ToString("N2")</div>
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">
@@ -429,7 +429,7 @@
                                 @if (!string.IsNullOrEmpty(promotion.MerchantPromotionDescription))
                                 {
                                     <div class="promotion-description">
-                                        <small class="text-muted">Descripción:</small><br>
+                                        <small class="text-muted">DescripciÃ³n:</small><br>
                                         @promotion.MerchantPromotionDescription
                                     </div>
                                 }
@@ -443,7 +443,7 @@
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">
-                                            <i class="bi bi-currency-dollar me-1"></i>Máximo Reembolso
+                                            <i class="bi bi-currency-dollar me-1"></i>MÃ¡ximo Reembolso
                                         </div>
                                         <div class="info-value">?@promotion.MaxRefund.ToString("N2")</div>
                                     </div>
@@ -524,7 +524,7 @@
                                 @if (!string.IsNullOrEmpty(promotion.MerchantPromotionDescription))
                                 {
                                     <div class="promotion-description">
-                                        <small class="text-muted">Descripción:</small><br>
+                                        <small class="text-muted">DescripciÃ³n:</small><br>
                                         @promotion.MerchantPromotionDescription
                                     </div>
                                 }
@@ -538,7 +538,7 @@
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">
-                                            <i class="bi bi-currency-dollar me-1"></i>Máximo Reembolso
+                                            <i class="bi bi-currency-dollar me-1"></i>MÃ¡ximo Reembolso
                                         </div>
                                         <div class="info-value">?@promotion.MaxRefund.ToString("N2")</div>
                                     </div>
@@ -550,7 +550,7 @@
                                     </div>
                                     <div class="info-item">
                                         <div class="info-label">
-                                            <i class="bi bi-calendar me-1"></i>Expiró
+                                            <i class="bi bi-calendar me-1"></i>ExpirÃ³
                                         </div>
                                         <div class="info-value">
                                             <small class="text-danger">@promotion.EndDate.ToString("dd/MM/yyyy")</small>

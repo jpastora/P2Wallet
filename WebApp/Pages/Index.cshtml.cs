@@ -96,6 +96,7 @@ namespace WebApp.Pages
                     
                     Promociones.Add(new PromocionInfo
                     {
+                        ID = promo.ID,
                         Titulo = promo.MerchantPromotionName,
                         Descripcion = promo.MerchantPromotionDescription,
                         ImagenUrl = !string.IsNullOrEmpty(promo.MerchantPromotionImage) 
@@ -104,7 +105,8 @@ namespace WebApp.Pages
                         FechaVencimiento = promo.EndDate,
                         TipoDescuento = promo.PromotionType,
                         PorcentajeDescuento = (decimal)promo.DiscountPercentage,
-                        ComercioNombre = merchantName
+                        ComercioNombre = merchantName,
+                        TipoPromocion = "Merchant"
                     });
                 }
 
@@ -125,6 +127,7 @@ namespace WebApp.Pages
                     
                     Promociones.Add(new PromocionInfo
                     {
+                        ID = promo.ID,
                         Titulo = promo.FinancialPromotionName,
                         Descripcion = promo.FinancialPromotionDescription,
                         ImagenUrl = !string.IsNullOrEmpty(promo.FinancialPromotionImage) 
@@ -133,7 +136,8 @@ namespace WebApp.Pages
                         FechaVencimiento = promo.EndDate,
                         TipoDescuento = promo.PromotionType,
                         PorcentajeDescuento = (decimal)promo.DiscountPercentage,
-                        ComercioNombre = entityName
+                        ComercioNombre = entityName,
+                        TipoPromocion = "Financial"
                     });
                 }
 
@@ -142,13 +146,15 @@ namespace WebApp.Pages
                 {
                     Promociones.Add(new PromocionInfo
                     {
+                        ID = 0,
                         Titulo = "Próximamente nuevas promociones",
                         Descripcion = "Estamos trabajando para traerte las mejores ofertas exclusivas.",
                         ImagenUrl = "https://picsum.photos/seed/coming-soon/400/200",
                         FechaVencimiento = DateTime.Now.AddDays(30),
                         TipoDescuento = "Información",
                         PorcentajeDescuento = 0,
-                        ComercioNombre = "Yavi"
+                        ComercioNombre = "Yavi",
+                        TipoPromocion = "Information"
                     });
                 }
             }
@@ -350,6 +356,7 @@ namespace WebApp.Pages
 
     public class PromocionInfo
     {
+        public int ID { get; set; } // Agregar ID para el enlace de detalle
         public string Titulo { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public string ImagenUrl { get; set; } = string.Empty;
@@ -357,6 +364,7 @@ namespace WebApp.Pages
         public string TipoDescuento { get; set; } = string.Empty;
         public decimal PorcentajeDescuento { get; set; }
         public string ComercioNombre { get; set; } = string.Empty;
+        public string TipoPromocion { get; set; } = string.Empty; // "Merchant" o "Financial" para determinar el enlace
     }
 
     public class ComercioInfo
