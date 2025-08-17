@@ -144,16 +144,6 @@ else
                                 Comercio afiliado a Yavi que ofrece experiencias digitales seguras y promociones exclusivas.
                             </p>
                         </div>
-                        <div class="col-md-4 text-center">
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-primary" onclick="contactarComercio('@Model.MerchantInfo.MerchantName')">
-                                    <i class="bi bi-telephone me-2"></i>Contactar
-                                </button>
-                                <small class="text-muted">
-                                    <i class="bi bi-geo-alt me-1"></i>Ver ubicación
-                                </small>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -192,13 +182,6 @@ else
                                     <p class="mb-0">
                                         <i class="bi bi-card-text me-2"></i>
                                         @(!string.IsNullOrEmpty(Model.MerchantInfo.TaxID) ? Model.MerchantInfo.TaxID : "No especificado")
-                                    </p>
-                                </div>
-                                <div class="mb-3">
-                                    <h6 class="text-muted mb-1">Comisión</h6>
-                                    <p class="mb-0">
-                                        <i class="bi bi-percent me-2"></i>
-                                        @Model.MerchantInfo.CommissionPercentage.ToString("0.0")% por transacción
                                     </p>
                                 </div>
                             </div>
@@ -299,9 +282,9 @@ else
                                     </div>
                                 </div>
                                 <div class="card-footer bg-transparent border-0">
-                                    <button class="btn btn-outline-primary w-100" onclick="mostrarDetallesPromocion('@promotion.Name')">
+                                    <a href="/Promotion/MerchantPromotionDetail?promotionId=@promotion.ID" class="btn btn-outline-primary w-100">
                                         <i class="bi bi-eye me-2"></i>Ver Detalles
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -323,14 +306,11 @@ else
     <section class="py-5 bg-light">
         <div class="container text-center">
             <h3 class="mb-3">¿Listo para disfrutar de estas promociones?</h3>
-            <p class="lead mb-4">Descarga Yavi y comienza a ahorrar con @Model.MerchantInfo.MerchantName</p>
+            <p class="lead mb-4">Regístrate en Yavi y comienza a ahorrar con @Model.MerchantInfo.MerchantName</p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="/Register/UserRegister" class="btn btn-primary btn-lg">
-                    <i class="bi bi-download me-2"></i>Descargar Yavi
+                    <i class="bi bi-download me-2"></i>Regístrate
                 </a>
-                <button class="btn btn-outline-primary btn-lg" onclick="contactarComercio('@Model.MerchantInfo.MerchantName')">
-                    <i class="bi bi-telephone me-2"></i>Contactar Comercio
-                </button>
             </div>
         </div>
     </section>
@@ -338,14 +318,11 @@ else
 
 @section Scripts {
     <script>
-        // Función para contactar comercio
-        function contactarComercio(nombreComercio) {
-            alert(`Contactando a ${nombreComercio}...\n\nEsta funcionalidad estará disponible próximamente.`);
-        }
-
         // Función para mostrar detalles de promoción
         function mostrarDetallesPromocion(tituloPromocion) {
-            alert(`Mostrando detalles de: ${tituloPromocion}\n\nEsta funcionalidad estará disponible próximamente.`);
+            // Buscar la promoción por título y redirigir
+            console.log(`Buscando detalles de promoción: ${tituloPromocion}`);
+            // Esta función ahora usa los enlaces directos en las cards
         }
 
         // Smooth scrolling

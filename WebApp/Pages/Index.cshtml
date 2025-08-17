@@ -175,6 +175,26 @@
                                                     <i class="bi bi-calendar"></i> Válida hasta: @promocion.FechaVencimiento.ToString("dd/MM/yyyy")
                                                 </small>
                                             </div>
+                                            <div class="card-footer bg-transparent border-0">
+                                                @if (promocion.TipoPromocion == "Merchant")
+                                                {
+                                                    <a href="/Promotion/MerchantPromotionDetail?promotionId=@promocion.ID" class="btn btn-outline-primary w-100">
+                                                        <i class="bi bi-eye me-2"></i>Ver Detalles
+                                                    </a>
+                                                }
+                                                else if (promocion.TipoPromocion == "Financial")
+                                                {
+                                                    <a href="/Promotion/FinancialPromotionDetail?promotionId=@promocion.ID" class="btn btn-outline-primary w-100">
+                                                        <i class="bi bi-eye me-2"></i>Ver Detalles
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button class="btn btn-outline-secondary w-100" disabled>
+                                                        <i class="bi bi-info-circle me-2"></i>Información
+                                                    </button>
+                                                }
+                                            </div>
                                         </div>
                                     </div>
                                 }
@@ -454,22 +474,22 @@
         <div class="row text-center">
             <div class="col-md-3">
                 <div class="mb-3">
-                    <i class="bi bi-people fs-1"></i>
-                    <h3 class="mt-2">@Model.ComerciosAfiliados.Count(c => c.Categoria != "Información")+</h3>
+                    <i class="bi bi-shop fs-1"></i>
+                    <h3 class="mt-2">@Model.ComerciosAfiliados.Count(c => c.Categoria != "Información")</h3>
                     <p>Comercios Afiliados</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="mb-3">
                     <i class="bi bi-bank fs-1"></i>
-                    <h3 class="mt-2">@Model.EntidadesFinancieras.Count(e => e.Nombre.Contains("Banco") || e.Nombre.Contains("Financiera"))+</h3>
+                    <h3 class="mt-2">@Model.EntidadesFinancieras.Count(e => !e.Nombre.Contains("próximamente"))</h3>
                     <p>Entidades Financieras</p>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="mb-3">
                     <i class="bi bi-gift fs-1"></i>
-                    <h3 class="mt-2">@Model.Promociones.Count(p => p.PorcentajeDescuento > 0)+</h3>
+                    <h3 class="mt-2">@Model.Promociones.Count(p => p.PorcentajeDescuento > 0)</h3>
                     <p>Promociones Activas</p>
                 </div>
             </div>
