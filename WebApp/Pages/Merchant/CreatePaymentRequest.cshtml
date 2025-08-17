@@ -120,16 +120,6 @@
                                 <span id="countdown" class="text-warning d-block">@Model.GetTimeUntilExpiration()</span>
                             </div>
                         </div>
-
-                        @if (Model.SalesTaxAmount > 0)
-                        {
-                            <div class="mb-3">
-                                <small class="text-muted">
-                                    Incluye ₡@Model.SalesTaxAmount.ToString("N2") de impuestos
-                                </small>
-                            </div>
-                        }
-
                         <!-- Instrucciones para el cliente -->
                         <div class="alert alert-light">
                             <h6>Instrucciones para el cliente:</h6>
@@ -143,9 +133,6 @@
 
                         <!-- Acciones -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <button type="button" class="btn btn-outline-primary" onclick="shareQR()">
-                                <i class="bi bi-share me-1"></i>Compartir
-                            </button>
                             <button type="button" class="btn btn-outline-secondary" onclick="printQR()">
                                 <i class="bi bi-printer me-1"></i>Imprimir
                             </button>
