@@ -8,7 +8,7 @@ namespace CoreApp
         public static string HashPassword(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Password cannot be null or empty.", nameof(password));
+                throw new ArgumentException("La contraseña no puede estar vacía.\r\n", nameof(password));
             // Parameters
             int saltSize = 16; // 128 bit
             int keySize = 32;  // 256 bit

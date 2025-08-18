@@ -29,7 +29,7 @@ namespace CoreApp
                     userCrud.Create(user); // Si no existe, crea el usuario
                 }
                 else
-                    throw new Exception("User already exists with this email."); // Si existe, lanza excepción
+                    throw new Exception("El usuario con este correo ya existe."); // Si existe, lanza excepción
             }
             catch (Exception ex)
             {
