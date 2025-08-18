@@ -138,7 +138,6 @@ namespace CoreApp
             }
             catch
             {
-                ExceptionLogger.LogException(ex);
                 return false;
             }
         }
