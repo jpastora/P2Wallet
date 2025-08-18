@@ -1,5 +1,6 @@
 ﻿using CoreApp;
 using DTOs;
+using Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,7 +10,6 @@ namespace WebAPI.Controllers
     [ApiController]
     public class FinancialEntityController : ControllerBase
     {
-
         [HttpPost]
         [Route("Create")]
         public ActionResult CreateFinancialEntity(FinancialEntity financialEntity)
@@ -18,19 +18,19 @@ namespace WebAPI.Controllers
             {
                 var financialEntityManager = new FinancialEntityManager();
                 financialEntityManager.CreateFinancialEntity(financialEntity);
-                // Retorna un objeto JSON con mensaje de éxito
+
                 return Ok(new
                 {
-                    message = "Entidad Financiera agregada exitosamente.",
+                    message = "Entidad financiera agregada exitosamente.",
                     icon = "success",
                     title = "¡Éxito!"
                 });
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 return StatusCode(500, new
                 {
-                    // Retorna un objeto JSON con mensaje de error
                     message = ex.Message,
                     icon = "error",
                     title = "Error"
@@ -46,18 +46,19 @@ namespace WebAPI.Controllers
             {
                 var financialEntityManager = new FinancialEntityManager();
                 financialEntityManager.UpdateFinancialEntity(financialEntity);
+
                 return Ok(new
                 {
-                    message = "Entidad Financiera actualizada exitosamente.",
+                    message = "Entidad financiera actualizada exitosamente.",
                     icon = "success",
                     title = "¡Éxito!"
                 });
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 return StatusCode(500, new
                 {
-                    // Retorna un objeto JSON con mensaje de error
                     message = ex.Message,
                     icon = "error",
                     title = "Error"
@@ -67,37 +68,69 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         [Route("RetrieveAll")]
-        public ActionResult<List<FinancialEntity>> RetrieveAllFinancialEntities()
+        public ActionResult RetrieveAllFinancialEntities()
         {
             try
             {
                 var financialEntityManager = new FinancialEntityManager();
                 var listFinancialEntityResult = financialEntityManager.RetrieveAllFinancialEntities();
-                return Ok(listFinancialEntityResult);
+
+                return Ok(new
+                {
+                    message = "Entidades financieras recuperadas exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = listFinancialEntityResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("RetrieveById/{id}")]
-        public ActionResult<FinancialEntity> RetrieveFinancialEntityById(int id)
+        public ActionResult RetrieveFinancialEntityById(int id)
         {
             try
             {
                 var financialEntityManager = new FinancialEntityManager();
                 var financialEntityResult = financialEntityManager.RetrieveFinancialEntityById(id);
+
                 if (financialEntityResult == null)
                 {
-                    return NotFound("Financial entity not found.");
+                    return NotFound(new
+                    {
+                        message = "Entidad financiera no encontrada.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(financialEntityResult);
+
+                return Ok(new
+                {
+                    message = "Entidad financiera encontrada.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = financialEntityResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
@@ -109,36 +142,63 @@ namespace WebAPI.Controllers
             {
                 var financialEntityManager = new FinancialEntityManager();
                 financialEntityManager.DeleteFinancialEntity(financialEntity);
-                return Ok("Financial entity deleted successfully.");
+
+                return Ok(new
+                {
+                    message = "Entidad financiera eliminada exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
-
-
         }
 
         [HttpGet]
         [Route("GetByTaxID")]
-
-        public ActionResult RetrieveEntityByTaxID(String taxId)
+        public ActionResult RetrieveEntityByTaxID(string taxId)
         {
             try
             {
                 var financialEntityManager = new FinancialEntityManager();
                 var entityResult = financialEntityManager.RetrieveByTaxID(taxId);
+
                 if (entityResult == null)
                 {
-                    return NotFound("No se encontró el banco.");
+                    return NotFound(new
+                    {
+                        message = "No se encontró la entidad financiera con ese Tax ID.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(entityResult);
+
+                return Ok(new
+                {
+                    message = "Entidad financiera encontrada.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = entityResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
-
         }
     }
 }

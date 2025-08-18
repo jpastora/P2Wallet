@@ -1,3 +1,4 @@
+using Exceptions;
 using System;
 using System.Text;
 
@@ -27,6 +28,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 throw new Exception($"Error al generar código QR: {ex.Message}");
             }
         }
@@ -58,6 +60,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 throw new Exception($"Error al generar URL del código QR: {ex.Message}");
             }
         }
@@ -81,6 +84,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 throw new Exception($"Error al generar código QR base64: {ex.Message}");
             }
         }

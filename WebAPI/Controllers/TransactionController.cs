@@ -1,5 +1,6 @@
 ﻿using CoreApp;
 using DTOs;
+using Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,11 +18,23 @@ namespace WebAPI.Controllers
             {
                 var transactionManager = new TransactionManager();
                 transactionManager.CreateTransaction(transaction);
-                return Ok("Transaction created successfully.");
+
+                return Ok(new
+                {
+                    message = "Transacción creada exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
@@ -33,51 +46,92 @@ namespace WebAPI.Controllers
             {
                 var transactionManager = new TransactionManager();
                 transactionManager.UpdateTransaction(transaction);
-                return Ok("Transaction updated successfully.");
+
+                return Ok(new
+                {
+                    message = "Transacción actualizada exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("RetrieveAll")]
-        public ActionResult<List<Transaction>> RetrieveAllTransactions()
+        public ActionResult RetrieveAllTransactions()
         {
             try
             {
                 var transactionManager = new TransactionManager();
                 var listTransactionResult = transactionManager.RetrieveAllTransactions();
-                return Ok(listTransactionResult);
+
+                return Ok(new
+                {
+                    message = "Transacciones recuperadas exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = listTransactionResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("RetrieveById/{id}")]
-        public ActionResult<Transaction> RetrieveTransactionById(int id)
+        public ActionResult RetrieveTransactionById(int id)
         {
             try
             {
                 var transactionManager = new TransactionManager();
                 var transactionResult = transactionManager.RetrieveTransactionById(id);
+
                 if (transactionResult == null)
                 {
-                    return NotFound("Transaction not found.");
+                    return NotFound(new
+                    {
+                        message = "Transacción no encontrada.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(transactionResult);
+
+                return Ok(new
+                {
+                    message = "Transacción encontrada.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = transactionResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
-
-
-
         }
 
         [HttpDelete]
@@ -88,13 +142,24 @@ namespace WebAPI.Controllers
             {
                 var transactionManager = new TransactionManager();
                 transactionManager.DeleteTransaction(transaction);
-                return Ok("Transaction deleted successfully.");
+
+                return Ok(new
+                {
+                    message = "Transacción eliminada exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
-
     }
 }

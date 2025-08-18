@@ -1,8 +1,8 @@
 ﻿using CoreApp;
 using DTOs;
+using Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace WebAPI.Controllers
 {
@@ -18,7 +18,7 @@ namespace WebAPI.Controllers
             {
                 var merchantManager = new MerchantManager();
                 merchantManager.CreateMerchant(merchant);
-                // Retorna un objeto JSON con mensaje de éxito
+
                 return Ok(new
                 {
                     message = "Comercio agregado exitosamente.",
@@ -28,9 +28,9 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 return StatusCode(500, new
                 {
-                    // Retorna un objeto JSON con mensaje de error
                     message = ex.Message,
                     icon = "error",
                     title = "Error"
@@ -42,22 +42,23 @@ namespace WebAPI.Controllers
         [Route("Update")]
         public ActionResult UpdateMerchant(Merchant merchant)
         {
-             try 
-             {
-                 var merchantManager = new MerchantManager();
-                 merchantManager.UpdateMerchant(merchant);
-                    return Ok(new
-                    {
-                        message = "Comercio actualizado exitosamente.",
-                        icon = "success",
-                        title = "¡Éxito!"
-                    });
-                }
-             catch (Exception ex)
-             {
+            try
+            {
+                var merchantManager = new MerchantManager();
+                merchantManager.UpdateMerchant(merchant);
+
+                return Ok(new
+                {
+                    message = "Comercio actualizado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
+            }
+            catch (Exception ex)
+            {
+                ExceptionLogger.LogException(ex);
                 return StatusCode(500, new
                 {
-                    // Retorna un objeto JSON con mensaje de error
                     message = ex.Message,
                     icon = "error",
                     title = "Error"
@@ -67,39 +68,70 @@ namespace WebAPI.Controllers
 
         [HttpGet]
         [Route("RetrieveAll")]
-        public ActionResult<List<User>> RetrieveAllMerchants()
+        public ActionResult RetrieveAllMerchants()
         {
             try
             {
                 var merchantManager = new MerchantManager();
                 var listMerchantResult = merchantManager.RetrieveAllMerchants();
-                return Ok(listMerchantResult);
+
+                return Ok(new
+                {
+                    message = "Comercios recuperados exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = listMerchantResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("RetrieveById/{id}")]
-        public ActionResult<Merchant> RetrieveMerchantById(int id)
+        public ActionResult RetrieveMerchantById(int id)
         {
             try
             {
                 var merchantManager = new MerchantManager();
                 var merchantResult = merchantManager.RetrieveMerchantById(id);
+
                 if (merchantResult == null)
                 {
-                    return NotFound("Merchant not found.");
+                    return NotFound(new
+                    {
+                        message = "Comercio no encontrado.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(merchantResult);
+
+                return Ok(new
+                {
+                    message = "Comercio encontrado.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = merchantResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
-
         }
 
         [HttpDelete]
@@ -110,36 +142,63 @@ namespace WebAPI.Controllers
             {
                 var merchantManager = new MerchantManager();
                 merchantManager.DeleteMerchant(merchant);
-                return Ok("Merchant deleted successfully.");
+
+                return Ok(new
+                {
+                    message = "Comercio eliminado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("GetByTaxID")]
-
-        public ActionResult RetrieveMerchantByTextID(String taxId)
+        public ActionResult RetrieveMerchantByTaxID(string taxId)
         {
             try
             {
                 var merchantManager = new MerchantManager();
                 var merchantResult = merchantManager.RetrieveByTaxID(taxId);
+
                 if (merchantResult == null)
                 {
-                    return NotFound("No se encontró el comercio.");
+                    return NotFound(new
+                    {
+                        message = "No se encontró el comercio con ese Tax ID.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(merchantResult);
+
+                return Ok(new
+                {
+                    message = "Comercio encontrado.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = merchantResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
-
         }
-
     }
-
 }

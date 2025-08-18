@@ -14,6 +14,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2_CoreApp", "2_CoreApp", "{8E6B1ABF-BB8E-4177-AD28-24997BA05D60}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreApp", "CoreApp\CoreApp.csproj", "{524D2097-059E-4346-880C-CEA97A399A49}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3787C16C-5782-4BE0-9D5C-A48726E07213} = {3787C16C-5782-4BE0-9D5C-A48726E07213}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3_Exceptions", "3_Exceptions", "{ADCEC319-459E-42A2-86BD-CDA101DB15B7}"
 EndProject

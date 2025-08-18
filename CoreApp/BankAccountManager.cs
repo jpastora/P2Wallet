@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Exceptions;
+
 
 namespace CoreApp
 {
@@ -27,6 +29,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 throw new Exception("Ocurrió un error al crear la cuenta bancaria: " + ex.Message);
             }
         }
@@ -55,6 +58,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 ManageException(ex); // Maneja la excepción usando el método base
             }
         }
@@ -69,6 +73,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 ManageException(ex); // Maneja la excepción usando el método base
             }
         }

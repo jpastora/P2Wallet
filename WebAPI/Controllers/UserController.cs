@@ -1,5 +1,6 @@
 ﻿using CoreApp;
 using DTOs;
+using Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -10,7 +11,6 @@ namespace WebAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        // Crea un nuevo usuario
         [HttpPost]
         [Route("Create")]
         public ActionResult CreateUser(User user)
@@ -20,8 +20,8 @@ namespace WebAPI.Controllers
                 var userManager = new UserManager();
                 user.EmailVerified = "Active"; // Marcar como verificado por OTP
                 userManager.CreateUser(user);
-                // Retorna un objeto JSON con mensaje de éxito
-                return Ok(new   
+
+                return Ok(new
                 {
                     message = "Usuario creado exitosamente.",
                     icon = "success",
@@ -31,7 +31,7 @@ namespace WebAPI.Controllers
             }
             catch (Exception ex)
             {
-                // Retorna un objeto JSON con mensaje de error
+                ExceptionLogger.LogException(ex);
                 return StatusCode(500, new
                 {
                     message = ex.Message,
@@ -41,7 +41,6 @@ namespace WebAPI.Controllers
             }
         }
 
-        // Actualiza un usuario existente
         [HttpPut]
         [Route("Update")]
         public ActionResult UpdateUser(User user)
@@ -50,35 +49,17 @@ namespace WebAPI.Controllers
             {
                 var userManager = new UserManager();
                 userManager.UpdateUser(user);
-                return Ok(new { message = "Usuario actualizado correctamente." });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
 
-        // Actualiza la información biometrica de un usuario
-        [HttpPut]
-        [Route("UpdateBiometricInfo")]
-
-        public ActionResult UpdateBiometricInfo(User user)
-        {
-            try
-            {
-                var userManager = new UserManager();
-                userManager.UpdateBiometric(user);
-                // Retorna un objeto JSON con mensaje de éxito
                 return Ok(new
                 {
-                    message = "Información Biométrica verificada exitosamente.",
+                    message = "Usuario actualizado correctamente.",
                     icon = "success",
-                    title = "¡Éxito!",
+                    title = "¡Éxito!"
                 });
             }
             catch (Exception ex)
             {
-                // Retorna un objeto JSON con mensaje de error
+                ExceptionLogger.LogException(ex);
                 return StatusCode(500, new
                 {
                     message = ex.Message,
@@ -88,24 +69,63 @@ namespace WebAPI.Controllers
             }
         }
 
-        // Recupera todos los usuarios
+        [HttpPut]
+        [Route("UpdateBiometricInfo")]
+        public ActionResult UpdateBiometricInfo(User user)
+        {
+            try
+            {
+                var userManager = new UserManager();
+                userManager.UpdateBiometric(user);
+
+                return Ok(new
+                {
+                    message = "Información Biométrica verificada exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
+            }
+            catch (Exception ex)
+            {
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
+            }
+        }
+
         [HttpGet]
         [Route("RetrieveAll")]
-        public ActionResult<List<User>> RetrieveAllUsers()
+        public ActionResult RetrieveAllUsers()
         {
             try
             {
                 var userManager = new UserManager();
                 var listUserResult = userManager.RetrieveAllUsers();
-                return Ok(listUserResult);
+
+                return Ok(new
+                {
+                    message = "Usuarios recuperados exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = listUserResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
-        // Recupera un usuario por su ID
         [HttpGet]
         [Route("RetrieveById/{id}")]
         public ActionResult RetrieveUserById(int id)
@@ -114,19 +134,37 @@ namespace WebAPI.Controllers
             {
                 var userManager = new UserManager();
                 var userResult = userManager.RetrieveUserById(id);
+
                 if (userResult == null)
                 {
-                    return NotFound("Usuario no encontrado.");
+                    return NotFound(new
+                    {
+                        message = "Usuario no encontrado.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(userResult);
+
+                return Ok(new
+                {
+                    message = "Usuario encontrado.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = userResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
-        // Recupera un usuario por su correo electrónico
         [HttpGet]
         [Route("RetrieveByEmail/{email}")]
         public ActionResult RetrieveUserByEmail(string email)
@@ -134,21 +172,38 @@ namespace WebAPI.Controllers
             try
             {
                 var userManager = new UserManager();
-                var user = new User { Email = email };
-                var userResult = userManager.RetrieveUserByEmail(user);
+                var userResult = userManager.RetrieveUserByEmail(new User { Email = email });
+
                 if (userResult == null)
                 {
-                    return NotFound("Usuario no encontrado.");
+                    return NotFound(new
+                    {
+                        message = "Usuario no encontrado.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(userResult);
+
+                return Ok(new
+                {
+                    message = "Usuario encontrado.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = userResult
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
-        // Elimina un usuario
         [HttpDelete]
         [Route("Delete")]
         public ActionResult DeleteUser(User user)
@@ -157,22 +212,32 @@ namespace WebAPI.Controllers
             {
                 var userManager = new UserManager();
                 userManager.DeleteUser(user);
-                return Ok(new { message = "Usuario eliminado correctamente." });
+
+                return Ok(new
+                {
+                    message = "Usuario eliminado correctamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
-        // Inicia sesión de usuario validando solo email y contraseña
         [HttpPost]
         [Route("Login")]
         public ActionResult Login([FromBody] JsonElement loginData)
         {
             try
             {
-                // Validate and extract email and password from the body JSON
                 if (!loginData.TryGetProperty("email", out JsonElement emailElement) || string.IsNullOrWhiteSpace(emailElement.GetString()))
                     return BadRequest(new { message = "El campo 'email' es obligatorio y no puede estar vacío." });
 
@@ -182,19 +247,32 @@ namespace WebAPI.Controllers
                 var email = emailElement.GetString();
                 var password = passwordElement.GetString();
                 var user = new UserManager().RetrieveUserByEmail(new User { Email = email });
+
                 if (user == null || !PasswordHelper.VerifyPassword(password, user.Password))
                     return Unauthorized(new { message = "Usuario o contraseña incorrectos." });
 
-                user.Password = null; 
-                return Ok(user);
+                user.Password = null;
+
+                return Ok(new
+                {
+                    message = "Inicio de sesión exitoso.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = user
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
-        // Cambia la contraseña de un usuario
         [HttpPost]
         [Route("ChangePassword")]
         public ActionResult ChangePassword([FromBody] ChangePasswordRequest request)
@@ -203,11 +281,23 @@ namespace WebAPI.Controllers
             {
                 var userManager = new UserManager();
                 userManager.ChangeUserPassword(request.UserId, request.NewPassword);
-                return Ok(new { message = "Contraseña cambiada correctamente." });
+
+                return Ok(new
+                {
+                    message = "Contraseña cambiada correctamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
     }

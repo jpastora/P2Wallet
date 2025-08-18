@@ -1,5 +1,6 @@
 ﻿using DataAccess.CRUD;
 using DTOs;
+using Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 throw new Exception("Ocurrió un error al crear el movimiento: " + ex.Message);
             }
         }
@@ -51,6 +53,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 ManageException(ex);
             }
         }
@@ -64,6 +67,7 @@ namespace CoreApp
             }
             catch (Exception ex)
             {
+                ExceptionLogger.LogException(ex);
                 ManageException(ex);
             }
         }

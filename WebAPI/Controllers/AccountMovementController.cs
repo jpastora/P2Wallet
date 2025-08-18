@@ -1,5 +1,6 @@
 ﻿using CoreApp;
 using DTOs;
+using Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,11 +18,23 @@ namespace WebAPI.Controllers
             {
                 var manager = new AccountMovementManager();
                 manager.CreateAccountMovement(movement);
-                return Ok("Account movement created successfully.");
+
+                return Ok(new
+                {
+                    message = "Movimiento de cuenta creado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
@@ -33,47 +46,91 @@ namespace WebAPI.Controllers
             {
                 var manager = new AccountMovementManager();
                 manager.UpdateAccountMovement(movement);
-                return Ok("Account movement updated successfully.");
+
+                return Ok(new
+                {
+                    message = "Movimiento de cuenta actualizado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("RetrieveAll")]
-        public ActionResult<List<AccountMovement>> RetrieveAllAccountMovements()
+        public ActionResult RetrieveAllAccountMovements()
         {
             try
             {
                 var manager = new AccountMovementManager();
                 var result = manager.RetrieveAllAccountMovements();
-                return Ok(result);
+
+                return Ok(new
+                {
+                    message = "Movimientos de cuenta recuperados exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = result
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
         [HttpGet]
         [Route("RetrieveById/{id}")]
-        public ActionResult<AccountMovement> RetrieveAccountMovementById(int id)
+        public ActionResult RetrieveAccountMovementById(int id)
         {
             try
             {
                 var manager = new AccountMovementManager();
                 var result = manager.RetrieveAccountMovementById(id);
+
                 if (result == null)
                 {
-                    return NotFound("Account movement not found.");
+                    return NotFound(new
+                    {
+                        message = "Movimiento de cuenta no encontrado.",
+                        icon = "warning",
+                        title = "Aviso"
+                    });
                 }
-                return Ok(result);
+
+                return Ok(new
+                {
+                    message = "Movimiento de cuenta encontrado.",
+                    icon = "success",
+                    title = "¡Éxito!",
+                    data = result
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
 
@@ -85,13 +142,24 @@ namespace WebAPI.Controllers
             {
                 var manager = new AccountMovementManager();
                 manager.DeleteAccountMovement(movement);
-                return Ok("Account movement deleted successfully.");
+
+                return Ok(new
+                {
+                    message = "Movimiento de cuenta eliminado exitosamente.",
+                    icon = "success",
+                    title = "¡Éxito!"
+                });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                ExceptionLogger.LogException(ex);
+                return StatusCode(500, new
+                {
+                    message = ex.Message,
+                    icon = "error",
+                    title = "Error"
+                });
             }
         }
     }
 }
-
