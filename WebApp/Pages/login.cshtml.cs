@@ -40,14 +40,15 @@
                     // Leer el contenido de la respuesta
                     var responseString = await response.Content.ReadAsStringAsync();
 
-                    //Console.WriteLine(responseString);
-
-                    // Parsear el JSON para extraer los campos
                     using var doc = JsonDocument.Parse(responseString);
                     var root = doc.RootElement;
 
-                    var biometricStatus = root.GetProperty("biometricVerified").GetString();
-                    var userId = root.GetProperty("id").GetInt32();
+                    // Acceder al objeto "data"
+                    var data = root.GetProperty("data");
+
+                    // Obtener valores dentro de "data"
+                    var biometricStatus = data.GetProperty("biometricVerified").GetString();
+                    var userId = data.GetProperty("id").GetInt32();
 
                 if (biometricStatus == "Inactive")
                     {
