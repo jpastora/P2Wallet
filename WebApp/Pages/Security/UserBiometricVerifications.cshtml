@@ -231,6 +231,20 @@
             formData.append('id_image', idImageBlob, 'id_image.jpg');
             formData.append('id_back', idBackBlob, 'id_back.jpg');
 
+            // Apagar camaras, ocultar videos, canvases y botones
+            Object.keys(videoElements).forEach(key => {
+                const stream = videoElements[key].srcObject;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    videoElements[key].srcObject = null;
+                }
+                videoElements[key].classList.add('d-none');
+                canvasElements[key].classList.add('d-none');
+                document.getElementById(`btnTake${capitalize(key)}`).classList.add('d-none');
+                document.getElementById(`btnConfirm${capitalize(key)}`).classList.add('d-none');
+                document.getElementById(`btnRetake${capitalize(key)}`).classList.add('d-none');
+            });
+
             const resultDiv = document.getElementById('result');
             resultDiv.textContent = 'Procesando...';
 
@@ -274,14 +288,6 @@
                 };
 
                 await userController.UpdateBiometricInfo(userDTO);
-
-                Object.keys(videoElements).forEach(key => {
-                    const stream = videoElements[key].srcObject;
-                    if (stream) {
-                        stream.getTracks().forEach(track => track.stop());
-                        videoElements[key].srcObject = null;
-                    }
-                });
 
                 await fetch("/Logout", { method: "POST" });
 
