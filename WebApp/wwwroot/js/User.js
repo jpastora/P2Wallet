@@ -62,7 +62,7 @@
             sessionStorage.setItem('autoLoginEmail', email);
             sessionStorage.setItem('autoLoginPassword', password);
 
-            // Esperar 5 segundos antes de redirigir (puede ser menos)
+            // Esperar 5 segundos antes de redirigir
             setTimeout(() => {
                 window.location.href = '/Login';
             }, 3000);

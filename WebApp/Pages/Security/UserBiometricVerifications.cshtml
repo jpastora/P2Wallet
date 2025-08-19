@@ -8,7 +8,7 @@
 <script src="~/js/User.js"></script>
 
 <div class="container py-5 text-center">
-     <form id="verifyForm">
+    <form id="verifyForm">
         <h3 class="mb-4">Verificación Biométrica</h3>
 
         <!-- Selfie -->
@@ -67,31 +67,26 @@
     <script>
         const userId = @Model.Id;
 
-        const videoElements = 
-        {
+        const videoElements = {
             selfie: document.getElementById('selfieVideo'),
             front: document.getElementById('frontIdVideo'),
             back: document.getElementById('backIdVideo')
         };
 
-        const canvasElements =
-        {
+        const canvasElements = {
             selfie: document.getElementById('selfieCanvas'),
             front: document.getElementById('frontIdCanvas'),
             back: document.getElementById('backIdCanvas')
         };
 
-        const inputElements = 
-        {
+        const inputElements = {
             selfie: document.getElementById('selfie'),
             front: document.getElementById('id_image'),
             back: document.getElementById('id_back')
         };
 
-        async function startCamera(type)
-        {
-            try
-            {
+        async function startCamera(type) {
+            try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: type === 'selfie' ? 'user' : 'environment',
@@ -101,25 +96,24 @@
                     audio: false
                 });
                 videoElements[type].srcObject = stream;
-            } catch (err)
-            {
-                alert('Error al acceder a la cámara: ' + err.message);
+            } catch (err) {
+                Swal.fire({
+                    title: "Error",
+                    text: "No se pudo acceder a la cámara: " + err.message,
+                    icon: "error"
+                });
             }
         }
 
-
-        function stopCamera(type)
-        {
+        function stopCamera(type) {
             const stream = videoElements[type].srcObject;
-            if (stream) 
-            {
+            if (stream) {
                 stream.getTracks().forEach(track => track.stop());
                 videoElements[type].srcObject = null;
             }
         }
 
-        function takePhoto(type) 
-        {
+        function takePhoto(type) {
             const video = videoElements[type];
             const canvas = canvasElements[type];
             const ctx = canvas.getContext('2d');
@@ -137,29 +131,23 @@
             document.getElementById(`btnRetake${capitalize(type)}`).classList.remove('d-none');
         }
 
-        function confirmPhoto(type) 
-        {
+        function confirmPhoto(type) {
             stopCamera(type);
 
-            if (type === 'selfie') 
-            {
+            if (type === 'selfie') {
                 document.getElementById('selfieSection').classList.add('d-none');
                 document.getElementById('frontIdSection').classList.remove('d-none');
                 startCamera('front');
-            } else if (type === 'front') 
-            {
+            } else if (type === 'front') {
                 document.getElementById('frontIdSection').classList.add('d-none');
                 document.getElementById('backIdSection').classList.remove('d-none');
                 startCamera('back');
-            } else if (type === 'back')
-            {
+            } else if (type === 'back') {
                 document.getElementById('submitSection').classList.remove('d-none');
-
             }
         }
 
-        function retakePhoto(type) 
-        {
+        function retakePhoto(type) {
             const canvas = canvasElements[type];
             const video = videoElements[type];
 
@@ -173,9 +161,43 @@
             inputElements[type].value = '';
         }
 
-        function capitalize(str)
-        {
+        function capitalize(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function resetProcess() {
+            // Detener cámaras
+            Object.keys(videoElements).forEach(key => {
+                const stream = videoElements[key].srcObject;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    videoElements[key].srcObject = null;
+                }
+            });
+
+            // Limpiar inputs
+            Object.keys(inputElements).forEach(key => {
+                inputElements[key].value = '';
+            });
+
+            // Ocultar secciones
+            ['selfieSection', 'frontIdSection', 'backIdSection', 'submitSection'].forEach(id => {
+                document.getElementById(id).classList.add('d-none');
+            });
+
+            // Restaurar vista de videos y botones
+            Object.keys(canvasElements).forEach(key => {
+                canvasElements[key].classList.add('d-none');
+                videoElements[key].classList.remove('d-none');
+
+                document.getElementById(`btnTake${capitalize(key)}`).classList.remove('d-none');
+                document.getElementById(`btnConfirm${capitalize(key)}`).classList.add('d-none');
+                document.getElementById(`btnRetake${capitalize(key)}`).classList.add('d-none');
+            });
+
+            // Volver al inicio
+            document.getElementById('selfieSection').classList.remove('d-none');
+            startCamera('selfie');
         }
 
         window.addEventListener('load', () => {
@@ -189,9 +211,7 @@
             const formData = new FormData();
             const userController = new UserViewController();
 
-            // Convertir los base64 a blobs
-            function dataURLtoBlob(dataurl) 
-            {
+            function dataURLtoBlob(dataurl) {
                 const arr = dataurl.split(',');
                 const mime = arr[0].match(/:(.*?);/)[1];
                 const bstr = atob(arr[1]);
@@ -207,7 +227,6 @@
             const idImageBlob = dataURLtoBlob(document.getElementById('id_image').value);
             const idBackBlob = dataURLtoBlob(document.getElementById('id_back').value);
 
-            // Agregar blobs como archivos reales
             formData.append('selfie', selfieBlob, 'selfie.jpg');
             formData.append('id_image', idImageBlob, 'id_image.jpg');
             formData.append('id_back', idBackBlob, 'id_back.jpg');
@@ -223,59 +242,63 @@
 
                 const data = await response.json();
 
-                if (!response.ok) 
-                {
-                    resultDiv.innerHTML = `<strong>Error:</strong> ${data.error}`;
-                } 
-                else 
-                {
-                    // Verifica si la validación biométrica fue exitosa
-                    if (!data.verified) {
-                        Swal.fire({
-                            title: "Error",
-                            text: "Validación biométrica inválida, por favor intente de nuevo.",
-                            icon: "error"
-                        });
-                        return; // Detiene la ejecución para que no siga el proceso
-                    }
-
-                    // Extraer datos de OCR
-                    const cedula = data.ocr_data.numero_cedula;
-                    const fechaNacimiento = data.ocr_data.fecha_nacimiento;
-
-                    // Crear DTO con datos biométricos y OCR
-                    var userDTO = {
-                        ID: userId,
-                        IDNumber: cedula,
-                        BirthDate: new Date(fechaNacimiento).toISOString()
-                    };
-
-                    await userController.UpdateBiometricInfo(userDTO);
-
-                    // Detener todas las cámaras activas
-                    Object.keys(videoElements).forEach(key => {
-                        const stream = videoElements[key].srcObject;
-                        if (stream) {
-                            stream.getTracks().forEach(track => track.stop());
-                            videoElements[key].srcObject = null;
-                        }
+                if (!response.ok) {
+                    Swal.fire({
+                        title: "Error",
+                        text: data.error,
+                        icon: "error",
+                        confirmButtonText: "Intentar de nuevo"
+                    }).then(() => {
+                        resetProcess();
                     });
-
-                    //Cerrar sesión en el backend (POST a Logout)
-                    await fetch("/Logout", { method: "POST" });
-
-                    setTimeout(() => {
-                        window.location.href = "/Login";
-                    }, 500);
-                    
+                    return;
+                } else if (!data.verified) {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Validación biométrica inválida, por favor intente de nuevo.",
+                        icon: "error",
+                        confirmButtonText: "Intentar de nuevo"
+                    }).then(() => {
+                        resetProcess();
+                    });
+                    return;
                 }
 
-            } catch (error) 
-            {
-                resultDiv.innerHTML = `<strong>Error de red:</strong> ${error.message}`;
+                const cedula = data.ocr_data.numero_cedula;
+                const fechaNacimiento = data.ocr_data.fecha_nacimiento;
+
+                var userDTO = {
+                    ID: userId,
+                    IDNumber: cedula,
+                    BirthDate: new Date(fechaNacimiento).toISOString()
+                };
+
+                await userController.UpdateBiometricInfo(userDTO);
+
+                Object.keys(videoElements).forEach(key => {
+                    const stream = videoElements[key].srcObject;
+                    if (stream) {
+                        stream.getTracks().forEach(track => track.stop());
+                        videoElements[key].srcObject = null;
+                    }
+                });
+
+                await fetch("/Logout", { method: "POST" });
+
+                setTimeout(() => {
+                    window.location.href = "/Login";
+                }, 500);
+
+            } catch (error) {
+                Swal.fire({
+                    title: "Error de red",
+                    text: error.message,
+                    icon: "error",
+                    confirmButtonText: "Intentar de nuevo"
+                }).then(() => {
+                    resetProcess();
+                });
             }
         });
-
-
     </script>
 }

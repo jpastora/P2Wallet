@@ -150,5 +150,13 @@ namespace WebApp.Pages.FinancialEntity
         public string ImageUrl { get; set; } = string.Empty;
         public string PromotionType { get; set; } = string.Empty;
         public string Terms { get; set; } = string.Empty;
+
+        public string PromotionTypeText =>
+            PromotionType switch
+            {
+                "Time" => "Tiempo",
+                "Quantity" => "Cantidad",
+                _ => PromotionType // fallback: devuelve lo que venga
+            };
     }
 }

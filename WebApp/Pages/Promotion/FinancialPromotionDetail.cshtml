@@ -125,7 +125,7 @@ else
                         <span class="badge @Model.GetPromotionStatusBadgeClass() me-2">
                             @Model.GetPromotionStatusText()
                         </span>
-                        <span class="badge bg-light text-dark">@Model.PromotionInfo.PromotionType</span>
+                        <span class="badge bg-light text-dark">@Model.GetPromotionTypeText()</span>
                     </div>
                     <p class="lead mb-3">@Model.PromotionInfo.FinancialPromotionDescription</p>
                     

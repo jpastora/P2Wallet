@@ -70,6 +70,15 @@ namespace WebApp.Pages.Promotion
             }
         }
 
+        public string GetPromotionTypeText()
+        {
+            if (PromotionInfo.PromotionType == "Time")
+            {
+                return "Tiempo";
+            }
+            return "Cantidad";
+        }
+
         public string GetPromotionStatusText()
         {
             var now = DateTime.Now;
