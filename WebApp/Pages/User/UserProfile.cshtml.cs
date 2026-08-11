@@ -113,8 +113,8 @@ namespace WebApp.Pages.User
                         currentUser.ProfilePhotoUrl = ProfilePhotoUrl;
                     }
                     
-                    // Log de los datos enviados al SP
-                    Console.WriteLine($"UpdateUser: ID={currentUser.ID}, FirstName={currentUser.FirstName}, LastName={currentUser.LastName}, MobilePhone={currentUser.MobilePhone}, Latitude={currentUser.Latitude}, Longitude={currentUser.Longitude}, Email={currentUser.Email}, ProfilePhotoUrl={currentUser.ProfilePhotoUrl}, Password={currentUser.Password}, EmailVerified={currentUser.EmailVerified}, MobileVerified={currentUser.MobileVerified}, BiometricVerified={currentUser.BiometricVerified}, ValidationStatus={currentUser.ValidationStatus}, SMSNotification={currentUser.SMSNotification}, EmailNotification={currentUser.EmailNotification}, PushNotification={currentUser.PushNotification}, Role={currentUser.Role}");
+                    // Log de los datos enviados al SP (sin información sensible)
+                    Console.WriteLine($"UpdateUser: ID={currentUser.ID}, FirstName={currentUser.FirstName}, LastName={currentUser.LastName}, MobilePhone={currentUser.MobilePhone}, Latitude={currentUser.Latitude}, Longitude={currentUser.Longitude}, Email={currentUser.Email}, ProfilePhotoUrl={currentUser.ProfilePhotoUrl}, EmailVerified={currentUser.EmailVerified}, MobileVerified={currentUser.MobileVerified}, BiometricVerified={currentUser.BiometricVerified}, ValidationStatus={currentUser.ValidationStatus}, SMSNotification={currentUser.SMSNotification}, EmailNotification={currentUser.EmailNotification}, PushNotification={currentUser.PushNotification}, Role={currentUser.Role}");
                     
                     userManager.UpdateUser(currentUser);
                     Message = "Datos personales actualizados correctamente.";

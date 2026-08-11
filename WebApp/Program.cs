@@ -6,6 +6,16 @@ builder.Services.AddRazorPages();
 // Agregar HttpClient para llamadas a APIs
 builder.Services.AddHttpClient();
 
+// Configurar acceso a datos y servicios de notificación
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    DataAccess.DAO.DataAccess.DAO.SqlDAO.Configure(connectionString);
+}
+
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<DataAccess.ServicesAccess.EmailService>();
+
 // Agregar autenticación por cookies
 builder.Services.AddAuthentication("MyCookieAuth")
     .AddCookie("MyCookieAuth", options =>

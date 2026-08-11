@@ -131,6 +131,12 @@ Desktop.ini
 .env
 .env.*
 
+# Secretos locales de configuración
+appsettings.Local.json
+appsettings.*.Local.json
+**/appsettings.Local.json
+**/appsettings.*.Local.json
+
 # Local test & coverage results
 coverage/
 *.lcov

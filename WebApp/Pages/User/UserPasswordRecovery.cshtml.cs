@@ -5,7 +5,6 @@ using CoreApp;
 using DTOs;
 using DataAccess.ServicesAccess;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 
 namespace WebApp.Pages.User
@@ -21,12 +20,12 @@ namespace WebApp.Pages.User
         public string ErrorMessage { get; set; }
 
         private readonly IMemoryCache _cache;
-        private readonly ILoggerFactory _loggerFactory;
+        private readonly EmailService _emailService;
 
-        public UserPasswordRecoveryModel(IMemoryCache cache, ILoggerFactory loggerFactory)
+        public UserPasswordRecoveryModel(IMemoryCache cache, EmailService emailService)
         {
             _cache = cache;
-            _loggerFactory = loggerFactory;
+            _emailService = emailService;
         }
 
         public void OnGet() { }
@@ -58,14 +57,11 @@ namespace WebApp.Pages.User
                 protocol: Request.Scheme
             );
 
-            // Enviar correo
-            var logger = _loggerFactory.CreateLogger<DataAccess.ServicesAccess.EmailService>();
-            var emailService = new EmailService(_cache, logger);
             var html = $@"<h3>Recuperación de contraseña</h3>
 <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
 <p><a href='{resetUrl}'>Restablecer contraseña</a></p>
 <p>Si no solicitaste este cambio, ignora este mensaje.</p>";
-            var enviado = emailService.EnviarCorreoAsync(Email, "Recuperación de contraseña Yavi", html).GetAwaiter().GetResult();
+            var enviado = _emailService.EnviarCorreoAsync(Email, "Recuperación de contraseña Yavi", html).GetAwaiter().GetResult();
             if (enviado)
             {
                 SuccessMessage = "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña.";
