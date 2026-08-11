@@ -7,23 +7,32 @@ using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DataAccess.ServicesAccess
 {
     public class EmailService
     {
-        private readonly string _smtpServer = "smtp.gmail.com";
-        private readonly int _smtpPort = 587;
-        private readonly string _smtpUser = "joe.red.pruebas@gmail.com";
-        private readonly string _smtpPass = "wqdz blov cnvz vlrl";
+        private readonly string _smtpServer;
+        private readonly int _smtpPort;
+        private readonly string _smtpUser;
+        private readonly string _smtpPass;
         private readonly IMemoryCache _cache;
         private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IMemoryCache cache, ILogger<EmailService> logger)
+        public EmailService(IMemoryCache cache, ILogger<EmailService> logger, IConfiguration configuration)
         {
             _cache = cache;
             _logger = logger;
+
+            _smtpServer = configuration["Smtp:Server"]
+                ?? throw new InvalidOperationException("Configure 'Smtp:Server' en appsettings o variables de entorno.");
+            _smtpPort = int.TryParse(configuration["Smtp:Port"], out var port) ? port : 587;
+            _smtpUser = configuration["Smtp:User"]
+                ?? throw new InvalidOperationException("Configure 'Smtp:User' en appsettings o variables de entorno.");
+            _smtpPass = configuration["Smtp:Password"]
+                ?? throw new InvalidOperationException("Configure 'Smtp:Password' en appsettings o variables de entorno.");
         }
 
         public async Task<bool> EnviarCorreoAsync(string destinatario, string asunto, string cuerpoHtml)
@@ -47,7 +56,7 @@ namespace DataAccess.ServicesAccess
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error enviando correo a {destinatario}");
+                _logger.LogError(ex, "Error enviando correo a {Destinatario}", destinatario);
                 return false;
             }
         }

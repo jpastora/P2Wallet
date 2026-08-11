@@ -19,6 +19,13 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Configurar acceso a datos
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    DataAccess.DAO.DataAccess.DAO.SqlDAO.Configure(connectionString);
+}
+
 // Add MemoryCache and EmailService
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<DataAccess.ServicesAccess.EmailService>();
@@ -35,8 +42,11 @@ var app = builder.Build();
 app.UseCors(misOrigenes);
 
 // Configure the HTTP request pipeline.
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

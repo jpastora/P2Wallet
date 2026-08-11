@@ -5,18 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace DataAccess.ServicesAccess
 {
     public class SmsService
     {
-        private readonly string _accountSid = "ACb7f405a447d6e2f358d139af231157a0";
-        private readonly string _authToken = "9c3df734b089ab904efbe8a8cf884ead";
-        private readonly string _fromNumber = "+13513331475"; // Número Twilio
+        private readonly string _accountSid;
+        private readonly string _authToken;
+        private readonly string _fromNumber;
 
-        public SmsService()
+        public SmsService(IConfiguration configuration)
         {
+            _accountSid = configuration["Twilio:AccountSid"]
+                ?? throw new InvalidOperationException("Configure 'Twilio:AccountSid' en appsettings o variables de entorno.");
+            _authToken = configuration["Twilio:AuthToken"]
+                ?? throw new InvalidOperationException("Configure 'Twilio:AuthToken' en appsettings o variables de entorno.");
+            _fromNumber = configuration["Twilio:FromNumber"]
+                ?? throw new InvalidOperationException("Configure 'Twilio:FromNumber' en appsettings o variables de entorno.");
+
             TwilioClient.Init(_accountSid, _authToken);
         }
 
@@ -32,4 +39,3 @@ namespace DataAccess.ServicesAccess
         }
     }
 }
-

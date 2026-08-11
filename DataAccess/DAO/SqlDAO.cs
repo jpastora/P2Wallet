@@ -14,19 +14,42 @@ namespace DataAccess.DAO
         {
 
             private static SqlDAO _instance;
+            private static readonly object _lock = new();
 
             private string _connectionString;
 
             private SqlDAO()
             {
-                _connectionString = @"Data Source=srv-sqldatabase-dbjpastora1.database.windows.net;Initial Catalog=yavidb;Persist Security Info=True;User ID=sysman;Password=Cenfotec12345!;Trust Server Certificate=True";
+                if (string.IsNullOrWhiteSpace(_connectionString))
+                {
+                    throw new InvalidOperationException(
+                        "La cadena de conexión no está configurada. " +
+                        "Configure 'ConnectionStrings:DefaultConnection' en appsettings o la variable de entorno 'ConnectionStrings__DefaultConnection'.");
+                }
+            }
+
+            public static void Configure(string connectionString)
+            {
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new ArgumentException("La cadena de conexión no puede estar vacía.", nameof(connectionString));
+                }
+
+                lock (_lock)
+                {
+                    _instance = null;
+                    _instance = new SqlDAO { _connectionString = connectionString };
+                }
             }
 
             public static SqlDAO GetInstance()
             {
                 if (_instance == null)
                 {
-                    _instance = new SqlDAO();
+                    lock (_lock)
+                    {
+                        _instance ??= new SqlDAO();
+                    }
                 }
                 return _instance;
             }

@@ -50,7 +50,6 @@
         userDTO.Password = document.getElementById("txtPassword").value;
 
         const email = userDTO.Email;
-        const password = userDTO.Password;
 
         var ca = new ControlActions();
         var urlService = this.ApiEndpoint + "/Create";
@@ -58,11 +57,10 @@
         ca.PostToAPI(urlService, userDTO, function () {
             console.log("Usuario creado exitosamente");
 
-            // Guardar datos en sessionStorage
+            // Prellenar solo el correo en el login (sin almacenar la contraseña)
             sessionStorage.setItem('autoLoginEmail', email);
-            sessionStorage.setItem('autoLoginPassword', password);
 
-            // Esperar 5 segundos antes de redirigir
+            // Esperar 3 segundos antes de redirigir
             setTimeout(() => {
                 window.location.href = '/Login';
             }, 3000);
